@@ -11,7 +11,8 @@ class Game :
         player1.game = self
         player2.game = self
         
-    def shuffle():
+    def shuffle(self):
+        random.shuffle
          
     def reset(self):
         self.nb = self.original_nb
