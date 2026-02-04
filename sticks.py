@@ -1,7 +1,23 @@
 import random 
 
 class Game :
-    None
+    def __init__(self, nb, player1,player2,displayable:True):
+        self.original_nb = nb
+        self.nb = nb
+        self.player1 = player1
+        self.player2 = player2
+        self.displayable = displayable
+        self.shuffle()
+        player1.game = self
+        player2.game = self
+        
+    def shuffle():
+         
+    def reset(self):
+        self.nb = self.original_nb
+        shuffle()
+    
+    def step(self):
 
 class Player :
     """
