@@ -1,24 +1,67 @@
 import random 
 
 class Game :
-    def __init__(self, nb, player1,player2,displayable:True):
+    def __init__(self, nb, player1,player2,displayable =True):
         self.original_nb = nb
         self.nb = nb
+        
         self.player1 = player1
         self.player2 = player2
-        self.displayable = displayable
-        self.shuffle()
-        player1.game = self
-        player2.game = self
         
+        self.displayable = displayable
+        
+        
+        self.player1.game = self
+        self.player2.game = self
+        
+        self.shuffle()
+        
+       
     def shuffle(self):
-        random.shuffle
+        players = [self.player1, self.player2]
+        random.shuffle(players)
+        self.player1, self.player2 = players
          
     def reset(self):
         self.nb = self.original_nb
-        shuffle()
-    
-    def step(self):
+        self.shuffle(self)
+        
+    def display(self):
+        if self.displayable:
+            print(f"Allumettes restantes : {self.nb}")
+            
+    def step(self, action):
+        if action < 1:
+            return False
+
+        if action > self.nb:
+            action = self.nb
+
+        self.nb -= action
+        return True
+
+    def play (self):
+        self.reset()
+        
+        current_player = self.player1
+        other_player = self.player2
+        
+        while self.nb>0:
+            self.display()
+            
+            self.step(current_player.play())
+            
+            current_player, other_player = other_player, current_player
+            
+        winner = other_player
+        loser = current_player
+
+        winner.win()
+        loser.lose()
+            
+        
+        
+        
 
 class Player :
     """
