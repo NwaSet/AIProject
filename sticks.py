@@ -24,14 +24,14 @@ class Game :
          
     def reset(self):
         self.nb = self.original_nb
-        self.shuffle(self)
+        self.shuffle()
         
     def display(self):
         if self.displayable:
             print(f"Allumettes restantes : {self.nb}")
             
     def step(self, action):
-        if action < 1:
+        if (action < 1 or action > 3):
             return False
 
         if action > self.nb:
@@ -41,7 +41,7 @@ class Game :
         return True
 
     def play (self):
-        self.reset()
+        self.reset
         
         current_player = self.player1
         other_player = self.player2
@@ -57,7 +57,7 @@ class Game :
         loser = other_player
 
         winner.win()
-        loser.lose()
+        loser.loose()
             
         
         
@@ -97,8 +97,16 @@ class Player :
 
 class Human(Player) :
     def play(self) :
-        choice = input("how many sticks do you wan't to take (1 - 3): ")
+        choice = int(input("how many sticks do you wan't to take (1 - 3): "))
         return choice
 
 class Ai(Player) :
     None
+
+if __name__ == "__main__":
+    player1 = Human("yo")
+    player2 = Player("flo")
+    
+    game = Game(10,player1,player2)
+    game.play()
+    print(f"{player1.name} a {player1.nb_win} win")
