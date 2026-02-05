@@ -53,8 +53,8 @@ class Game :
             
             current_player, other_player = other_player, current_player
             
-        winner = other_player
-        loser = current_player
+        winner = current_player
+        loser = other_player
 
         winner.win()
         loser.lose()
