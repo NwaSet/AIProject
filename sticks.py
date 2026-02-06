@@ -1,7 +1,7 @@
 import random 
 
 class Game :
-    def __init__(self, nb, player1,player2,displayable =True):
+    def __init__(self, player1, player2, nb=12, displayable =True):
         self.original_nb = nb
         self.nb = nb
         
@@ -9,7 +9,6 @@ class Game :
         self.player2 = player2
         
         self.displayable = displayable
-        
         
         self.player1.game = self
         self.player2.game = self
@@ -58,6 +57,8 @@ class Game :
 
         winner.win()
         loser.loose()
+        
+        print(f"{winner.name} is the winner with {winner.nb_win} ")
             
         
         
@@ -78,10 +79,7 @@ class Player :
         self.nb_loose = 0
     
     @property
-    def nb_game(self) :
-        """
-        return : the number of game plaied by the player
-        """
+    def nb_game(self: object) -> int:
         return self.nb_loose + self.nb_win
     
     def play(self) :
@@ -107,6 +105,5 @@ if __name__ == "__main__":
     player1 = Human("yo")
     player2 = Player("flo")
     
-    game = Game(10,player1,player2)
+    game = Game(player1,player2)
     game.play()
-    print(f"{player1.name} a {player1.nb_win} win")
