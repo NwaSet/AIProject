@@ -155,3 +155,5 @@ if __name__ == "__main__":
     game = Game(player1,player2)
     gui = Interface()
     controler = Controler(game, gui)
+
+    print("test")
