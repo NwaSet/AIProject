@@ -1,11 +1,6 @@
 import random
 from tkinter import *
 
-"""
-modification :
-    enlever l'init de interface, comme ca on commence par faire le link entre toutes les class
-"""
-
 class Game :
     def __init__(self, player1, player2, nb_stick=12, displayable =True):
         self.original_nb_stick = nb_stick
@@ -20,6 +15,8 @@ class Game :
         self.player2.game = self
         
         self.shuffle()
+
+        self.controler = None
         
        
     def shuffle(self):
@@ -101,9 +98,9 @@ class Ai(Player) :
     None
 
 class Interface :
-    def __init__(self, controler):
+    def __init__(self):
 
-        self.controler = controler
+        self.controler = None
 
         self.root = Tk()
         self.root.title("Mikado Game")
@@ -113,24 +110,39 @@ class Interface :
         self.canvas = Canvas(self.root, width= 800, height=300)
         self.canvas.pack()
 
+    def start_game(self) :
         self.root.mainloop()
 
-    
-    def set_controler(self, controler) :
-        self.controler = controler
-    
-    def show_stick(self, x_pos) :
+    def draw_stick(self, x_pos) :
         self.canvas.create_rectangle(x_pos, 100, x_pos+5, 250, fill="brown")
-    
-    def init_stick(self) :
+        self.canvas.create_oval(x_pos-2, 95, x_pos+7, 110, fill="red")
+        self.canvas.pack()
+
+    def draw_all_stick(self) :
         nb_stick = self.controler.get_nb_stick()
         for i in range(nb_stick) :
-            self.show_stick(i*10)
+            self.draw_stick((i*54) + 100)
+    
+    def draw_all_button(self) :
+        button_1_stick = Button(self.root, text="1 stick", width=10) # add fonction
+        button_2_stick = Button(self.root, text="2 stick", width=10) # add fonction
+        button_3_stick = Button(self.root, text="3 stick", width=10) # add fonction
+
+        button_1_stick.pack(side="left", anchor="e", expand=True)
+        button_2_stick.pack(side="left", anchor="center", expand=True)
+        button_3_stick.pack(side="left", anchor="w", expand=True)
 
 class Controler :
     def __init__(self, game, interface):
         self.game = game
-        self.interface = interface
+        self.gui = interface
+
+        self.game.controler = self
+        self.gui.controler = self
+
+        self.gui.draw_all_stick()
+        self.gui.draw_all_button()
+        self.gui.start_game()
     
     def get_nb_stick(self) :
         return self.game.nb_stick
@@ -140,6 +152,6 @@ if __name__ == "__main__":
     player1 = Human("yo")
     player2 = Player("flo")
     
-    controler = Controler()
     game = Game(player1,player2)
-    gui = Interface(controler)
+    gui = Interface()
+    controler = Controler(game, gui)
