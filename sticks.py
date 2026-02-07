@@ -40,18 +40,18 @@ class Game :
             action = self.nb_stick
 
         self.nb_stick -= action
+
+        self.controler.update_game()
         return True
 
     def play (self):
-        self.reset
+        self.reset()
         
         current_player = self.player1
         other_player = self.player2
         
-        while self.nb>0:
+        while self.nb_stick>0:
             self.display()
-            
-            self.step(current_player.play())
             
             current_player, other_player = other_player, current_player
             
@@ -110,27 +110,37 @@ class Interface :
         self.canvas = Canvas(self.root, width= 800, height=300)
         self.canvas.pack()
 
-    def start_game(self) :
-        self.root.mainloop()
+    def draw_stick(self, x_pos, stick_wood_color, stick_head_color) :
+        self.canvas.create_rectangle(x_pos, 100, x_pos+5, 250, fill=stick_wood_color)
+        self.canvas.create_oval(x_pos-2, 95, x_pos+7, 110, fill=stick_head_color)
 
-    def draw_stick(self, x_pos) :
-        self.canvas.create_rectangle(x_pos, 100, x_pos+5, 250, fill="brown")
-        self.canvas.create_oval(x_pos-2, 95, x_pos+7, 110, fill="red")
-        self.canvas.pack()
-
-    def draw_all_stick(self) :
-        nb_stick = self.controler.get_nb_stick()
-        for i in range(nb_stick) :
-            self.draw_stick((i*54) + 100)
-    
     def draw_all_button(self) :
-        button_1_stick = Button(self.root, text="1 stick", width=10) # add fonction
-        button_2_stick = Button(self.root, text="2 stick", width=10) # add fonction
-        button_3_stick = Button(self.root, text="3 stick", width=10) # add fonction
+        button_1_stick = Button(self.root, text="1 stick", width=10, command=self.controler.press_1_stick)
+        button_2_stick = Button(self.root, text="2 stick", width=10, command=self.controler.press_2_stick)
+        button_3_stick = Button(self.root, text="3 stick", width=10, command=self.controler.press_3_stick)
 
         button_1_stick.pack(side="left", anchor="e", expand=True)
         button_2_stick.pack(side="left", anchor="center", expand=True)
         button_3_stick.pack(side="left", anchor="w", expand=True)
+
+    def init_gui(self) :
+        nb_stick = self.controler.get_nb_stick()
+        for i in range(nb_stick) :
+            self.draw_stick((i*54) + 100, "brown", "red")
+        
+        self.draw_all_button()
+
+        self.root.mainloop()
+    
+    def update_gui(self) :
+        self.canvas.delete("all")
+
+        nb_stick = self.controler.get_nb_stick()
+        for i in range(self.controler.get_nb_original_stick()) :
+            if i < nb_stick :
+                self.draw_stick((i*54) + 100, "brown", "red")
+            else :
+                self.draw_stick((i*54) + 100, "gray", "gray")
 
 class Controler :
     def __init__(self, game, interface):
@@ -140,20 +150,34 @@ class Controler :
         self.game.controler = self
         self.gui.controler = self
 
-        self.gui.draw_all_stick()
-        self.gui.draw_all_button()
-        self.gui.start_game()
+        self.gui.init_gui()
     
     def get_nb_stick(self) :
         return self.game.nb_stick
+    
+    def get_nb_unlit_stick(self) :
+        return self.game.original_nb_stick - self.game.nb_stick
+    
+    def get_nb_original_stick(self) :
+        return self.game.original_nb_stick
+    
+    def press_1_stick(self) :
+        self.game.step(1)
+    
+    def press_2_stick(self) :
+        self.game.step(2)
+
+    def press_3_stick(self) :
+        self.game.step(3)
+
+    def update_game(self) :
+        self.gui.update_gui()
 
 
 if __name__ == "__main__":
     player1 = Human("yo")
-    player2 = Player("flo")
+    player2 = Human("flo")
     
     game = Game(player1,player2)
     gui = Interface()
     controler = Controler(game, gui)
-
-    print("test")
