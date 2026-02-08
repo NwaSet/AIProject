@@ -27,11 +27,7 @@ class Game :
     def reset(self):
         self.nb_stick = self.original_nb_stick
         self.shuffle()
-        
-    def display(self):
-        if self.displayable:
-            print(f"Allumettes restantes : {self.nb_stick}")
-            
+                
     def step(self, action):
         if (action < 1 or action > 3):
             return False
@@ -40,8 +36,11 @@ class Game :
             action = self.nb_stick
 
         self.nb_stick -= action
-
-        self.controler.update_game()
+        if self.nb_stick != 0 :
+            self.player1, self.player2 = self.player2, self.player1
+            self.controler.update_game()
+        else :
+            self.controler.is_game_over(self.player1.name)
         return True
 
     def play (self):
@@ -98,7 +97,10 @@ class Ai(Player) :
     None
 
 class Interface :
-    def __init__(self):
+    def __init__(self, width = 800, height = 300):
+
+        self.width = width
+        self.height = height
 
         self.controler = None
 
@@ -107,12 +109,12 @@ class Interface :
         self.root.geometry("850x450")
         self.root.resizable(False, False)
 
-        self.canvas = Canvas(self.root, width= 800, height=300)
+        self.canvas = Canvas(self.root, width = self.width, height = self.height)
         self.canvas.pack()
 
     def draw_stick(self, x_pos, stick_wood_color, stick_head_color) :
-        self.canvas.create_rectangle(x_pos, 100, x_pos+5, 250, fill=stick_wood_color)
-        self.canvas.create_oval(x_pos-2, 95, x_pos+7, 110, fill=stick_head_color)
+        self.canvas.create_rectangle(x_pos, 150, x_pos+5, 300, fill=stick_wood_color)
+        self.canvas.create_oval(x_pos-2, 145, x_pos+7, 160, fill=stick_head_color)
 
     def draw_all_button(self) :
         button_1_stick = Button(self.root, text="1 stick", width=10, command=self.controler.press_1_stick)
@@ -123,10 +125,33 @@ class Interface :
         button_2_stick.pack(side="left", anchor="center", expand=True)
         button_3_stick.pack(side="left", anchor="w", expand=True)
 
+    def show_current_player(self) :
+        player_name = self.controler.get_current_player()
+        self.canvas.create_text(
+            self.width // 2,
+            50,
+            text=f"turn to : {player_name} !",
+            fill="black",
+            font=("Arial", 24)
+        )
+    
+    def show_nb_stick(self) :
+        nb_stick = self.controler.get_nb_stick()
+        self.canvas.create_text(
+            self.width // 2,
+            100,
+            text=f"number of sticks left : {nb_stick} !",
+            fill="black",
+            font=("Arial", 18)
+        )
+
     def init_gui(self) :
         nb_stick = self.controler.get_nb_stick()
         for i in range(nb_stick) :
             self.draw_stick((i*54) + 100, "brown", "red")
+        
+        self.show_current_player()
+        self.show_nb_stick()
         
         self.draw_all_button()
 
@@ -141,6 +166,20 @@ class Interface :
                 self.draw_stick((i*54) + 100, "brown", "red")
             else :
                 self.draw_stick((i*54) + 100, "gray", "gray")
+        
+        self.show_current_player()
+        self.show_nb_stick()
+
+    def show_game_over(self, looser_name) :
+        self.canvas.delete("all")
+
+        self.canvas.create_text(
+            self.width // 2,
+            self.height // 2,
+            text=f"{looser_name} : you loose !",
+            fill="red",
+            font=("Arial", 72)
+        )
 
 class Controler :
     def __init__(self, game, interface):
@@ -158,6 +197,9 @@ class Controler :
     def get_nb_unlit_stick(self) :
         return self.game.original_nb_stick - self.game.nb_stick
     
+    def get_current_player(self):
+        return self.game.player1.name
+    
     def get_nb_original_stick(self) :
         return self.game.original_nb_stick
     
@@ -172,6 +214,9 @@ class Controler :
 
     def update_game(self) :
         self.gui.update_gui()
+    
+    def is_game_over(self, looser_name) :
+        self.gui.show_game_over(looser_name)
 
 
 if __name__ == "__main__":
