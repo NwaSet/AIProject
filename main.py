@@ -15,23 +15,11 @@ class Game :
         self.player2.game = self
         
         self.shuffle()
-
-        self.controler = None
-        
        
-    def shuffle(self):
-        players = [self.player1, self.player2]
-        random.shuffle(players)
-        self.player1, self.player2 = players
-         
-    def reset(self):
-        self.nb_stick = self.original_nb_stick
-        self.shuffle()
-        
     def display(self):
         if self.displayable:
             print(f"Allumettes restantes : {self.nb_stick}")
-            
+
     def step(self, action):
         if (action < 1 or action > 3):
             return False
@@ -41,14 +29,14 @@ class Game :
 
         self.nb_stick -= action
         return True
-
+    
     def play (self):
         self.reset
         
         current_player = self.player1
         other_player = self.player2
         
-        while self.nb>0:
+        while self.nb_stick>0:
             self.display()
             
             self.step(current_player.play())
@@ -59,8 +47,21 @@ class Game :
         loser = other_player
 
         winner.win()
-        loser.loose()
-                  
+        loser.lose()
+
+        print(f"well plaied {winner.name} , you have {winner.nb_win} victory !!")
+        print(f"you're bad {loser.name}, you have {loser.nb_lose} lose . . .")
+
+    def reset(self):
+        self.nb_stick = self.original_nb_stick
+        self.shuffle()
+
+    def shuffle(self):
+        players = [self.player1, self.player2]
+        random.shuffle(players)
+        self.player1, self.player2 = players
+
+               
 class Player :
     """
     A class represent a player
@@ -73,11 +74,11 @@ class Player :
         self.name = name
         self.game = game
         self.nb_win = 0
-        self.nb_loose = 0
+        self.nb_lose = 0
     
     @property
     def nb_game(self: object) -> int:
-        return self.nb_loose + self.nb_win
+        return self.nb_lose + self.nb_win
     
     def play(self) :
         choice = random.randint(1,3)
@@ -86,8 +87,8 @@ class Player :
     def win(self) :
         self.nb_win += 1
 
-    def loose(self) :
-        self.nb_loose += 1
+    def lose(self) :
+        self.nb_lose += 1
         
 class Human(Player) :
     def play(self) :
@@ -102,3 +103,4 @@ if __name__ == "__main__":
     player2 = Player("flo")
     
     game = Game(player1,player2)
+    game.play()
