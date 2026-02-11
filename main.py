@@ -2,9 +2,12 @@ import random
 from tkinter import *
 
 class GameModel :
-    def __init__(self, player1, player2, nb_stick=12, displayable =True) :
+    def __init__(self, player1, player2, controler, nb_stick=12, displayable =True) :
         self.original_nb_stick = nb_stick
         self.nb_stick = nb_stick
+
+        self.controler = controler
+        self.controler.game = self
         
         self.player1 = player1
         self.player2 = player2
@@ -14,11 +17,9 @@ class GameModel :
         self.player1.game = self
         self.player2.game = self
         
-        self.current_player = None
+        self.current_player = player1
         
-        self.shuffle()
-
-        self.controler = None
+        #self.shuffle()
         
        
     def shuffle(self) :
@@ -42,25 +43,34 @@ class GameModel :
             action = self.nb_stick
 
         self.nb_stick -= action
+
+        if self.is_game_over() :
+            self.controler.handle_end_game()
+        else :
+            self.switch_player()
+
+            if not isinstance(self.current_player, Human) :
+                self.controler.handle_ai_move()
+            if not self.is_game_over() :
+                self.controler.need_refresh()
+
         return True
 
     def switch_player(self) :
         self.current_player = self.player1 if self.current_player == self.player2 else self.player2
 
     def play (self) :
-        self.reset
+        self.reset()
         
         while self.nb_stick>0 :
-            self.display()
+            if not isinstance(self.current_player, Human) :
+                self.controler.handle_ai_move()
             
-            self.step(self.current_player.play())
-            
-            self.switch_player()
         winner = self.get_winner
         print(winner.name)
     
     def is_game_over(self) :
-        return self.nb_stick > 0
+        return True if self.nb_stick <= 0 else False
     
     @property
     def get_current_player(self) :
@@ -94,11 +104,9 @@ class Player :
     def nb_game(self: object) -> int :
         return self.nb_loose + self.nb_win
     
-    def play(self, choice: int = None) -> int :
-        if choice is None :
-            choice = random.randint(1,3)
-        return choice
-
+    def play(self) -> int :
+        return random.randint(1,3)
+        
     def win(self) :
         self.nb_win += 1
 
@@ -107,17 +115,17 @@ class Player :
         
 class Human(Player) :
     def play(self) :
-        choice = int(input("how many sticks do you wan't to take (1 - 3): "))
-        return choice
+        pass
 
 class Ai(Player) :
     None
 
 class GameView(Tk) :
-    def __init__(self, controler = None):
+    def __init__(self, controler):
         super().__init__()
 
         self.controler = controler
+        self.controler.view = self
 
         self.title("Mikado Game")
         self.resizable(False, False)
@@ -125,37 +133,87 @@ class GameView(Tk) :
         self.canvas = Canvas(self, width=700, height=200)
         self.canvas.pack()
 
-        self.label_message = Label(self, text="oui oui", font="Arial 20")
+        self.label_message = Label(self, font="Arial 20")
         self.label_message.pack()
 
         self.button_frame = ButtonFrame(self, controler)
         self.button_frame.pack()
 
+        self.update_view()
+
+    def update_view(self) :
+        self.canvas.delete("all")
+
+        self.draw_matches(self.controler.get_nb_matches())
+
+        status_message = self.controler.get_status_message()
+        self.label_message.config(text=status_message)
+
+    def end_game(self) :
+        self.button_frame.destroy()
+        self.canvas.delete("all")
+        self.label_message.config(text="game over")
+
+
+    def reset(self) :
+        pass
+
+    def draw_matches(self, nb_stick) :        
+        for i in range(nb_stick) :
+            self.canvas.create_rectangle((i*50)+73, 50 , (i*50)+77 , 150 , fill="brown")
+            self.canvas.create_oval((i*50)+72, 43 , (i*50)+78 , 55 , fill="red")
+
 
 class ButtonFrame(Frame) :
-    def __init__(self, parent, controler = None) :
+    def __init__(self, parent, controler) :
         super().__init__(parent)
 
         self.controler = controler
 
-        self.button1 = Button(self, text="take 1", width=10)
-        self.button2 = Button(self, text="take 2", width=10)
-        self.button3 = Button(self, text="take 3", width=10)
+        self.button1 = Button(self, text="take 1", width=10,
+                              command = lambda : self.controler.handle_human_move(1))
+        self.button2 = Button(self, text="take 2", width=10,
+                              command = lambda : self.controler.handle_human_move(2))
+        self.button3 = Button(self, text="take 3", width=10,
+                              command = lambda : self.controler.handle_human_move(3))
 
         self.button1.pack(side="left", pady=25, padx = 25)
         self.button2.pack(side="left",pady=25, padx = 25)
         self.button3.pack(side="left",pady=25, padx = 25)
 
+
+class GameController :
+    def __init__(self):
+        self.game = None
+        self.view = None
     
-class GamerController :
-    None
+    def get_nb_matches(self) :
+        return self.game.nb_stick
+    
+    def get_status_message(self) :
+        return f"turn to {self.game.current_player.name} !"
+    
+    def handle_human_move(self, nb_stick_taken) :
+        if isinstance(self.game.current_player, Human):
+            self.game.step(nb_stick_taken)
+    
+    def handle_ai_move(self) :
+        nb_stick_taken = random.randint(1,3)#self.game.current_player.play()
+        self.game.step(nb_stick_taken)
+    
+    def handle_end_game(self) :
+        self.view.end_game()
+    
+    def need_refresh(self) :
+        self.view.update_view()
+            
 
 if __name__ == "__main__" :
     player1 = Human("yo")
     player2 = Player("flo")
     
-    # game = GameModel(player1,player2)
-    # game.play()
+    game_controler = GameController()
+    game = GameModel(player1,player2, game_controler)
 
-    game_view = GameView()
+    game_view = GameView(game_controler)
     game_view.mainloop()
