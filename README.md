@@ -14,8 +14,9 @@ a player can be an Ai, Random Ai or a Human Player
 
 ### commande to install the game :
 
-git clone https://github.com/NwaSet/AIProject
-
-### how to use :
-
-TBD
+- git clone https://github.com/NwaSet/AIProject
+- python -m venv env
+- env\Scripts\activate (only for windows)
+- source env/bin/activate (only MacOs or Unix)
+- pip install -r requirements.txt
+- python main.py
