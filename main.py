@@ -33,6 +33,9 @@ class GameModel :
     def reset(self) :
         self.nb_stick = self.original_nb_stick
         self.shuffle()
+
+        if not isinstance(self.current_player, Human) :
+            self.controler.handle_ai_move()
         
     def display(self) :
         if self.displayable :
@@ -137,8 +140,10 @@ class GameView(Tk) :
         self.label_message = Label(self, font="Arial 20")
         self.label_message.pack()
 
-        self.button_frame = ButtonFrame(self, controler)
-        self.button_frame.pack()
+        self.button_frame = None
+        self.reset_button_frame = None
+
+        self.add_button()
 
     def update_view(self) :
         self.canvas.delete("all")
@@ -148,14 +153,27 @@ class GameView(Tk) :
         status_message = self.controler.get_status_message()
         self.label_message.config(text=status_message)
 
+
+    def add_button(self) :
+        self.button_frame = ButtonFrame(self, self.controler)
+        self.button_frame.pack()
+    
+    def add_reset_button(self) :
+        self.reset_button_frame = ResetButtonFrame(self, self.controler)
+        self.reset_button_frame.pack()
+
     def end_game(self) :
         self.button_frame.destroy()
         self.canvas.delete("all")
         self.label_message.config(text=f"game over. . . {self.controler.get_looser()} you loose !!")
 
+        self.add_reset_button()
+
 
     def reset(self) :
-        pass
+        self.update_view()
+        self.reset_button_frame.destroy()
+        self.add_button()
 
     def draw_matches(self, nb_stick) :
         for i in range(nb_stick) :
@@ -181,6 +199,16 @@ class ButtonFrame(Frame) :
         self.button1.pack(side="left", pady=25, padx = 25)
         self.button2.pack(side="left",pady=25, padx = 25)
         self.button3.pack(side="left",pady=25, padx = 25)
+    
+class ResetButtonFrame(Frame) :
+    def __init__(self, parent, controler) :
+        super().__init__(parent)
+
+        self.controler = controler
+
+        self.reset_button = Button(self, text="Restart A New Game", width=30,
+                                   command= lambda : self.controler.reset_game())
+        self.reset_button.pack(pady=25)
 
 
 class GameController :
@@ -217,7 +245,7 @@ class GameController :
     
     def reset_game(self) :
         self.game.reset()
-        self.view.update_view()
+        self.view.reset()
             
 
 if __name__ == "__main__" :
