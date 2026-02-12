@@ -12,14 +12,17 @@ class GameModel :
         self.player1 = player1
         self.player2 = player2
         
-        self.displayable = displayable
+        self.dclisplayable = displayable
         
         self.player1.game = self
         self.player2.game = self
         
         self.current_player = player1
         
-        #self.shuffle()
+        self.shuffle()
+
+        if not isinstance(self.current_player, Human) :
+            self.controler.handle_ai_move()
         
        
     def shuffle(self) :
@@ -58,16 +61,6 @@ class GameModel :
 
     def switch_player(self) :
         self.current_player = self.player1 if self.current_player == self.player2 else self.player2
-
-    def play (self) :
-        self.reset()
-        
-        while self.nb_stick>0 :
-            if not isinstance(self.current_player, Human) :
-                self.controler.handle_ai_move()
-            
-        winner = self.get_winner
-        print(winner.name)
     
     def is_game_over(self) :
         return True if self.nb_stick <= 0 else False
@@ -77,10 +70,15 @@ class GameModel :
         return self.current_player
     
     @property
-    def get_winner(self) :
-        if self.is_game_over :
+    def looser(self) :
+        if self.is_game_over() :
             return self.current_player
     
+    @property
+    def winner(self) :
+        if self.is_game_over() :
+            return self.player1 if self.current_player == self.player2 else self.player2
+ 
     @property
     def get_loser(self) :
         if self.is_game_over :
@@ -99,6 +97,9 @@ class Player :
         self.game = game
         self.nb_win = 0
         self.nb_loose = 0
+    
+    def __str__(self):
+        return self.name
     
     @property
     def nb_game(self: object) -> int :
@@ -139,8 +140,6 @@ class GameView(Tk) :
         self.button_frame = ButtonFrame(self, controler)
         self.button_frame.pack()
 
-        self.update_view()
-
     def update_view(self) :
         self.canvas.delete("all")
 
@@ -152,16 +151,18 @@ class GameView(Tk) :
     def end_game(self) :
         self.button_frame.destroy()
         self.canvas.delete("all")
-        self.label_message.config(text="game over")
+        self.label_message.config(text=f"game over. . . {self.controler.get_looser()} you loose !!")
 
 
     def reset(self) :
         pass
 
-    def draw_matches(self, nb_stick) :        
+    def draw_matches(self, nb_stick) :
         for i in range(nb_stick) :
             self.canvas.create_rectangle((i*50)+73, 50 , (i*50)+77 , 150 , fill="brown")
             self.canvas.create_oval((i*50)+72, 43 , (i*50)+78 , 55 , fill="red")
+
+    
 
 
 class ButtonFrame(Frame) :
@@ -191,20 +192,31 @@ class GameController :
         return self.game.nb_stick
     
     def get_status_message(self) :
-        return f"turn to {self.game.current_player.name} !"
+        return f"turn to {self.game.current_player} !"
+
+    def get_looser(self) :
+        return self.game.looser
     
     def handle_human_move(self, nb_stick_taken) :
         if isinstance(self.game.current_player, Human):
             self.game.step(nb_stick_taken)
     
     def handle_ai_move(self) :
-        nb_stick_taken = random.randint(1,3)#self.game.current_player.play()
+        nb_stick_taken =self.game.current_player.play()
         self.game.step(nb_stick_taken)
     
     def handle_end_game(self) :
         self.view.end_game()
     
     def need_refresh(self) :
+        self.view.update_view()
+    
+    def start_game(self) :
+        self.view.update_view()
+        self.view.mainloop()
+    
+    def reset_game(self) :
+        self.game.reset()
         self.view.update_view()
             
 
@@ -213,7 +225,9 @@ if __name__ == "__main__" :
     player2 = Player("flo")
     
     game_controler = GameController()
-    game = GameModel(player1,player2, game_controler)
 
     game_view = GameView(game_controler)
-    game_view.mainloop()
+
+    game = GameModel(player1,player2, game_controler)
+
+    game_controler.start_game()
