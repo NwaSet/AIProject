@@ -4,8 +4,15 @@ from .gameModel import *
 from .view import *
 
 def start_mikado_Game() :
-    player1 = Human("Florian")
-    player2 = Player("Yohann")
+    """
+    
+    Initialise  two player
+                the gameController
+                the Game
+    Start the game
+    """
+    player1 = Human("Human")
+    player2 = Player("Bot")
         
     game_controler = GameController()
     game_view = GameView(game_controler)
