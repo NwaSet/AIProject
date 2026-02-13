@@ -1,5 +1,6 @@
 import random
 
+
 class Player :
     """
     A class represent a player
@@ -8,27 +9,49 @@ class Player :
         name (str)  : Player name
         game (Game) : Player game where he can be playing, he is not obliged to be in a game. 
     """
-    def __init__(self, name, game=None) :
+    def __init__(self, name: str, game = None) -> None :
+        """
+        Generic variable of a Player in the Mikado Game
+        
+        name(str):name of the player
+        game(GameModel): game where is the player
+        nb_win(int): total number of game won
+        nb_lose(int): total number of game lose 
+        """
         self.name = name
         self.game = game
         self.nb_win = 0
-        self.nb_loose = 0
+        self.nb_lose = 0
     
     def __str__(self):
         return self.name
     
     @property
     def nb_game(self: object) -> int :
-        return self.nb_loose + self.nb_win
+        """
+        Calculate the total of game played by the player
+        
+        Returns:
+        int: the sum of the lose and the win
+        """
+        return self.nb_lose + self.nb_win
     
     def play(self) -> int :
-        return random.randint(1,3)
+        """ 
+        Define th move logic
         
-    def win(self) :
+        returns:
+        int: Random number between 1 and 3
+        """
+        return random.randint(1,3)
+       
+    def win(self) -> None :
+        """Add a win to its total"""
         self.nb_win += 1
 
-    def lose(self) :
-        self.nb_loose += 1
+    def lose(self) -> None :
+        """Add a lose to its total"""
+        self.nb_lose += 1
         
 class Human(Player) :
     def play(self) :
