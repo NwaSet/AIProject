@@ -13,7 +13,7 @@ class GameModel :
     - Control and validate player actions during the game.
     """
 
-    def __init__(self, player1: Player, player2: Player, controler: GameController, nb_stick: int = 12, displayable: bool =True) -> None :
+    def __init__(self, player1: object, player2: object, controler: object , nb_stick: int = 12, displayable: bool =True) -> None :
         """
     Initialize a new GameModel instance.
 
@@ -70,7 +70,9 @@ class GameModel :
             self.controler.handle_ai_move()
         
     def display(self) -> None :
-        """Display the number of remaining sticks if the game is displayable."""
+        """
+        Display the number of remaining sticks if the game is displayable.
+        """
         if self.displayable :
             print(f"Allumettes restantes : {self.nb_stick}")
             
@@ -109,26 +111,36 @@ class GameModel :
 
 
     def switch_player(self) -> None :
-        """Change the current player"""
+        """
+        Change the current player
+        """
         self.current_player = self.player1 if self.current_player == self.player2 else self.player2
     
     def is_game_over(self) -> bool  :
-        """Return if the game is over"""
+        """
+        Return if the game is over
+        """
         return True if self.nb_stick <= 0 else False
     
     @property
     def get_current_player(self) -> Player  :
-        """Return the player whose turn it is."""
+        """
+        Return the player whose turn it is.
+        """
         return self.current_player
     
     @property
     def loser(self) -> Player:
-        """Return hte loser"""
+        """
+        Return hte loser
+        """
         if self.is_game_over() :
             return self.current_player
     
     @property
     def winner(self) -> Player :
-        """Return the winner"""
+        """
+        Return the winner
+        """
         if self.is_game_over() :
             return self.player1 if self.current_player == self.player2 else self.player2

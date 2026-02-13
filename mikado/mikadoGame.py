@@ -7,12 +7,13 @@ def start_mikado_Game() :
     """
     
     Initialise  two player
-                the gameController
-                the Game
+                the game controller
+                the Game view
+                the game
     Start the game
     """
-    player1 = Human("Human")
-    player2 = Player("Bot")
+    player1 = Human("Yohann")
+    player2 = Player("Ai")
         
     game_controler = GameController()
     game_view = GameView(game_controler)

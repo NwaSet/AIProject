@@ -48,7 +48,7 @@ class GameController :
 
     def handle_human_move(self, nb_stick_taken : int) -> None :
         """
-        Docstring for handle_human_move
+        handle a move triggered by a human player
         
         :param nb_stick_taken: the number of stick the player take
         """

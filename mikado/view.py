@@ -3,10 +3,12 @@ from .gameControler import *
 from .gameModel import *
 
 class GameView(Tk) :
+
     """
-    A class for display th UI of the game
+    A class for display the GUI of the game
     """
-    def __init__(self, controler: GameController):
+
+    def __init__(self, controler: object):
         """
         Initializes the visual interface for the Mikado game.
 
@@ -28,13 +30,15 @@ class GameView(Tk) :
         self.title("Mikado Game")
         self.resizable(False, False)
 
-        #Ui components initialization
+        #GUI components initialization
         self.canvas = Canvas(self, width=700, height=200)
         self.canvas.pack()
 
+        #initiate the labal message to say whose turn it is
         self.label_message = Label(self, font="Arial 20")
         self.label_message.pack()
 
+        # initiate the variable for the button frame
         self.button_frame = None
         self.reset_button_frame = None
 
@@ -56,18 +60,22 @@ class GameView(Tk) :
 
 
     def add_button(self) :
-        """Initialise and display the action buttons"""
+        """
+        Initialise and display the action buttons
+        """
         self.button_frame = ButtonFrame(self, self.controler)
         self.button_frame.pack()
     
     def add_reset_button(self) :
-        """Initialise and display the restart buttons"""
+        """
+        Initialise and display the restart buttons
+        """
         self.reset_button_frame = ResetButtonFrame(self, self.controler)
         self.reset_button_frame.pack()
 
     def end_game(self) :
         """
-        Handles the UI transition to the 'Game Over' state.
+        Handles the GUI transition to the 'Game Over' state.
         
         Removes move buttons, clears the matchstick display, shows the 
         final result, and offers a restart option.
@@ -80,7 +88,9 @@ class GameView(Tk) :
 
 
     def reset(self) :
-        """Restores the UI to its initial game state """
+        """
+        Restores the GUI to its initial game state
+        """
         self.update_view()
         self.reset_button_frame.destroy()
         self.add_button()
@@ -100,7 +110,11 @@ class GameView(Tk) :
 
 
 class ButtonFrame(Frame) :
-    """A container for the move action buttons (Take 1, 2, or 3 sticks)."""
+
+    """
+    A container for the move action buttons (Take 1, 2, or 3 sticks).
+    """
+
     def __init__(self, parent, controler) :
         """
         Initializes the frame and its three action buttons.
@@ -125,7 +139,10 @@ class ButtonFrame(Frame) :
         self.button3.pack(side="left",pady=25, padx = 25)
     
 class ResetButtonFrame(Frame) :
-    """A container for the restart button"""
+
+    """
+    A container for the restart button
+    """
     def __init__(self, parent, controler) :
         """
         Initializes the frame with a restart button.
