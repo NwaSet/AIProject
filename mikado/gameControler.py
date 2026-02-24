@@ -36,7 +36,7 @@ class GameController :
         """
         return f"turn to {self.game.current_player} !"
 
-    def get_loser(self) -> Player:
+    def get_loser(self) -> object:
         """
         return the loser
         """

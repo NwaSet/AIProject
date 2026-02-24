@@ -31,12 +31,13 @@ class GameModel :
         self.nb_stick = nb_stick
 
         self.controler = controler
-        self.controler.game = self
+        if self.controler is not None :
+            self.controler.game = self
         
         self.player1 = player1
         self.player2 = player2
         
-        self.dclisplayable = displayable
+        self.displayable = displayable
         
         self.player1.game = self
         self.player2.game = self
@@ -45,8 +46,8 @@ class GameModel :
         
         self.shuffle()
 
-        if not isinstance(self.current_player, Human) :
-            self.controler.handle_ai_move()
+        # if not isinstance(self.current_player, Human) :
+        #     self.controler.handle_ai_move()
         
        
     def shuffle(self) -> None :
@@ -66,8 +67,8 @@ class GameModel :
         self.nb_stick = self.original_nb_stick
         self.shuffle()
 
-        if not isinstance(self.current_player, Human) :
-            self.controler.handle_ai_move()
+        # if not isinstance(self.current_player, Human) :
+        #     self.controler.handle_ai_move()
         
     def display(self) -> None :
         """
@@ -97,16 +98,17 @@ class GameModel :
         self.nb_stick -= action
 
         if self.is_game_over() :
-            self.winner.win()
-            self.loser.lose()
-            self.controler.handle_end_game()
+            # self.winner.win()
+            # self.loser.lose()
+            # self.controler.handle_end_game()
+            pass
         else :
             self.switch_player()
 
-            if not isinstance(self.current_player, Human) :
-                self.controler.handle_ai_move()
-            if not self.is_game_over() :
-                self.controler.need_refresh()
+            # if not isinstance(self.current_player, Human) :
+            #     self.controler.handle_ai_move()
+            # if not self.is_game_over() :
+            #     self.controler.need_refresh()
 
 
 
@@ -123,14 +125,14 @@ class GameModel :
         return True if self.nb_stick <= 0 else False
     
     @property
-    def get_current_player(self) -> Player  :
+    def get_current_player(self) -> object  :
         """
         Return the player whose turn it is.
         """
         return self.current_player
     
     @property
-    def loser(self) -> Player:
+    def loser(self) -> object:
         """
         Return hte loser
         """
@@ -138,9 +140,28 @@ class GameModel :
             return self.current_player
     
     @property
-    def winner(self) -> Player :
+    def winner(self) -> object :
         """
         Return the winner
         """
         if self.is_game_over() :
             return self.player1 if self.current_player == self.player2 else self.player2
+        
+    def play (self):
+        self.reset()
+        
+        current_player = self.player1
+        other_player = self.player2
+        
+        while self.nb_stick>0:
+            self.display()
+            
+            self.step(current_player.play())
+            
+            current_player, other_player = other_player, current_player
+            
+        winner = current_player
+        loser = other_player
+
+        winner.win()
+        loser.lose()
