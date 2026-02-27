@@ -1,4 +1,5 @@
 import random
+import json
 
 
 class Player :
@@ -169,4 +170,19 @@ class AI(Player) :
         """
         self.epsilon = max(minimum, self.epsilon * coefficient)
         return self.epsilon
+
+    def upload(self) :
+        with open(f"mikado/data/{self.name}Data.json", "w") as file :
+            data = {
+                "v_function": self.v_fuction,
+                "epsilon": self.epsilon
+            }
+            json.dump(data, file)
+    
+    def download(self, file_name) :
+        with open(f"mikado/data/{file_name}Data.json", "r") as file :
+            data = json.load(file)
+
+            self.v_fuction = data.get("v_function")
+            self.epsilon = data.get("epsilon")
         
