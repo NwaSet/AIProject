@@ -7,6 +7,7 @@ from .train import training, compare_ai
 
 def start_mikado_Game() :
     """
+    create fiew Ai, train them then play aginst one
     
     Initialise  two player
                 the game controller
@@ -19,13 +20,10 @@ def start_mikado_Game() :
     Alice = AI("Alice")
     Randy = AI("Randy")
 
-    # training(Bob, Alice,  1_000_000, 1_000)
-    # training(Randy, Basic, 100_000, 1_000)
-    # Bob.nb_lose = 0
-    # Bob.nb_win = 0
-    # training(Bob, Basic, 100_000, 100)
-    # compare_ai(Bob, Alice, Randy)
-    # Bob.upload()
+    training(Bob, Alice,  1_000_000, 10_000)
+    training(Randy, Basic, 100_000, 10_000)
+    compare_ai(Bob, Alice, Randy)
+    Bob.upload()
 
     Bob.download("Bob")
 

@@ -2,7 +2,6 @@ from .player import *
 from .gameControler import *
 from .gameModel import *
 import random
-import time
 
 class GameModel :
     """
@@ -105,7 +104,6 @@ class GameModel :
             self.switch_player()
 
             if not isinstance(self.current_player, Human) :
-                self.controler.need_refresh()
                 self.controler.handle_ai_move()
             if not self.is_game_over() :
                 self.controler.need_refresh()
@@ -151,6 +149,11 @@ class GameModel :
             return self.player1 if self.current_player == self.player2 else self.player2
         
     def play (self):
+        """
+        say who is the current and the other player
+        start a loop until the end of the game
+        say to the player if he/she win or loose at the end of the game.
+        """
         self.reset()
         
         current_player = self.player1

@@ -1,7 +1,6 @@
 import random
 import json
 
-
 class Player :
     """
     A class represent a player
@@ -62,7 +61,24 @@ class Human(Player) :
     None
 
 class AI(Player) :
-    def __init__(self, name, game = None):
+    """
+    class AI
+
+    it is an AI player that will learn by renforcement.
+    V(s) <- V(s) + lr * (V(s') - V(s))
+    """
+    def __init__(self, name, game = None) -> None:
+        """
+        function that initiate all attributs:
+
+        lose_Reward     : the reward given after a lose
+        win_reward      : the reward given after a win
+        epsilon         : say if the choice of the AI is random or exploit, value between 0 - 1
+        learning_rate   : how fast the AI learn 
+        history         : list of all tuple of history : (previous_state, state)
+        previous_state  : previous state in the game
+        self.v_function : say if the state is good or not. value between -1 - 1
+        """
         super().__init__(name, game)
 
         self.lose_reward = -1
@@ -75,9 +91,10 @@ class AI(Player) :
 
         self.v_fuction = {"lose": self.lose_reward, "win": self.win_reward}
 
-    def legal_actions(self) -> list[float]:
+    def legal_actions(self) -> list[int]:
         """
-        Return legal actions according to the remaining number of sticks.
+        Return a list of legal actions according to the remaining number of sticks.
+        max 3 min 1
         """
         max_take = min(3, self.game.nb_stick)
         return list(range(1, max_take + 1))
@@ -90,13 +107,13 @@ class AI(Player) :
             self.v_fuction[state] = 0.0
         return self.v_fuction[state]
 
-    def explore(self) -> float:
+    def explore(self) -> int:
         """
-        Random action among legal actions.
+        Random action in the legal actions.
         """
         return random.choice(self.legal_actions())
 
-    def exploit(self) -> float:
+    def exploit(self) -> int:
         """
         Choose the action that minimizes the value of the opponent next state.
         """
@@ -116,9 +133,11 @@ class AI(Player) :
 
         return random.choice(best_actions)
 
-    def play(self) -> float:
+    def play(self) -> int:
         """
-        Epsilon-greedy policy and transition tracking.
+        save the previous state of the game, 
+        make a move (explore or exploit)
+        update previous state
         """
         current_state = self.game.nb_stick if self.game is not None else None
 
@@ -171,7 +190,10 @@ class AI(Player) :
         self.epsilon = max(minimum, self.epsilon * coefficient)
         return self.epsilon
 
-    def upload(self) :
+    def upload(self) -> None :
+        """
+        create or overwrite a json file in the data folder with all data needed for the AI
+        """
         with open(f"mikado/data/{self.name}Data.json", "w") as file :
             data = {
                 "v_function": self.v_fuction,
@@ -179,7 +201,10 @@ class AI(Player) :
             }
             json.dump(data, file)
     
-    def download(self, file_name) :
+    def download(self, file_name : str) -> None :
+        """
+        read the json fil with the file_name and copy all data needed in self.
+        """
         with open(f"mikado/data/{file_name}Data.json", "r") as file :
             data = json.load(file)
 
