@@ -16,7 +16,7 @@ def start_mikado_Game() :
     Bob = AI("Bob")
     Alice = AI("Alice")
     Randy = AI("Randy")
-    player1 = Player("yohann")
+    player1 = Human("yohann")
 
     training(Alice, Bob,  10000, 10)
     training(Randy, Basic, 10000, 10)
@@ -27,7 +27,7 @@ def start_mikado_Game() :
         
     game_controler = GameController()
     game_view = GameView(game_controler)
-    game = GameModel(player1,Basic, game_controler)
+    game = GameModel(player1,Bob, game_controler)
     game_controler.start_game()
 
 def training(ai1, ai2, nb_games , nb_epsilon):

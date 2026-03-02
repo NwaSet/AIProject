@@ -48,19 +48,38 @@ class GameController :
 
     def handle_human_move(self, nb_stick_taken : int) -> None :
         """
-        handle a move triggered by a human player
-        
-        :param nb_stick_taken: the number of stick the player take
+        Gère le coup de l'humain et lance celui de l'IA juste après.
         """
+        # 1. Vérifie que c'est bien au tour de l'humain
         if isinstance(self.game.current_player, Human):
             self.game.step(nb_stick_taken)
+            self.view.update_view() # On rafraîchit pour voir le coup de l'humain
+
+            # 2. Vérifie si l'humain a perdu
+            if self.game.is_game_over():
+                self.handle_end_game()
+            else:
+                # 3. SI LE JOUEUR SUIVANT N'EST PAS HUMAIN -> L'IA joue
+                if not isinstance(self.game.current_player, Human):
+                    # On appelle la méthode de l'IA
+                    self.handle_ai_move()
     
     def handle_ai_move(self) -> None :
         """
-        handle a move triggered by an Ai
+        Fait jouer l'IA et met à jour la vue.
         """
-        nb_stick_taken =self.game.current_player.play()
+        # L'IA (ou le Player random) décide combien il prend
+        nb_stick_taken = self.game.current_player.play()
+        
+        # Le modèle met à jour le nombre d'allumettes
         self.game.step(nb_stick_taken)
+        
+        # On rafraîchit la vue pour montrer les allumettes enlevées par l'IA
+        self.view.update_view()
+
+        # On vérifie si l'IA a perdu
+        if self.game.is_game_over():
+            self.handle_end_game()
     
     def handle_end_game(self) -> None :
         """
@@ -83,6 +102,9 @@ class GameController :
         Start the graphical loop of the game
         """
         self.view.update_view()
+        if not isinstance(self.game.current_player, Human):
+            print(f"L'IA {self.game.current_player} commence !")
+            self.handle_ai_move()
         self.view.mainloop()
     
     def reset_game(self) -> None :
