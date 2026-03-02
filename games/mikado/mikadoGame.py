@@ -16,18 +16,19 @@ def start_mikado_Game() :
     Bob = AI("Bob")
     Alice = AI("Alice")
     Randy = AI("Randy")
+    player1 = Player("yohann")
 
-    training(Alice, Bob,  10000000, 1000)
-    training(Randy, Basic, 10000000, 1000)
+    training(Alice, Bob,  100000, 10)
+    training(Randy, Basic, 100000, 10)
     Bob.nb_win = 0
     Bob.nb_lose = 0
-    training(Bob, Basic, 10000000, 1000)
+    training(Bob, Basic, 100000, 10)
     compare_ai(Bob, Alice, Randy)
         
-    # game_controler = GameController()
-    # game_view = GameView(game_controler)
-    # game = GameModel(player1,player2, game_controler)
-    # game_controler.start_game()
+    game_controler = GameController()
+    game_view = GameView(game_controler)
+    game = GameModel(player1,Basic, game_controler)
+    game_controler.start_game()
 
 def training(ai1, ai2, nb_games , nb_epsilon):
     # Train the AIs @ai1 and @ai2 during @nb_games games
