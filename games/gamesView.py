@@ -14,11 +14,11 @@ class GameSelectionView(Tk):
         self.resizable(False, False)
 
 
-        self.canvas = Canvas(self, width=500, height=150, bg="#2c3e50", highlightthickness=0)
+        self.canvas = Canvas(self, width=500, height=150)
         self.canvas.pack()
         
         self.canvas.create_text(250, 75, text="CHOISISSEZ VOTRE JEU", 
-                                fill="white", font=("Arial", 20, "bold"))
+                                fill="black", font=("Arial", 20, "bold"))
 
         self.selection_frame = None
         self.add_selection_buttons()
