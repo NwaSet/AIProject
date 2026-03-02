@@ -46,9 +46,8 @@ class GameModel :
         
         self.shuffle()
 
-        if self.displayable :
-            if not isinstance(self.current_player, Human) :
-                self.controler.handle_ai_move()
+        # if not isinstance(self.current_player, Human) :
+        #     self.controler.handle_ai_move()
         
        
     def shuffle(self) -> None :
@@ -68,9 +67,8 @@ class GameModel :
         self.nb_stick = self.original_nb_stick
         self.shuffle()
 
-        if self.displayable :
-            if not isinstance(self.current_player, Human) :
-                self.controler.handle_ai_move()
+        # if not isinstance(self.current_player, Human) :
+        #     self.controler.handle_ai_move()
         
     def display(self) -> None :
         """
@@ -79,7 +77,6 @@ class GameModel :
         if self.displayable :
             print(f"Allumettes restantes : {self.nb_stick}")
             
-
     def step(self, action: int) -> None :
         """
         Execute one turn of the game.
@@ -100,17 +97,19 @@ class GameModel :
 
         self.nb_stick -= action
 
-        if not self.is_game_over() :
+        if self.is_game_over() :
+            # self.winner.win()
+            # self.loser.lose()
+            # self.controler.handle_end_game()
+            pass
+        else :
             self.switch_player()
 
-            if not isinstance(self.current_player, Human) :
-                self.controler.handle_ai_move()
-            if not self.is_game_over() :
-                self.controler.need_refresh()
-        else :
-            self.winner.win()
-            self.loser.lose()
-            self.controler.handle_end_game()
+            # if not isinstance(self.current_player, Human) :
+            #     self.controler.handle_ai_move()
+            # if not self.is_game_over() :
+            #     self.controler.need_refresh()
+
 
 
     def switch_player(self) -> None :
@@ -135,7 +134,7 @@ class GameModel :
     @property
     def loser(self) -> object:
         """
-        Return the loser
+        Return hte loser
         """
         if self.is_game_over() :
             return self.current_player
@@ -149,11 +148,6 @@ class GameModel :
             return self.player1 if self.current_player == self.player2 else self.player2
         
     def play (self):
-        """
-        say who is the current and the other player
-        start a loop until the end of the game
-        say to the player if he/she win or loose at the end of the game.
-        """
         self.reset()
         
         current_player = self.player1
@@ -162,7 +156,7 @@ class GameModel :
         while self.nb_stick>0:
             self.display()
             
-            self.nb_stick -= min(current_player.play(), self.nb_stick)
+            self.step(current_player.play())
             
             current_player, other_player = other_player, current_player
             

@@ -1,4 +1,9 @@
-from mikado.mikadoGame import *
+from games.gamesView import *
 
-if __name__ == "__main__" :
-    start_mikado_Game()
+
+if __name__ == "__main__":
+
+    controller = GameSelectionController()
+    view = GameSelectionView(controller)
+    
+    view.mainloop()
