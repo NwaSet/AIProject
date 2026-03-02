@@ -18,11 +18,11 @@ def start_mikado_Game() :
     Randy = AI("Randy")
     player1 = Player("yohann")
 
-    training(Alice, Bob,  100000, 10)
-    training(Randy, Basic, 100000, 10)
+    training(Alice, Bob,  10000, 10)
+    training(Randy, Basic, 10000, 10)
     Bob.nb_win = 0
     Bob.nb_lose = 0
-    training(Bob, Basic, 100000, 10)
+    training(Bob, Basic, 10000, 10)
     compare_ai(Bob, Alice, Randy)
         
     game_controler = GameController()
