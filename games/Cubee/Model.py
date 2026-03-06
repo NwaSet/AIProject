@@ -10,12 +10,12 @@ class GameModel :
         self.player1 = Player1
         self.player2 = Player2
 
-        #self.player1.coord = (self.grid_size-1, self.grid_size-1)
-        #self.player2.coord = (0, 0)        
+        self.player1.coord = (self.grid_size-1, self.grid_size-1)
+        self.player2.coord = (0, 0)        
 
         self.score = {self.player1.__str__() : 0, self.player2.__str__() : 0}
 
-        #self.current_player = self.shuffle()
+        self.current_player = self.shuffle()
     
     def init_grid(self) :
         for x in range(self.grid_size) :
