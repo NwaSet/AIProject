@@ -1,11 +1,22 @@
 import random
+from Cubee.Player.Human import Human
 
 class GameModel :
-    def __init__(self, grid_size, Player1=None, Player2=None):
+
+    possible_direction = [
+            (0, 1)  # up
+            (0, -1) # down
+            (-1, 0) # left
+            (1, 0)  # right
+        ]
+    
+    def __init__(self, grid_size, display = True, Player1=None, Player2=None):
 
         self.grid_size = grid_size
         self.grid = []
         self.init_grid()
+
+        self.display = display
 
         self.player1 = Player1
         self.player2 = Player2
@@ -16,6 +27,10 @@ class GameModel :
         self.score = {self.player1.__str__() : 0, self.player2.__str__() : 0}
 
         self.current_player = self.shuffle()
+
+        if display and not isinstance(self.current_player, Human) :
+            self.step(self.current_player.play())
+
     
     def init_grid(self) :
         for _ in range(self.grid_size) :
@@ -23,8 +38,8 @@ class GameModel :
             for _ in range(self.grid_size) :
                 row.append(0)
             self.grid.append(row)
-        self.grid[0][0] = 2
-        self.grid[self.grid_size-1][self.grid_size-1] = 1
+        self.grid[0][0] = self.player2.id
+        self.grid[self.grid_size-1][self.grid_size-1] = self.player1.id
     
     def shuffle(self) :
         return random.choice(self.player1, self.player2)
@@ -58,16 +73,9 @@ class GameModel :
         """
         player_coord_x, player_coord_y = self.current_player.coord
 
-        possible_direction = [
-            (0, 1)  # up
-            (0, -1) # down
-            (-1, 0) # left
-            (1, 0)  # right
-        ]
-
         legal_action = []
 
-        for direction_x, direction_y in possible_direction :
+        for direction_x, direction_y in GameModel.possible_direction :
             new_x = player_coord_x + direction_x
             new_y = player_coord_y + direction_y
 
@@ -75,17 +83,46 @@ class GameModel :
                 if self.grid[new_x][new_y] in (0, self.current_player.id):
                     legal_action.append((direction_x, direction_y))
 
+        return legal_action
     
-    def step(self) :
-        None
+    def set_case(self) :
+        p_x, p_y = self.current_player.coord
+        self.grid[p_x][p_y] = self.current_player.id
+
+    def step(self, move) :
+
+        if move in self.legal_move() :
+            self.current_player.coord += move
+            self.set_case
+
+        if self.is_game_over() :
+            self.winner.win()
+            self.loser.lose()
+        else :
+            self.switch_player()
+            if not isinstance(self.current_player, Human) :
+                self.step(self.current_player.play())
     
     def play(self) :
-        None
+        
+        while not self.is_game_over() :
+
+            move = self.current_player.play()
+            if move in self.legal_move() :
+                self.current_player.coord += move
+                self.set_case
+
+            self.switch_player()
+        
+        self.winner.win()
+        self.loser.lose()
 
     @property
     def winner(self) :
-        None
+        if self.is_game_over :
+            return self.player1 if self.score[self.player1.__str__()] > self.score[self.player2.__str__()] else self/self.player2
     
     @property
     def loser(self) :
-        None
+        if self.is_game_over :
+            return self.player1 if self.score[self.player1.__str__()] < self.score[self.player2.__str__()] else self/self.player2
