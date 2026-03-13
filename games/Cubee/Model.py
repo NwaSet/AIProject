@@ -18,9 +18,10 @@ class GameModel :
         self.current_player = self.shuffle()
     
     def init_grid(self) :
-        for x in range(self.grid_size) :
+        self.grid = []
+        for _ in range(self.grid_size) :
             row = []
-            for y in range(self.grid_size) :
+            for _ in range(self.grid_size) :
                 row.append(0)
             self.grid.append(row)
         self.grid[0][0] = 2
@@ -42,6 +43,3 @@ class GameModel :
         self.current_player = self.shuffle()
 
         self.score = {self.player1.__str__() : 0, self.player2.__str__() : 0}
-
-test = GameModel(3)
-print(test.grid)
