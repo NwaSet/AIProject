@@ -1,5 +1,5 @@
 import random
-from Cubee.Player.Human import Human
+from games.Cubee.Player.Human import Human
 
 class GameModel :
 
@@ -27,10 +27,6 @@ class GameModel :
         self.score = {self.player1.__str__() : 0, self.player2.__str__() : 0}
 
         self.current_player = self.shuffle()
-
-        if display and not isinstance(self.current_player, Human) :
-            self.step(self.current_player.play())
-
     
     def init_grid(self) :
         for _ in range(self.grid_size) :
