@@ -126,3 +126,12 @@ class GameModel :
     def loser(self) :
         if self.is_game_over :
             return self.player1 if self.score[self.player1.__str__()] < self.score[self.player2.__str__()] else self/self.player2
+
+    def get_model_data(self) :
+        return {
+            "grid_size" : self.grid_size ,
+            "grid" : "" + self.grid ,
+            "players" : self.score ,
+            "player_coord" : [self.player1.coord, self.player2.coord] ,
+            "player_color" : [self.player1.color, self.player1.color]
+        }
