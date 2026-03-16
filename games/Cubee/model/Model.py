@@ -4,9 +4,9 @@ from Cubee.Player.Human import Human
 class GameModel :
 
     possible_direction = [
-            (0, 1)  # up
-            (0, -1) # down
-            (-1, 0) # left
+            (0, 1),  # up
+            (0, -1), # down
+            (-1, 0), # left
             (1, 0)  # right
         ]
     
