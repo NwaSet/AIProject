@@ -1,4 +1,5 @@
 import random
+from games.Cubee.model.Model.py import GameModel
 
 
 class Player:
