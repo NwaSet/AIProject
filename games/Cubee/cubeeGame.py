@@ -4,7 +4,8 @@ from .View.view import View
 from .Player.Player import Player
 from .Player.Human import Human
 
-def start_cubee_game() :
+
+def start_cubee_game():
 
     flo = Human(1, "flo", "red")
     yo = Human(2, "yo", "blue")
@@ -19,4 +20,3 @@ def start_cubee_game() :
 
     view = View(ctrl)
     ctrl.start_game()
-

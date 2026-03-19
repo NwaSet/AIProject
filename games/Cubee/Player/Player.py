@@ -1,7 +1,8 @@
 import random
 
+
 class Player:
-    def __init__(self,id,  name: str, game= None):
+    def __init__(self, id, name: str, game=None):
         self.name = name
         self.game = game
 

@@ -241,4 +241,3 @@ class View:
     def run(self):
         self.update_view()
         self.root.mainloop()
-
