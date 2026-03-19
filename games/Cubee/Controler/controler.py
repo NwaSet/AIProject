@@ -1,11 +1,9 @@
-from games.Cubee.model.cubeeModel import GameModel
-from games.Cubee.Player.Human import Human
-
+from ..Player.Human import Human
 
 class gameControler:
-    def __init__(self, game=None, controler=None) -> None:
+    def __init__(self, game=None, view=None) -> None:
         self.game = game
-        self.controler = controler
+        self.view = view
 
     def handle_ai_move(self) -> None:
         if not isinstance(self.game.current_player, Human):
@@ -13,17 +11,20 @@ class gameControler:
 
             self.game.step(move)
 
+            self.view.update_view()
             if self.game.is_game_over():
                 self.handle_end_game()
-            else:
-                self.view.update_view()
 
     def handle_human_move(self, move: tuple) -> None:
         if isinstance(self.game.current_player, Human):
             self.game.step(move)
 
+            self.view.update_view()
+            if self.game.is_game_over():
+                self.handle_end_game()
+
     def handle_end_game(self):
-        self.view.end_game()
+        self.view.game_over()
 
     def get_legal_move(self):
         legal_move = self.game.legal_move()
@@ -43,13 +44,13 @@ class gameControler:
 
     def start_game(self):
 
-        self.view.update_view()
-
         if not isinstance(self.game.current_player, Human):
             print(f"L'IA {self.game.current_player} commence !")
             self.handle_ai_move()
+        
+        self.view.run()
 
-        self.view.mainloop()
+        
 
     def reset_game(self):
         self.game.reset()

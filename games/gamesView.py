@@ -43,7 +43,7 @@ class SelectionButtonsFrame(Frame):
                                 command=lambda: self.controller.start_game("cubee"))
         
         self.btn_kart = Button(self, text="Kart", width=15, height=2,
-                               command=lambda: self.controller.start_game("kart"))
+                               command=lambda: self.controller.start_game("pixelKart"))
 
         self.btn_mikado.pack(side="left", padx=10)
         self.btn_cubee.pack(side="left", padx=10)

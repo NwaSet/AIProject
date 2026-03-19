@@ -1,48 +1,31 @@
-<<<<<<< HEAD
-from tkinter import *
-from Cubee import Model 
-
-class View(Tk):
-    def __init__(self, controler: object):
-        super().__init__()
-
-        self.title("Cubee")
-        self.grid = Grid()
-        self.controler = controler
-
-    def display_grid(self):
-        for i in range(controler.)
-=======
 import tkinter as tk
-# from games.Cubee.model import Model
+from ..Controler.controler import gameControler
 
 
 class View:
-    def __init__(self):
-        # self.controler = controler
-        self.dic = {"player1": 2, "player2": 8}
-        self.nb_case = 10
+    def __init__(self, controler: gameControler = None):
+        self.controler = controler
+        self.controler.view = self
+
+        self.data = self.controler.get_model_data()
+
+        self.nb_case = self.data["grid_size"]
+        self.grid = self.data["grid"]
+        self.players_score = self.data["players"]
+        self.player_id = self.data["player_id"]
+        self.current_player = self.data["current_player"]
+        self.player_names = list(self.players_score.keys())
         self.size = 100
-        self.score = 0
-        self.score_text = "score"
         self.root = tk.Tk()
         self.root.title("Cubee")
 
-        self.root.bind("<Left>", self.controler)
+        self.root.focus_set()
 
-        self.root.bind("<Right>", self.controler)
+        self.root.bind("<Left>", lambda event: self.controler.handle_human_move((-1, 0)))
+        self.root.bind("<Right>", lambda event: self.controler.handle_human_move((1, 0)))
+        self.root.bind("<Up>", lambda event: self.controler.handle_human_move((0, -1)))
+        self.root.bind("<Down>", lambda event: self.controler.handle_human_move((0, 1)))
 
-        self.root.bind("<Up>", self.controler)
-
-        self.root.bind("<Down>", self.controler)
-
-        self.player_coord = ((0, 0), (9, 9))
-        self.player_color = ("gray", "red")
-
-        self.restart_button = tk.Button(
-            self.root, text="Restart", command=self.update_view
-        )
-        self.owners = [[None for _ in range(self.nb_case)] for _ in range(self.nb_case)]
         self.max_size = self.size * self.nb_case
         self.canva = tk.Canvas(
             self.root,
@@ -50,29 +33,51 @@ class View:
             height=self.max_size + 5,
         )
         self.canva.pack(padx=(20, 5))
+
+        self.player_coord = self.data["player_coord"]
+        self.player_color = self.data["player_color"]
+
         self.cases = []
+        self.score_text = None
+
+        self.restart_button = tk.Button(
+            self.root,
+            text="Restart",
+            command=self.controler.reset_game
+        )
 
     def creation_grid(self):
         self.canva.delete("all")
+        self.cases = []
         offset = 4
+
         for row in range(self.nb_case):
             line = []
             for col in range(self.nb_case):
                 x = col * self.size + offset
                 y = row * self.size + offset
 
+                cell_value = self.grid[row][col]
+
+                if cell_value == self.player_id[0]:
+                    fill_color = self.player_color[0]
+                elif cell_value == self.player_id[1]:
+                    fill_color = self.player_color[1]
+                else:
+                    fill_color = "white"
+
                 case = self.canva.create_rectangle(
                     x,
                     y,
-                    x + self.size + 2,
-                    y + self.size + 2,
+                    x + self.size,
+                    y + self.size,
+                    fill=fill_color,
                     outline="gray",
                     width=2,
                     tags="grid",
                 )
 
                 line.append(case)
-
             self.cases.append(line)
 
         self.canva.create_rectangle(
@@ -84,45 +89,144 @@ class View:
             width=2,
         )
 
-    def creation_score(self):
-        self.score = 0
-        self.score_text = self.canva.create_text(
-            self.nb_case * self.size + 50,
-            20,
-            text=f"Score: \n player1 : {self.score}",
+    def display_infos(self):
+        info_x = self.max_size + 30
+
+        player1_name = self.player_names[0]
+        player2_name = self.player_names[1]
+
+        score_p1 = self.players_score[player1_name]
+        score_p2 = self.players_score[player2_name]
+
+        current_player_name = str(self.current_player)
+
+        ### label information ###
+        self.canva.create_text(
+            info_x,
+            30,
+            text="Informations",
+            font=("Arial", 16, "bold"),
+            anchor="nw"
         )
 
-    def update_score(self, new_score):
-        self.score = new_score
-        self.canva.itemconfig(self.score_text, text=f"Score: {self.score}")
+        ### label current player ###
+        self.canva.create_text(
+            info_x,
+            80,
+            text=f"Tour de : {current_player_name}",
+            font=("Arial", 14),
+            anchor="nw"
+        )
+
+        ### label color ###
+        self.canva.create_text(
+            info_x,
+            130,
+            text="Couleurs :",
+            font=("Arial", 14, "bold"),
+            anchor="nw"
+        )
+
+        # player 1
+        self.canva.create_rectangle(
+            info_x,
+            165,
+            info_x + 20,
+            185,
+            fill=self.player_color[0],
+            outline="black"
+        )
+        self.canva.create_text(
+            info_x + 30,
+            175,
+            text=f"{player1_name} ({self.player_color[0]})",
+            font=("Arial", 12),
+            anchor="w"
+        )
+
+        # player 2
+        self.canva.create_rectangle(
+            info_x,
+            205,
+            info_x + 20,
+            225,
+            fill=self.player_color[1],
+            outline="black"
+        )
+        self.canva.create_text(
+            info_x + 30,
+            215,
+            text=f"{player2_name} ({self.player_color[1]})",
+            font=("Arial", 12),
+            anchor="w"
+        )
+
+        ### label score ###
+        self.canva.create_text(
+            info_x,
+            270,
+            text="Scores :",
+            font=("Arial", 14, "bold"),
+            anchor="nw"
+        )
+
+        self.canva.create_text(
+            info_x,
+            305,
+            text=f"{player1_name} : {score_p1}\n{player2_name} : {score_p2}",
+            font=("Arial", 12),
+            anchor="nw"
+        )
 
     def game_over(self):
-        self.canva.delete("grid")
+        loser = self.controler.get_loser()
+        info_x = self.max_size + 30
+
+        # Position sous les infos
+        y_base = 380
+
         self.canva.create_text(
-            self.size * self.nb_case / 2,
-            self.size * self.nb_case / 2,
-            text="Game Over",
-            font=("Arial", 40, "bold"),
+            info_x,
+            y_base,
+            text="GAME OVER",
+            font=("Arial", 20, "bold"),
+            fill="red",
+            anchor="nw",
+            tags="game_over"
+        )
+
+        self.canva.create_text(
+            info_x,
+            y_base + 30,
+            text=f"player {loser}, you lose !",
+            font=("Arial", 12),
+            anchor="nw",
+            tags="game_over"
         )
 
         self.restart_button = tk.Button(
-            self.root, text="Restart", command=self.update_view
+            self.root,
+            text="Restart",
+            command=self.controler.reset_game,
+            width=20
         )
 
         self.canva.create_window(
-            self.size * self.nb_case / 2,
-            self.size * self.nb_case / 2 + 80,
+            info_x,
+            y_base + 70,
             window=self.restart_button,
+            anchor="nw",
+            tags="game_over"
         )
 
     def display_player(self):
-
         self.canva.delete("player")
 
         radius = self.size // 3
+
         for i, (col, row) in enumerate(self.player_coord):
-            x_center = col * self.size + self.size / 2
-            y_center = row * self.size + self.size / 2
+            x_center = col * self.size + self.size / 2 + 4
+            y_center = row * self.size + self.size / 2 + 4
 
             x0 = x_center - radius
             y0 = y_center - radius
@@ -139,22 +243,24 @@ class View:
                 width=2,
                 tags="player",
             )
-        for i, (col, row) in enumerate(self.player_coord):
-            self.capture_case(i, col, row)
-
-    def capture_case(self, player_index, col, row):
-        self.owners[row][col] = player_index
-        case_id = self.cases[row][col]
-        self.canva.itemconfig(case_id, fill=self.player_color[player_index])
+    
+    def refresh_data(self):
+        """Met à jour les données venant du modèle."""
+        self.data = self.controler.get_model_data()
+        self.nb_case = self.data["grid_size"]
+        self.grid = self.data["grid"]
+        self.players_score = self.data["players"]
+        self.player_id = self.data["player_id"]
+        self.player_coord = self.data["player_coord"]
+        self.player_color = self.data["player_color"]
+        self.current_player = self.data["current_player"]
 
     def update_view(self):
+        self.refresh_data()
         self.creation_grid()
         self.display_player()
-        self.creation_score()
+        self.display_infos()
+
+    def run(self):
+        self.update_view()
         self.root.mainloop()
-
-
-if __name__ == "__main__":
-    view = View()
-    view.update_view()
->>>>>>> 39bfedad19760df8bd92adaa262d8bf43c7e0e35

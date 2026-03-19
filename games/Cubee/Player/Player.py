@@ -1,9 +1,7 @@
 import random
-from games.Cubee.model.Model.py import GameModel
-
 
 class Player:
-    def __init__(self, name: str, game: object = None):
+    def __init__(self,id,  name: str, game= None):
         self.name = name
         self.game = game
 
@@ -11,10 +9,9 @@ class Player:
         self.nb_lose = 0
         self.tie = 0
         self.coord = None
-<<<<<<< HEAD
-=======
         self.color = "gray"
->>>>>>> 39bfedad19760df8bd92adaa262d8bf43c7e0e35
+
+        self.id = id
 
     def play(self):
         return random(self.game.legal_move())
@@ -26,8 +23,4 @@ class Player:
         self.nb_lose += 1
 
     def __str__(self):
-<<<<<<< HEAD
         return self.name
-=======
-        return self.name
->>>>>>> 39bfedad19760df8bd92adaa262d8bf43c7e0e35

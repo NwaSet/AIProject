@@ -4,13 +4,19 @@ from games.Cubee.Player.Human import Human
 class GameModel :
 
     possible_direction = [
-            (0, 1),  # up
-            (0, -1), # down
+            (0, -1),  # up
+            (0, 1), # down
             (-1, 0), # left
             (1, 0)  # right
         ]
     
-    def __init__(self, grid_size, display = True, Player1=None, Player2=None):
+    def __init__(self, grid_size, display = True, Player1=None, Player2=None, controler = None):
+
+        self.player1 = Player1
+        self.player2 = Player2
+
+        self.controler = controler
+        self.controler.game = self
 
         self.grid_size = grid_size
         self.grid = []
@@ -18,13 +24,10 @@ class GameModel :
 
         self.display = display
 
-        self.player1 = Player1
-        self.player2 = Player2
-
         self.player1.coord = (self.grid_size-1, self.grid_size-1)
         self.player2.coord = (0, 0)        
 
-        self.score = {self.player1.__str__() : 0, self.player2.__str__() : 0}
+        self.score = {self.player1.__str__() : 1, self.player2.__str__() : 1}
 
         self.current_player = self.shuffle()
     
@@ -38,7 +41,7 @@ class GameModel :
         self.grid[self.grid_size-1][self.grid_size-1] = self.player1.id
     
     def shuffle(self) :
-        return random.choice(self.player1, self.player2)
+        return random.choice([self.player1, self.player2])
 
     def switch_player(self) :
         self.current_player = self.player1 if self.current_player == self.player2 else self.player2
@@ -53,14 +56,14 @@ class GameModel :
 
         self.current_player = self.shuffle()
 
-        self.score = {self.player1.__str__() : 0, self.player2.__str__() : 0}
+        self.score = {self.player1.__str__() : 1, self.player2.__str__() : 1}
     
     def is_game_over(self) :
         """
         check if the all grid is complet
         return true if the all grid is used else false
         """
-        return 0 not in self.grid
+        return all(0 not in row for row in self.grid)
 
     def legal_move(self) :
         """
@@ -76,20 +79,30 @@ class GameModel :
             new_y = player_coord_y + direction_y
 
             if 0 <= new_x < self.grid_size and 0 <= new_y < self.grid_size :
-                if self.grid[new_x][new_y] in (0, self.current_player.id):
+                if self.grid[new_y][new_x] in (0, self.current_player.id):
                     legal_action.append((direction_x, direction_y))
 
         return legal_action
     
     def set_case(self) :
         p_x, p_y = self.current_player.coord
-        self.grid[p_x][p_y] = self.current_player.id
+        if self.grid[p_y][p_x] == 0 :
+            self.grid[p_y][p_x] = self.current_player.id
+            self.score[self.current_player.__str__()] += 1
+        else : pass
+    
+    def set_player_coord(self, move) :
+        if not self.is_game_over() :
+            p_x, p_y = self.current_player.coord
+            d_x, d_y = move
+            self.current_player.coord = (p_x+d_x , p_y+d_y)
+
 
     def step(self, move) :
 
         if move in self.legal_move() :
-            self.current_player.coord += move
-            self.set_case
+            self.set_player_coord(move)
+            self.set_case()
 
         if self.is_game_over() :
             self.winner.win()
@@ -105,8 +118,8 @@ class GameModel :
 
             move = self.current_player.play()
             if move in self.legal_move() :
-                self.current_player.coord += move
-                self.set_case
+                self.set_player_coord(move)
+                self.set_case()
 
             self.switch_player()
         
@@ -116,18 +129,20 @@ class GameModel :
     @property
     def winner(self) :
         if self.is_game_over :
-            return self.player1 if self.score[self.player1.__str__()] > self.score[self.player2.__str__()] else self/self.player2
+            return self.player1 if self.score[self.player1.__str__()] > self.score[self.player2.__str__()] else self.player2
     
     @property
     def loser(self) :
         if self.is_game_over :
-            return self.player1 if self.score[self.player1.__str__()] < self.score[self.player2.__str__()] else self/self.player2
+            return self.player1 if self.score[self.player1.__str__()] < self.score[self.player2.__str__()] else self.player2
 
     def get_model_data(self) :
         return {
             "grid_size" : self.grid_size ,
-            "grid" : "" + self.grid ,
+            "grid" : self.grid ,
             "players" : self.score ,
+            "current_player" : self.current_player ,
             "player_coord" : [self.player1.coord, self.player2.coord] ,
-            "player_color" : [self.player1.color, self.player1.color]
+            "player_color" : [self.player1.color, self.player2.color] ,
+            "player_id" : [self.player1.id, self.player2.id]
         }
