@@ -117,39 +117,6 @@ class GameModel:
             if not isinstance(self.current_player, Human):
                 self.step(self.current_player.play())
 
-    def bfs(self):
-        visited = [
-            [False for _ in range(self.grid_size)] for _ in range(self.grid_size)
-        ]
-        queue = deque()
-
-        for i in range(self.grid_size):
-            if self.grid[i][0] == 0:
-                queue.append((0, i))
-            if self.grid[i][self.grid_size - 1] == 0:
-                queue.append((self.grid_size - 1, i))
-            if self.grid[0][i] == 0:
-                queue.append((i, 0))
-            if self.grid[self.grid_size - 1][i] == 0:
-                queue.append((i, self.grid_size - 1))
-
-        while queue:
-            col, row = queue.popleft()
-
-            if visited[row][col]:
-                continue
-
-            visited[row][col] = True
-
-            for dcol, drow in GameModel.possible_direction:
-                ncol, nrow = col + dcol, row + drow
-
-                if 0 <= ncol < self.grid_size and 0 <= nrow < self.grid_size:
-                    if self.grid[nrow][ncol] == 0:
-                        queue.append((ncol, nrow))
-
-        return visited
-
     def update_enclos(self):
         visited = [
             [False for _ in range(self.grid_size)] for _ in range(self.grid_size)
