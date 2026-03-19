@@ -94,11 +94,9 @@ class View:
 
     def display_player(self):
 
-        # Supprime les anciens joueurs
         self.canva.delete("player")
 
-        radius = self.size // 3  # taille du cercle
-
+        radius = self.size // 3
         for i, (col, row) in enumerate(self.player_coord):
             x_center = col * self.size + self.size / 2
             y_center = row * self.size + self.size / 2
@@ -122,10 +120,7 @@ class View:
             self.capture_case(i, col, row)
 
     def capture_case(self, player_index, col, row):
-        # Sauvegarde logique
         self.owners[row][col] = player_index
-
-        # Mise à jour visuelle
         case_id = self.cases[row][col]
         self.canva.itemconfig(case_id, fill=self.player_color[player_index])
 
