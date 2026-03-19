@@ -13,6 +13,14 @@ class View:
         self.root = tk.Tk()
         self.root.title("Cubee")
 
+        self.root.bind("<Left>", self.controler)
+
+        self.root.bind("<Right>", self.controler)
+
+        self.root.bind("<Up>", self.controler)
+
+        self.root.bind("<Down>", self.controler)
+
         self.player_coord = ((0, 0), (9, 9))
         self.player_color = ("gray", "red")
 
