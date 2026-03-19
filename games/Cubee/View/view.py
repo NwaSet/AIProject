@@ -21,8 +21,12 @@ class View:
 
         self.root.focus_set()
 
-        self.root.bind("<Left>", lambda event: self.controler.handle_human_move((-1, 0)))
-        self.root.bind("<Right>", lambda event: self.controler.handle_human_move((1, 0)))
+        self.root.bind(
+            "<Left>", lambda event: self.controler.handle_human_move((-1, 0))
+        )
+        self.root.bind(
+            "<Right>", lambda event: self.controler.handle_human_move((1, 0))
+        )
         self.root.bind("<Up>", lambda event: self.controler.handle_human_move((0, -1)))
         self.root.bind("<Down>", lambda event: self.controler.handle_human_move((0, 1)))
 
@@ -41,9 +45,7 @@ class View:
         self.score_text = None
 
         self.restart_button = tk.Button(
-            self.root,
-            text="Restart",
-            command=self.controler.reset_game
+            self.root, text="Restart", command=self.controler.reset_game
         )
 
     def creation_grid(self):
@@ -102,11 +104,7 @@ class View:
 
         ### label information ###
         self.canva.create_text(
-            info_x,
-            30,
-            text="Informations",
-            font=("Arial", 16, "bold"),
-            anchor="nw"
+            info_x, 30, text="Informations", font=("Arial", 16, "bold"), anchor="nw"
         )
 
         ### label current player ###
@@ -115,59 +113,41 @@ class View:
             80,
             text=f"Tour de : {current_player_name}",
             font=("Arial", 14),
-            anchor="nw"
+            anchor="nw",
         )
 
         ### label color ###
         self.canva.create_text(
-            info_x,
-            130,
-            text="Couleurs :",
-            font=("Arial", 14, "bold"),
-            anchor="nw"
+            info_x, 130, text="Couleurs :", font=("Arial", 14, "bold"), anchor="nw"
         )
 
         # player 1
         self.canva.create_rectangle(
-            info_x,
-            165,
-            info_x + 20,
-            185,
-            fill=self.player_color[0],
-            outline="black"
+            info_x, 165, info_x + 20, 185, fill=self.player_color[0], outline="black"
         )
         self.canva.create_text(
             info_x + 30,
             175,
             text=f"{player1_name} ({self.player_color[0]})",
             font=("Arial", 12),
-            anchor="w"
+            anchor="w",
         )
 
         # player 2
         self.canva.create_rectangle(
-            info_x,
-            205,
-            info_x + 20,
-            225,
-            fill=self.player_color[1],
-            outline="black"
+            info_x, 205, info_x + 20, 225, fill=self.player_color[1], outline="black"
         )
         self.canva.create_text(
             info_x + 30,
             215,
             text=f"{player2_name} ({self.player_color[1]})",
             font=("Arial", 12),
-            anchor="w"
+            anchor="w",
         )
 
         ### label score ###
         self.canva.create_text(
-            info_x,
-            270,
-            text="Scores :",
-            font=("Arial", 14, "bold"),
-            anchor="nw"
+            info_x, 270, text="Scores :", font=("Arial", 14, "bold"), anchor="nw"
         )
 
         self.canva.create_text(
@@ -175,7 +155,7 @@ class View:
             305,
             text=f"{player1_name} : {score_p1}\n{player2_name} : {score_p2}",
             font=("Arial", 12),
-            anchor="nw"
+            anchor="nw",
         )
 
     def game_over(self):
@@ -192,7 +172,7 @@ class View:
             font=("Arial", 20, "bold"),
             fill="red",
             anchor="nw",
-            tags="game_over"
+            tags="game_over",
         )
 
         self.canva.create_text(
@@ -201,14 +181,11 @@ class View:
             text=f"player {loser}, you lose !",
             font=("Arial", 12),
             anchor="nw",
-            tags="game_over"
+            tags="game_over",
         )
 
         self.restart_button = tk.Button(
-            self.root,
-            text="Restart",
-            command=self.controler.reset_game,
-            width=20
+            self.root, text="Restart", command=self.controler.reset_game, width=20
         )
 
         self.canva.create_window(
@@ -216,7 +193,7 @@ class View:
             y_base + 70,
             window=self.restart_button,
             anchor="nw",
-            tags="game_over"
+            tags="game_over",
         )
 
     def display_player(self):
@@ -243,7 +220,7 @@ class View:
                 width=2,
                 tags="player",
             )
-    
+
     def refresh_data(self):
         """Met à jour les données venant du modèle."""
         self.data = self.controler.get_model_data()
@@ -264,3 +241,4 @@ class View:
     def run(self):
         self.update_view()
         self.root.mainloop()
+
