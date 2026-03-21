@@ -1,4 +1,5 @@
 from .mikado.mikadoGame import *
+from .Cubee.cubeeGame import *
 
 class GameSelectionController:
     def start_game(self, game_name, view = None):
@@ -11,6 +12,8 @@ class GameSelectionController:
 
         elif game_name == "cubee":
             print("Lancement cubee")
+            self.view.destroy()
+            start_cubee_game()
             
 
         elif game_name == "pixelKart":
