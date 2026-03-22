@@ -2,7 +2,14 @@ from .gamesControlers import *
 from tkinter import *
 
 class GameSelectionView(Tk):
-    def __init__(self, controller):
+    """
+    class that permit to display the view of the game selection
+    """
+
+    def __init__(self, controller : object) -> None:
+        """
+        init the view
+        """
         super().__init__()
 
 
@@ -23,15 +30,23 @@ class GameSelectionView(Tk):
         self.selection_frame = None
         self.add_selection_buttons()
 
-    def add_selection_buttons(self):
-        
+    def add_selection_buttons(self) -> None:
+        """
+        add and pack the button to choose the game
+        """
         self.selection_frame = SelectionButtonsFrame(self, self.controller)
         self.selection_frame.pack(pady=20)
 
 
 class SelectionButtonsFrame(Frame):
+    """
+    class that can create all button for all the possible choice.
+    """
 
-    def __init__(self, parent, controller):
+    def __init__(self, parent : object, controller : object) -> None:
+        """
+        init of the button class
+        """
         super().__init__(parent)
         self.controller = controller
 

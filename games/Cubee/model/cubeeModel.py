@@ -4,6 +4,32 @@ from collections import deque
 
 
 class GameModel:
+    """
+    Represent the main model of the Cubee game.
+
+    This class manages:
+    - the game grid
+    - the two players
+    - player positions
+    - scores
+    - turn management
+    - move validation
+    - territory capture logic
+    - end-game detection
+
+    Attributes:
+        possible_direction (list[tuple[int, int]]): List of all possible movement
+            directions: up, down, left, and right.
+        player1 (Player): First player of the game.
+        player2 (Player): Second player of the game.
+        controler (gameControler): Controller associated with the model.
+        grid_size (int): Size of the square grid.
+        grid (list[list[int]]): 2D grid representing the board.
+        display (bool): Indicates whether the game should be displayed.
+        score (dict): Dictionary containing each player's score.
+        current_player (Player): Player whose turn it is.
+    """
+
     possible_direction = [
         (0, -1),  # up
         (0, 1),  # down
@@ -11,9 +37,18 @@ class GameModel:
         (1, 0),  # right
     ]
 
-    def __init__(
-        self, grid_size, display=True, Player1=None, Player2=None, controler=None
-    ):
+    def __init__(self, grid_size : int, display : bool = True, Player1 : object = None, Player2 : object = None, controler : object = None) -> None:
+        """
+        Initialize the game model.
+
+        Args:
+            grid_size (int): Size of the square grid.
+            display (bool, optional): Whether the game is displayed. Defaults to True.
+            Player1 (Player, optional): First player. Defaults to None.
+            Player2 (Player, optional): Second player. Defaults to None.
+            controler (gameControler, optional): Controller associated with the model.
+                Defaults to None.
+        """
 
         self.player1 = Player1
         self.player2 = Player2
@@ -34,7 +69,14 @@ class GameModel:
 
         self.current_player = self.shuffle()
 
-    def init_grid(self):
+    def init_grid(self) -> None:
+        """
+        Initialize the game grid.
+
+        Creates an empty square grid filled with 0, then places:
+        - player 2 in the top-left corner
+        - player 1 in the bottom-right corner
+        """
         for _ in range(self.grid_size):
             row = []
             for _ in range(self.grid_size):
@@ -43,16 +85,26 @@ class GameModel:
         self.grid[0][0] = self.player2.id
         self.grid[self.grid_size - 1][self.grid_size - 1] = self.player1.id
 
-    def shuffle(self):
+    def shuffle(self) -> object:
+        """
+        return a random player to be the current player
+        """
         return random.choice([self.player1, self.player2])
 
-    def switch_player(self):
+    def switch_player(self) -> None:
+        """
+        switch the current player between the 2 players
+        """
         self.current_player = (
             self.player1 if self.current_player == self.player2 else self.player2
         )
 
-    def reset(self):
-
+    def reset(self) -> None:
+        """
+        reset the grid
+        replace both players
+        put their score at 1
+        """
         self.grid = []
         self.init_grid()
 
@@ -63,14 +115,14 @@ class GameModel:
 
         self.score = {self.player1.__str__(): 1, self.player2.__str__(): 1}
 
-    def is_game_over(self):
+    def is_game_over(self) -> bool:
         """
         check if the all grid is complet
         return true if the all grid is used else false
         """
         return all(0 not in row for row in self.grid)
 
-    def legal_move(self):
+    def legal_move(self) -> list[tuple]:
         """
         verify all possible move for the player,
         return a list of tuple for all possible action == (x, y) .
@@ -89,7 +141,10 @@ class GameModel:
 
         return legal_action
 
-    def set_case(self):
+    def set_case(self) -> None:
+        """
+        set the case where the current player is with his id
+        """
         p_x, p_y = self.current_player.coord
         if self.grid[p_y][p_x] == 0:
             self.grid[p_y][p_x] = self.current_player.id
@@ -97,14 +152,32 @@ class GameModel:
         else:
             pass
 
-    def set_player_coord(self, move):
+    def set_player_coord(self, move : tuple) -> None:
+        """
+        set the current player with the new coord
+        """
         if not self.is_game_over():
             p_x, p_y = self.current_player.coord
             d_x, d_y = move
             self.current_player.coord = (p_x + d_x, p_y + d_y)
 
-    def step(self, move):
+    def step(self, move : tuple) -> None:
+        """
+        Execute one turn of the game.
 
+        If the move is legal:
+        - update the player's coordinates
+        - mark the new cell
+        - update enclosed areas
+
+        Then:
+        - if the game is over, update winner and loser statistics
+        - otherwise switch to the next player
+        - if the next player is an AI, automatically play its turn
+
+        Args:
+            move (tuple[int, int]): Move chosen by the current player.
+        """
         if move in self.legal_move():
             self.set_player_coord(move)
             self.set_case()
@@ -117,7 +190,18 @@ class GameModel:
             if not isinstance(self.current_player, Human):
                 self.step(self.current_player.play())
 
-    def update_enclos(self):
+    def update_enclos(self) -> None:
+        """
+        Detect and fill enclosed empty zones.
+
+        This method uses a breadth-first search (BFS) to explore each empty zone.
+        An empty zone is assigned to a player if it touches only that player's
+        cells and not the opponent's cells.
+
+        When a zone is captured:
+        - the cells are filled with the owner's id
+        - the owner's score is increased accordingly
+        """
         visited = [
             [False for _ in range(self.grid_size)] for _ in range(self.grid_size)
         ]
@@ -169,7 +253,19 @@ class GameModel:
                             self.score[self.player2.__str__()] += 1
 
     def play(self):
+        """
+        Run a full automatic game until completion.
 
+        At each turn:
+        - the current player chooses a move
+        - the move is applied if legal
+        - the board and enclosed areas are updated
+        - the turn is passed to the next player
+
+        Once the game ends:
+        - the winner's statistics are updated
+        - the loser's statistics are updated
+        """
         while not self.is_game_over():
             move = self.current_player.play()
             if move in self.legal_move():
@@ -182,7 +278,11 @@ class GameModel:
         self.loser.lose()
 
     @property
-    def winner(self):
+    def winner(self) -> object:
+        """
+        return the winner of the game
+        if game is over
+        """
         if self.is_game_over:
             return (
                 self.player1
@@ -192,7 +292,11 @@ class GameModel:
             )
 
     @property
-    def loser(self):
+    def loser(self) -> object:
+        """
+        return the loser of the game
+        if game is over
+        """
         if self.is_game_over:
             return (
                 self.player1
@@ -201,7 +305,10 @@ class GameModel:
                 else self.player2
             )
 
-    def get_model_data(self):
+    def get_model_data(self) -> dict:
+        """
+        send the model data needed by the view
+        """
         return {
             "grid_size": self.grid_size,
             "grid": self.grid,

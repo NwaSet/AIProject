@@ -6,6 +6,9 @@ from .Player.Human import Human
 
 
 def start_cubee_game():
+    """
+    function that permiet to launch the cubee game
+    """
 
     flo = Human(1, "flo", "red")
     yo = Human(2, "yo", "blue")
