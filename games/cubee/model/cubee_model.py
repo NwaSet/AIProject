@@ -1,5 +1,5 @@
 import random
-from games.Cubee.Player.Human import Human
+from games.cubee.player.human import Human
 from collections import deque
 
 
@@ -37,7 +37,14 @@ class GameModel:
         (1, 0),  # right
     ]
 
-    def __init__(self, grid_size : int, display : bool = True, Player1 : object = None, Player2 : object = None, controler : object = None) -> None:
+    def __init__(
+        self,
+        grid_size: int,
+        display: bool = True,
+        Player1: object = None,
+        Player2: object = None,
+        controler: object = None,
+    ) -> None:
         """
         Initialize the game model.
 
@@ -152,7 +159,7 @@ class GameModel:
         else:
             pass
 
-    def set_player_coord(self, move : tuple) -> None:
+    def set_player_coord(self, move: tuple) -> None:
         """
         set the current player with the new coord
         """
@@ -161,7 +168,7 @@ class GameModel:
             d_x, d_y = move
             self.current_player.coord = (p_x + d_x, p_y + d_y)
 
-    def step(self, move : tuple) -> None:
+    def step(self, move: tuple) -> None:
         """
         Execute one turn of the game.
 
@@ -318,4 +325,3 @@ class GameModel:
             "player_color": [self.player1.color, self.player2.color],
             "player_id": [self.player1.id, self.player2.id],
         }
-

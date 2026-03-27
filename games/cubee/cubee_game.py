@@ -1,8 +1,8 @@
-from .Controler.controler import gameControler
-from .model.cubeeModel import GameModel
-from .View.view import View
-from .Player.Player import Player
-from .Player.Human import Human
+from .controler.controler import gameControler
+from .model.cubee_model import GameModel
+from .view.view import View
+from .player.player import Player
+from .player.human import Human
 
 
 def start_cubee_game():

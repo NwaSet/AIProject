@@ -1,5 +1,5 @@
 import tkinter as tk
-from ..Controler.controler import gameControler
+from ..controler.controler import gameControler
 
 
 class View:

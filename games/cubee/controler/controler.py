@@ -1,4 +1,5 @@
-from ..Player.Human import Human
+from ..player.human import Human
+
 
 class gameControler:
     """
@@ -92,7 +93,7 @@ class gameControler:
         if not isinstance(self.game.current_player, Human):
             print(f"L'IA {self.game.current_player} commence !")
             self.handle_ai_move()
-        
+
         self.view.run()
 
     def reset_game(self) -> None:
@@ -101,3 +102,4 @@ class gameControler:
         """
         self.game.reset()
         self.view.update_view()
+
