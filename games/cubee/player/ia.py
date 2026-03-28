@@ -150,8 +150,8 @@ class IA(Player):
         self.take_cell = 1
 
         self.epsilon = 0.9
-        self.learning_rate = 0.01
-        self.gamma = 1
+        self.learning_rate = 0.1
+        self.gamma = 0.8
 
         self.dao = Dao(self.name)
 

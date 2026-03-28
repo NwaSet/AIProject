@@ -60,8 +60,12 @@ class GameModel:
         self.player1 = Player1
         self.player2 = Player2
 
+        self.player1.game = self
+        self.player2.game = self
+
         self.controler = controler
-        self.controler.game = self
+        if self.controler != None :
+            self.controler.game = self
 
         self.grid_size = grid_size
         self.grid = []
@@ -290,7 +294,7 @@ class GameModel:
         return the winner of the game
         if game is over
         """
-        if self.is_game_over:
+        if self.is_game_over():
             return (
                 self.player1
                 if self.score[self.player1.__str__()]
@@ -304,7 +308,7 @@ class GameModel:
         return the loser of the game
         if game is over
         """
-        if self.is_game_over:
+        if self.is_game_over():
             return (
                 self.player1
                 if self.score[self.player1.__str__()]
