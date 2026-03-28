@@ -118,37 +118,22 @@ class Dao:
         self.session.execute(row)
         self.session.commit()
 
-
-test = Dao("flo")
-test.add_row(
-    {
-        "current_player": 1,
-        "player1_coord": 5,
-        "player2_coord": 9,
-        "grid": "001020010",
-        "grid_size": 3,
-        "up": 10,
-        "down": -2,
-        "left": 4,
-        "right": 7,
-    }
-)
-test.add_row(
-    {
-        "current_player": 1,
-        "player1_coord": 20,
-        "player2_coord": 9,
-        "grid": "001020010",
-        "grid_size": 3,
-        "up": 10,
-        "down": -2,
-        "left": 4,
-        "right": 7,
-    }
-)
-
-print(
-    test.select_row_by_dto(
+if __name__ == "__main__" :
+    test = Dao("flo")
+    test.add_row(
+        {
+            "current_player": 1,
+            "player1_coord": 5,
+            "player2_coord": 9,
+            "grid": "001020010",
+            "grid_size": 3,
+            "up": 10,
+            "down": -2,
+            "left": 4,
+            "right": 7,
+        }
+    )
+    test.add_row(
         {
             "current_player": 1,
             "player1_coord": 20,
@@ -161,13 +146,42 @@ print(
             "right": 7,
         }
     )
-)
-test.update_row({"up": 5, "down": 5, "left": 5, "right": 5})
-print(
-    test.select_row_by_dto(
+
+    print(
+        test.select_row_by_dto(
+            {
+                "current_player": 1,
+                "player1_coord": 20,
+                "player2_coord": 9,
+                "grid": "001020010",
+                "grid_size": 3,
+                "up": 10,
+                "down": -2,
+                "left": 4,
+                "right": 7,
+            }
+        )
+    )
+    test.update_row({"up": 5, "down": 5, "left": 5, "right": 5})
+    print(
+        test.select_row_by_dto(
+            {
+                "current_player": 1,
+                "player1_coord": 20,
+                "player2_coord": 9,
+                "grid": "001020010",
+                "grid_size": 3,
+                "up": 10,
+                "down": -2,
+                "left": 4,
+                "right": 7,
+            }
+        )
+    )
+    test.add_row(
         {
             "current_player": 1,
-            "player1_coord": 20,
+            "player1_coord": 5,
             "player2_coord": 9,
             "grid": "001020010",
             "grid_size": 3,
@@ -177,17 +191,3 @@ print(
             "right": 7,
         }
     )
-)
-test.add_row(
-    {
-        "current_player": 1,
-        "player1_coord": 5,
-        "player2_coord": 9,
-        "grid": "001020010",
-        "grid_size": 3,
-        "up": 10,
-        "down": -2,
-        "left": 4,
-        "right": 7,
-    }
-)
