@@ -16,8 +16,8 @@ class IA(Player):
 
         self.epsilon = 0.9
         self.learning_rate = 0.01
+        self.gamma = 1
 
-        self.v_fuction = {"lose": self.lose_reward, "win": self.win_reward}
         self.game = game
 
         self.dao = Dao(self.name)
