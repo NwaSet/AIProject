@@ -101,4 +101,6 @@ class IA(Player):
         next_state = self.game.get_state_dto()
 
         self.q_function(state, action, reward, next_state)
-        self.epsilon *= 0.999
+
+    def next_epsilon(self) :
+        pass
