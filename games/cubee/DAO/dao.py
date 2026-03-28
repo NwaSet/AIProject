@@ -116,11 +116,10 @@ class Dao:
         )
 
         self.session.execute(row)
+        self.session.commit()
 
-    self.session.commit()
 
-
-test = DAO("flo")
+test = Dao("flo")
 test.add_row(
     {
         "current_player": 1,
