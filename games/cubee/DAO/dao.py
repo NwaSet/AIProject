@@ -47,11 +47,11 @@ class Dao:
             Column("player2_coord", Integer),
             Column("grid", String),
             Column("grid_size", Integer),
-            Column("up", Integer),
-            Column("down", Integer),
-            Column("left", Integer),
-            Column("right", Integer),
-            Column("id", Integer, primary_key=True, autoincrement=True),
+            Column("up", Float),
+            Column("down", Float),
+            Column("left", Float),
+            Column("right", Float),
+            Column("id", Integer, primary_key=True, autoincrement=True)
         )
 
         metadata.create_all(self.engine)
