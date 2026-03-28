@@ -148,9 +148,9 @@ class GameModel:
 
         return legal_action
 
-    def set_case(self) -> None:
+    def set_cell(self) -> None:
         """
-        set the case where the current player is with his id
+        set the cell where the current player is with his id
         """
         p_x, p_y = self.current_player.coord
         if self.grid[p_y][p_x] == 0:
@@ -187,8 +187,8 @@ class GameModel:
         """
         if move in self.legal_move():
             self.set_player_coord(move)
-            self.set_case()
-            self.update_enclos()
+            self.set_cell()
+            self.update_enclosure()
         if self.is_game_over():
             self.winner.win()
             self.loser.lose()
@@ -197,7 +197,7 @@ class GameModel:
             if not isinstance(self.current_player, Human):
                 self.step(self.current_player.play())
 
-    def update_enclos(self) -> None:
+    def update_enclosure(self) -> None:
         """
         Detect and fill enclosed empty zones.
 
@@ -277,7 +277,7 @@ class GameModel:
             move = self.current_player.play()
             if move in self.legal_move():
                 self.set_player_coord(move)
-                self.set_case()
+                self.set_cell()
                 self.update_enclos()
             self.switch_player()
 
@@ -311,6 +311,46 @@ class GameModel:
                 < self.score[self.player2.__str__()]
                 else self.player2
             )
+
+    def play_ai_step(self, move):
+        """
+        Version step pour IA avec retour d'information
+        """
+
+        info = {"took_case": False, "win": False, "lose": False}
+
+        old_score = self.score[self.current_player.__str__()]
+
+        if move in self.legal_move():
+            self.set_player_coord(move)
+            self.set_cell()
+            self.update_enclosure()
+
+            new_score = self.score[self.current_player.__str__()]
+            if new_score > old_score:
+                info["took_case"] = True
+
+        if self.is_game_over():
+            if self.winner == self.current_player:
+                info["win"] = True
+            else:
+                info["lose"] = True
+
+        else:
+            self.switch_player()
+
+        return info
+
+    def get_state_dto(self):
+        return {
+            "current_player": self.current_player.id,
+            "player1_coord": self.player1.coord[0] * self.grid_size
+            + self.player1.coord[1],
+            "player2_coord": self.player2.coord[0] * self.grid_size
+            + self.player2.coord[1],
+            "grid": "".join(str(cell) for row in self.grid for cell in row),
+            "grid_size": self.grid_size,
+        }
 
     def get_model_data(self) -> dict:
         """

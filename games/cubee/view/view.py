@@ -33,7 +33,7 @@ class View:
 
         self.data = self.controler.get_model_data()
 
-        self.nb_case = self.data["grid_size"]
+        self.nb_cell = self.data["grid_size"]
         self.grid = self.data["grid"]
         self.players_score = self.data["players"]
         self.player_id = self.data["player_id"]
@@ -54,7 +54,7 @@ class View:
         self.root.bind("<Up>", lambda event: self.controler.handle_human_move((0, -1)))
         self.root.bind("<Down>", lambda event: self.controler.handle_human_move((0, 1)))
 
-        self.max_size = self.size * self.nb_case
+        self.max_size = self.size * self.nb_cell
         self.canva = tk.Canvas(
             self.root,
             width=self.max_size + 200,
@@ -65,7 +65,7 @@ class View:
         self.player_coord = self.data["player_coord"]
         self.player_color = self.data["player_color"]
 
-        self.cases = []
+        self.cells = []
         self.score_text = None
 
         self.restart_button = tk.Button(
@@ -77,12 +77,12 @@ class View:
         create and diplay the game grid on the canvas
         """
         self.canva.delete("all")
-        self.cases = []
+        self.cells = []
         offset = 4
 
-        for row in range(self.nb_case):
+        for row in range(self.nb_cell):
             line = []
-            for col in range(self.nb_case):
+            for col in range(self.nb_cell):
                 x = col * self.size + offset
                 y = row * self.size + offset
 
@@ -95,7 +95,7 @@ class View:
                 else:
                     fill_color = "white"
 
-                case = self.canva.create_rectangle(
+                cell = self.canva.create_rectangle(
                     x,
                     y,
                     x + self.size,
@@ -106,8 +106,8 @@ class View:
                     tags="grid",
                 )
 
-                line.append(case)
-            self.cases.append(line)
+                line.append(cell)
+            self.cells.append(line)
 
         self.canva.create_rectangle(
             offset,
@@ -264,7 +264,7 @@ class View:
         Met à jour les données venant du modèle
         """
         self.data = self.controler.get_model_data()
-        self.nb_case = self.data["grid_size"]
+        self.nb_cell = self.data["grid_size"]
         self.grid = self.data["grid"]
         self.players_score = self.data["players"]
         self.player_id = self.data["player_id"]
