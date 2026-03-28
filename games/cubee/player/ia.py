@@ -1,7 +1,7 @@
 import random
 from .player import Player
-from games.cubee.model.cubee_model import GameModel
-from games.cubee.DAO.dao import Dao
+from games.Cubee.model.cubee_model import GameModel
+from games.Cubee.DAO.dao import Dao
 
 
 class IA(Player):
@@ -91,7 +91,7 @@ class IA(Player):
     def play_turn(self):
         state = self.game.get_state_dto()
 
-        action = self.choose_move(state, legal_move)
+        action = self.choose_move(state, self.game.legal_move())
 
         move = self.string_to_move(action)
         info = self.game.play_ai_step(move)
