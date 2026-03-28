@@ -1,7 +1,7 @@
 import random
 from .player import Player
-from games.Cubee.model.cubee_model import GameModel
-from games.Cubee.DAO.dao import Dao
+from games.cubee.model.cubee_model import GameModel
+from games.cubee.DAO.dao import Dao
 
 # add self.reward en cas de retour sur une case déja à nous ?
 # faire la fonction to_dto que j'aurais besoin dans le dao
