@@ -3,6 +3,10 @@ from .player import Player
 from games.Cubee.model.cubee_model import GameModel
 from games.Cubee.DAO.dao import Dao
 
+# add self.reward en cas de retour sur une case déja à nous ?
+# faire la fonction to_dto que j'aurais besoin dans le dao
+# le nom du dao devra etre les paramètre pour avoir plus facile à les trier 
+
 
 class IA(Player):
     def __init__(self, id: int, name: str, game: object = None) -> None:
@@ -73,6 +77,7 @@ class IA(Player):
         return reward
 
     def q_function(self, state, action, reward, next_state):
+        # attention tu fais update mais il est possible qu'il faut faire add_row si elle existe pas
         current = self.dao.select_row_by_dto(state)
         next_action = self.dao.select_row_by_dto(next_state)
 
@@ -83,7 +88,7 @@ class IA(Player):
 
         old_value = current[action]
 
-        new_value = old_value + self.learning_rate * (reward + max_next - old_value)
+        new_value = old_value + self.learning_rate * (reward + self.gamma*max_next - old_value)
         current[action] = new_value
 
         self.dao.update_row(current)
