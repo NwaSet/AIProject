@@ -282,7 +282,7 @@ class GameModel:
             if move in self.legal_move():
                 self.set_player_coord(move)
                 self.set_cell()
-                self.update_enclos()
+                self.update_enclosure()
             self.switch_player()
 
         self.winner.win()
