@@ -29,7 +29,7 @@ source env/bin/activate
 
 3. install the requirements on your Virtual Environment
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 4. start game by launching the file main.py
