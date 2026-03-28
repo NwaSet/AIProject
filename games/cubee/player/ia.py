@@ -106,6 +106,20 @@ class IA(Player):
         next_state = self.game.get_state_dto()
 
         self.q_function(state, action, reward, next_state)
+        
+    
+    def play(self) :
+        
+        if random.random() < self.epsilon:
+            action = self.explore()
+        else:
+            action = self.exploit()
+
+    def exploit(self) :
+        pass
+
+    def explore(self) :
+        pass
 
     def next_epsilon(self, coefficient: float = 0.95, minimum: float = 0.05) -> float:
         """
