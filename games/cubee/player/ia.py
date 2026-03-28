@@ -107,5 +107,9 @@ class IA(Player):
 
         self.q_function(state, action, reward, next_state)
 
-    def next_epsilon(self) :
-        pass
+    def next_epsilon(self, coefficient: float = 0.95, minimum: float = 0.05) -> float:
+        """
+        Decrease epsilon while keeping it above a minimum value.
+        """
+        self.epsilon = max(minimum, self.epsilon * coefficient)
+        return self.epsilon
