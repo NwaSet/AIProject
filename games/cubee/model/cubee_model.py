@@ -265,7 +265,7 @@ class GameModel:
                         else:
                             self.score[self.player2.__str__()] += 1
 
-    def play(self):
+    def play(self) -> None:
         """
         Run a full automatic game until completion.
 
@@ -319,9 +319,10 @@ class GameModel:
                 else self.player2
             )
 
-    def play_ai_step(self, move):
+    def play_ai_step(self, move : tuple[int,int]) -> None:
         """
-        Version step pour IA avec retour d'information
+        step ai version,
+        return info after the move to update the q-table.
         """
 
         info = {"took_case": False, "win": False, "lose": False}
@@ -348,7 +349,10 @@ class GameModel:
 
         return info
 
-    def get_state_dto(self):
+    def get_state_dto(self) -> dict:
+        """
+        return state of the game that the ia and the dao will need
+        """
         return {
             "current_player": self.current_player.id,
             "player1_coord": self.player1.coord[0] * self.grid_size
