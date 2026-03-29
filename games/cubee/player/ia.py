@@ -14,9 +14,9 @@ class IA(Player):
         super().__init__(id, name, game)
         self.color = "gray"
 
-        self.lose_reward = -10
-        self.win_reward = 10
-        self.penalty = -1
+        self.lose_reward = -5
+        self.win_reward = 5
+        self.penalty = -0.1
         self.take_cell = 1
 
         self.epsilon = epsilon

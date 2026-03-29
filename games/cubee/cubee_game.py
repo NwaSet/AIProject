@@ -23,8 +23,8 @@ def start_cubee_game():
 
 def train_ai() :
 
+    x = 1
     for i in range(10_000) :
-        x = 1
         if i % 1000 == 0 :
             x = max(0, x - 0.1)
         
