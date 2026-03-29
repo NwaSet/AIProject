@@ -130,7 +130,6 @@ class Dao:
         self.session.execute(row)
         self.session.commit()
 
-
 if __name__ == "__main__" :
     test = Dao("test_db")
     test.add_row(
