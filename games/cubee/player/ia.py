@@ -16,7 +16,7 @@ class IA(Player):
 
         self.lose_reward = -10
         self.win_reward = 10
-        self.penalty = -5
+        self.penalty = -1
         self.take_cell = 1
 
         self.epsilon = epsilon

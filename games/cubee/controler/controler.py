@@ -28,7 +28,7 @@ class gameControler:
         if game is over, call the handle_end_game
         """
         if not isinstance(self.game.current_player, Human):
-            move = self.current_player.play()
+            move = self.game.current_player.play()
 
             self.game.step(move)
 
@@ -101,5 +101,9 @@ class gameControler:
         reset all data, in the view and in the model to restart a game
         """
         self.game.reset()
+        if not isinstance(self.game.current_player, Human):
+            move = self.game.current_player.play()
+            self.game.step(move)
+            
         self.view.update_view()
 

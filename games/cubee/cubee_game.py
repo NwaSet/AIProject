@@ -16,16 +16,21 @@ def start_cubee_game():
     flo = Human(1, "flo", "red")
     # yo = Human(2, "yo", "blue")
     ctrl = gameControler()
-    game = GameModel(5, Player1=flo, Player2=bot, controler=ctrl)
+    game = GameModel(3, Player1=flo, Player2=bot, controler=ctrl)
     view = View(ctrl)
     ctrl.start_game()
 
 
 def train_ai() :
-    bot_1 = IA(1,"ia1")
-    bot_2 = IA(2,"ia2")
 
-    for _ in range(10_000) :
+    for i in range(10_000) :
+        x = 1
+        if i % 1000 == 0 :
+            x = max(0, x - 0.1)
+        
+        bot_1 = IA(1,"ia1", epsilon=x)
+        bot_2 = IA(2,"ia1", epsilon=x)
+
         game = GameModel(3,False, bot_1,bot_2)
         game.play()
 
