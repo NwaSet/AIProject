@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 class Dao :
 
     """
-    class that permit to communicate between 
+    class that permit to communicate between the game model and a db
     """
     
     def __init__(
