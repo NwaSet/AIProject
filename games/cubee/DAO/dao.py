@@ -2,7 +2,11 @@ from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
 
 
-class Dao:
+class Dao :
+
+    """
+    class that permit to communicate between 
+    """
     
     def __init__(
             self,
@@ -21,7 +25,7 @@ class Dao:
         self.current_row = None
         self.data_table = None
 
-        if db_name:
+        if db_name :
             self.connect_player_db(db_name)
 
 
@@ -43,7 +47,7 @@ class Dao:
         self.init_column()
 
 
-    def init_column(self) -> None:
+    def init_column(self) -> None :
         """
         init the table of the db
         """
@@ -106,14 +110,14 @@ class Dao:
             row
         ).fetchone()
 
-        if self.current_row:
+        if self.current_row :
             return {
                 "up": self.current_row.up,
                 "down": self.current_row.down,
                 "left": self.current_row.left,
                 "right": self.current_row.right,
             }
-        else:
+        else :
             return None
 
 
