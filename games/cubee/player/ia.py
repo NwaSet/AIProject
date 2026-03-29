@@ -10,7 +10,26 @@ class IA(Player):
     Q(s, a) <- Q(s, a) + lr * (reward + gamma * max(Q(s', .)) - Q(s, a))
     """
 
-    def __init__(self, id: int, name: str, game: object = None, epsilon : float= 0.9) -> None:
+    def __init__(
+            self,
+            id: int,
+            name: str,
+            game: object = None,
+            epsilon : float= 0.9,
+            lr : float = 0.1,
+            gamma : float = 0.8
+            ) -> None:
+        """
+        initialize the Ai : 
+
+        Args :
+        id : id of hte player
+        name : name of the ai
+        game : game model where the player is playing
+        epsilon : represente if the play chose a randome move or a good move
+        lr : how fast the ai will learn
+        gamma : the importance of the instant move 
+        """
         super().__init__(id, name, game)
         self.color = "gray"
 
@@ -20,15 +39,22 @@ class IA(Player):
         self.take_cell = 1
 
         self.epsilon = epsilon
-        self.learning_rate = 0.1
-        self.gamma = 0.8
+        self.learning_rate = lr
+        self.gamma = gamma
 
-        self.dao = Dao(self.name)
+        self.dao = Dao(f"ia_lr{self.learning_rate}_g{self.gamma}")
 
         self.last_state = None
         self.last_action = None
 
-    def move_to_string(self, move: tuple[int, int]) -> str:
+    def move_to_string(
+        self,
+        move: tuple[int, int]
+        ) -> str:
+        """
+        return the move made as a string
+        need a tuple as action
+        """
         return {
             (0, -1): "up",
             (0, 1): "down",
@@ -36,7 +62,14 @@ class IA(Player):
             (1, 0): "right",
         }[move]
 
-    def string_to_move(self, action: str) -> tuple[int, int]:
+    def string_to_move(
+        self,
+        action: str
+        ) -> tuple[int, int]:
+        """
+        return the move made as a tuple
+        need a string as action
+        """
         return {
             "up": (0, -1),
             "down": (0, 1),
@@ -50,7 +83,10 @@ class IA(Player):
         """
         return [self.move_to_string(move) for move in self.game.legal_move()]
 
-    def init_state(self, state: dict) -> dict:
+    def init_state(
+        self,
+        state: dict
+        ) -> dict:
         """
         Create the state in DAO if it does not exist.
         Legal actions start at 0.
@@ -82,7 +118,10 @@ class IA(Player):
             "right": data["right"],
         }
 
-    def get_q_values(self, state: dict) -> dict:
+    def get_q_values(
+            self,
+            state: dict
+            ) -> dict:
         """
         Return Q-values of a state.
         Create the state if unknown.
@@ -137,7 +176,10 @@ class IA(Player):
 
         return action
 
-    def compute_reward(self, info: dict) -> float:
+    def compute_reward(
+        self,
+        info: dict
+        ) -> float:
         """
         Compute reward after the move.
         """
@@ -155,7 +197,11 @@ class IA(Player):
         return reward
 
     def q_function(
-        self, state: dict, action: str, reward: float, next_state: dict
+        self,
+        state: dict,
+        action: str,
+        reward: float,
+        next_state: dict
     ) -> None:
         """
         Apply Q-learning update.
@@ -175,7 +221,10 @@ class IA(Player):
         self.dao.select_row_by_dto(state)
         self.dao.update_row(current_q_values)
 
-    def update_after_move(self, info: dict) -> None:
+    def update_after_move(
+        self,
+        info: dict
+        ) -> None:
         """
         Must be called by the GameModel after the move has been applied.
         """
@@ -203,7 +252,9 @@ class IA(Player):
         return self.string_to_move(action)
 
     def next_epsilon(
-        self, coefficient: float = 0.95, minimum: float = 0.05
+        self,
+        coefficient: float = 0.95,
+        minimum: float = 0.05
     ) -> float:
         """
         Decrease epsilon while keeping it above a minimum value.

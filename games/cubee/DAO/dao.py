@@ -2,17 +2,6 @@ from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
 
 
-"""
-à faire :
-- faire une def init_colonne de la db = create table
-ordre : current_player -> p1_coord -> p2_coord -> tableau size -> tableau (str) -> les 4 move (up, down, left, right)
-l'init se fait si le fichier n'existait pas.
-+
-reste
-
-"""
-
-
 class Dao:
     def __init__(self, ai_name: str = None):
         self.engine = None
@@ -119,7 +108,7 @@ class Dao:
         self.session.commit()
 
 if __name__ == "__main__" :
-    test = Dao("flo")
+    test = Dao("test_db")
     test.add_row(
         {
             "current_player": 1,
