@@ -1,5 +1,5 @@
-from .mikado.mikadoGame import *
-from .cubee.cubee_game import *
+from games.mikado.mikado_game import *
+from games.cubee.cubee_game import *
 
 
 class GameSelectionController:
