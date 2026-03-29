@@ -75,15 +75,19 @@ class Dao:
         self.session.commit()
 
     def select_row_by_dto(self, dto):
+        """
+        return un dict (up = x, ...) si la row exsiste sinon null.
+        """
         row = select(self.data_table).where(
             self.data_table.c.current_player == dto["current_player"],
             self.data_table.c.player1_coord == dto["player1_coord"],
             self.data_table.c.player2_coord == dto["player2_coord"],
             self.data_table.c.grid == dto["grid"],
-            self.data_table.c.grid_size == dto["grid_size"],
         )
 
-        self.current_row = self.session.execute(row).fetchone()
+        self.current_row = self.session.execute(
+            row
+        ).fetchone()  # fetchone => return le premier result, fetchall => return tous sous forme d'une liste [row1, row2, ...]
 
         if self.current_row:
             return {
@@ -94,6 +98,7 @@ class Dao:
             }
         else:
             return None
+
     def update_row(self, dto):
         """
         pré condition, il faut un select pour update current view, si current view = none error ...
