@@ -1,5 +1,7 @@
 import random
 from games.cubee.player.human import Human
+from games.cubee.player.ia import IA
+
 from collections import deque
 
 
@@ -278,12 +280,13 @@ class GameModel:
         - the loser's statistics are updated
         """
         while not self.is_game_over():
-            move = self.current_player.play()
-            if move in self.legal_move():
-                self.set_player_coord(move)
-                self.set_cell()
-                self.update_enclosure()
-            self.switch_player()
+            player = self.current_player
+            move = player.play()
+
+            info = self.play_ai_step(move)
+
+            if isinstance(player, IA):
+                player.update_after_move(info)
 
         self.winner.win()
         self.loser.lose()
