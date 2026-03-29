@@ -45,8 +45,6 @@ cover/
 # Django stuff:
 *.log
 local_settings.py
-db.sqlite3
-db.sqlite3-journal
 
 
 # Environments
@@ -60,4 +58,6 @@ env.bak/
 venv.bak/
 
 # data base
-.db
+*.db
+db.sqlite3
+db.sqlite3-journal
