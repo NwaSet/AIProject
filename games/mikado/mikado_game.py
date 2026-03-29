@@ -1,7 +1,12 @@
-from .player import *
-from .gameControler import *
-from .gameModel import *
-from .view import *
+from games.mikado.player.player import *
+from games.mikado.player.ai import *
+from games.mikado.player.human import *
+from games.mikado.controler.game_controler import *
+from games.mikado.model.game_model import *
+from games.mikado.view.view import *
+
+from games.mikado.train import *
+
 
 def start_mikado_Game() :
     """
@@ -12,6 +17,7 @@ def start_mikado_Game() :
                 the game
     Start the game
     """
+
     Basic = Player("Basic")
     Bob = AI("Bob")
     Alice = AI("Alice")
@@ -29,23 +35,6 @@ def start_mikado_Game() :
     game_view = GameView(game_controler)
     game = GameModel(player1,Bob, game_controler)
     game_controler.start_game()
-
-def training(ai1, ai2, nb_games , nb_epsilon):
-    # Train the AIs @ai1 and @ai2 during @nb_games games
-    # epsilon decrease every @nb_epsilon games
-    training_game = GameModel(ai1, ai2, None,  12,  displayable = False)
-    for i in range(0, nb_games):
-        if i % nb_epsilon == 0:
-            if type(ai1)==AI : ai1.next_epsilon()
-            if type(ai2)==AI : ai2.next_epsilon()
-
-        training_game.play()
-        if type(ai1)==AI : ai1.train()
-        if type(ai2)==AI : ai2.train()
-
-        training_game.reset()
-
-def compare_ai(*ais):
     # Print a comparison between the @ais
     names = f"{'':4}"
     stats1 = f"{'':4}"
