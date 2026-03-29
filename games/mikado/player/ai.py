@@ -40,6 +40,7 @@ class AI(Player) :
 
         self.v_fuction = {"lose": self.lose_reward, "win": self.win_reward}
 
+
     def legal_actions(self) -> list[int] :
         """
         Return a list of legal actions according to the remaining number of sticks.
@@ -48,6 +49,7 @@ class AI(Player) :
 
         max_take = min(3, self.game.nb_stick)
         return list(range(1, max_take + 1))
+
 
     def get_value(
             self,
@@ -61,12 +63,14 @@ class AI(Player) :
             self.v_fuction[state] = 0.0
         return self.v_fuction[state]
 
+
     def explore(self) -> int :
         """
         Random action in the legal actions.
         """
 
         return random.choice(self.legal_actions())
+
 
     def exploit(self) -> int :
         """
@@ -89,6 +93,7 @@ class AI(Player) :
 
         return random.choice(best_actions)
 
+
     def play(self) -> int :
         """
         save the previous state of the game, 
@@ -109,6 +114,7 @@ class AI(Player) :
         self.previous_state = current_state
         return action
 
+
     def win(self) -> None :
         """
         Register win and final transition, then train.
@@ -120,6 +126,7 @@ class AI(Player) :
         self.previous_state = None
         self.train()
 
+
     def lose(self) -> None :
         """
         Register loss and final transition, then train.
@@ -130,6 +137,7 @@ class AI(Player) :
             self.history.append((self.previous_state, "lose"))
         self.previous_state = None
         self.train()
+
 
     def train(self) -> None :
         """
@@ -143,6 +151,7 @@ class AI(Player) :
 
         self.history.clear()
 
+
     def next_epsilon(
             self,
             coefficient: float = 0.95,
@@ -154,6 +163,7 @@ class AI(Player) :
 
         self.epsilon = max(minimum, self.epsilon * coefficient)
         return self.epsilon
+
 
     def upload(self) -> None :
         """
@@ -167,6 +177,7 @@ class AI(Player) :
             }
             json.dump(data, file)
     
+
     def download(
             self,
             file_name : str
@@ -174,7 +185,7 @@ class AI(Player) :
         """
         read the json fil with the file_name and copy all data needed in self.
         """
-        
+
         with open(f"mikado/player/data/{file_name}Data.json", "r") as file :
             data = json.load(file)
 
