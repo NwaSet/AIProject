@@ -3,29 +3,45 @@ from sqlalchemy.orm import sessionmaker
 
 
 class Dao:
-    def __init__(self, ai_name: str = None):
+    def __init__(
+            self,
+            db_name : str = None
+            ) -> None :
+        """
+        initialize a dao
+
+        Args :
+        ai_name : name of the ai
+        """
         self.engine = None
         self.session = None
-        self.ai_name = None
+        self.db_name = None
         self.current_row = None
         self.data_table = None
 
-        if ai_name:
-            self.connect_player_db(ai_name)
+        if db_name:
+            self.connect_player_db(db_name)
 
-    def connect_player_db(self, ai_name):
-        # connexion + création auto du fichier
-        self.engine = create_engine(f"sqlite:///games/Cubee/DAO/{ai_name}.db")
+    def connect_player_db(
+            self,
+            db_name : str
+            ) -> None : 
+        """
+        connect to the db if it existe, else create a new one
+        """
+        self.engine = create_engine(f"sqlite:///games/Cubee/DAO/{db_name}.db")
         self.engine.connect()
 
-        # création session
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
 
-        self.ai_name = ai_name
+        self.db_name = db_name
         self.init_column()
 
-    def init_column(self):
+    def init_column(self) -> None:
+        """
+        init the table of the db
+        """
         metadata = MetaData()
 
         self.data_table = Table(
@@ -45,27 +61,29 @@ class Dao:
 
         metadata.create_all(self.engine)
 
-    # gestion des donnée joueur
-    def add_row(self, dto_ai):
+    def add_row(
+            self,
+            dto_ai : dict
+            ) -> None :
         """
-        Ajoute une ligne uniquement si elle n'existe pas déjà.
+        add a row, only if it does not exist 
         """
-
-        # Vérifie si la ligne existe déjà
         existing = self.select_row_by_dto(dto_ai)
 
         if existing is not None:
             print("Row already exists, skip insert")
             return
 
-        # Sinon on insert
         row = self.data_table.insert().values(**dto_ai)
         self.session.execute(row)
         self.session.commit()
 
-    def select_row_by_dto(self, dto):
+    def select_row_by_dto(
+            self,
+            dto : dict
+            ) -> None :
         """
-        return un dict (up = x, ...) si la row exsiste sinon null.
+        return a dict (up = x, ...) of the row if it exist, else return None
         """
         row = select(self.data_table).where(
             self.data_table.c.current_player == dto["current_player"],
@@ -76,7 +94,7 @@ class Dao:
 
         self.current_row = self.session.execute(
             row
-        ).fetchone()  # fetchone => return le premier result, fetchall => return tous sous forme d'une liste [row1, row2, ...]
+        ).fetchone()
 
         if self.current_row:
             return {
@@ -88,9 +106,14 @@ class Dao:
         else:
             return None
 
-    def update_row(self, dto):
+    def update_row(
+            self,
+            dto : dict
+            ) -> None :
         """
-        pré condition, il faut un select pour update current view, si current view = none error ...
+        pre : need to do a select so self?current_row.id is not None
+
+        update the selected row with new info 
         """
         if self.current_row is None:
             print("x")
@@ -106,6 +129,7 @@ class Dao:
 
         self.session.execute(row)
         self.session.commit()
+
 
 if __name__ == "__main__" :
     test = Dao("test_db")
