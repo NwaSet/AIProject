@@ -1,5 +1,7 @@
-from .gameModel import GameModel
-from .player import *
+from games.mikado.model.game_model import GameModel
+from games.mikado.player.player import *
+from games.mikado.player.ai import *
+from games.mikado.player.human import *
 
 def training(ai1, ai2, nb_games , nb_epsilon):
     # Train the AIs @ai1 and @ai2 during @nb_games games
