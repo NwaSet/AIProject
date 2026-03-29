@@ -40,13 +40,13 @@ class GameModel:
     ]
 
     def __init__(
-        self,
-        grid_size: int,
-        display: bool = True,
-        Player1: object = None,
-        Player2: object = None,
-        controler: object = None,
-    ) -> None:
+            self,
+            grid_size: int,
+            display: bool = True,
+            Player1: object = None,
+            Player2: object = None,
+            controler: object = None,
+            ) -> None:
         """
         Initialize the game model.
 
@@ -165,7 +165,10 @@ class GameModel:
         else:
             pass
 
-    def set_player_coord(self, move: tuple) -> None:
+    def set_player_coord(
+            self,
+            move: tuple
+            ) -> None:
         """
         set the current player with the new coord
         """
@@ -174,7 +177,10 @@ class GameModel:
             d_x, d_y = move
             self.current_player.coord = (p_x + d_x, p_y + d_y)
 
-    def step(self, move: tuple) -> None:
+    def step(
+            self,
+            move: tuple
+            ) -> None:
         """
         Execute one turn of the game.
 
@@ -319,7 +325,10 @@ class GameModel:
                 else self.player2
             )
 
-    def play_ai_step(self, move : tuple[int,int]) -> None:
+    def play_ai_step(
+            self,
+            move : tuple[int,int]
+            ) -> None:
         """
         step ai version,
         return info after the move to update the q-table.
