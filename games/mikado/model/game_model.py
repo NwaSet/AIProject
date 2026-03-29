@@ -1,9 +1,12 @@
-from .player import *
-from .gameControler import *
-from .gameModel import *
+from games.mikado.player.player import *
+from games.mikado.player.ai import *
+from games.mikado.player.human import *
+from games.mikado.controler.game_controler import *
+
 import random
 
 class GameModel :
+
     """
     GameModel for a Mikado game.
 
@@ -13,7 +16,14 @@ class GameModel :
     - Control and validate player actions during the game.
     """
 
-    def __init__(self, player1: object, player2: object, controler: object , nb_stick: int = 12, displayable: bool =True) -> None :
+    def __init__(
+            self,
+            player1: object,
+            player2: object,
+            controler: object,
+            nb_stick: int = 12,
+            displayable: bool =True
+            ) -> None :
         """
     Initialize a new GameModel instance.
 
@@ -27,6 +37,7 @@ class GameModel :
             displayable (bool, optional): Indicates whether the game state should
                 be displayed (e.g., in a GUI). Defaults to True.
         """
+
         self.original_nb_stick = nb_stick
         self.nb_stick = nb_stick
 
@@ -54,30 +65,39 @@ class GameModel :
         """
         Changes the first player who play
         """
+
         players = [self.player1, self.player2]
         random.shuffle(players)
         self.current_player = players[0]
          
+
     def reset(self) -> None :
         """
         reset the game :
         - Put the number of stick in orginal number when the game restart
         - Call shuffle to change the first player
         """
+
         self.nb_stick = self.original_nb_stick
         self.shuffle()
 
         # if not isinstance(self.current_player, Human) :
         #     self.controler.handle_ai_move()
-        
+
+
     def display(self) -> None :
         """
         Display the number of remaining sticks if the game is displayable.
         """
+
         if self.displayable :
             print(f"Allumettes restantes : {self.nb_stick}")
-            
-    def step(self, action: int) -> None :
+
+
+    def step(
+            self,
+            action: int
+            ) -> None :
         """
         Execute one turn of the game.
 
@@ -92,7 +112,7 @@ class GameModel :
             action (int): Number of sticks to remove (expected between 1 and 3).
         """
 
-        if action > self.nb_stick:
+        if action > self.nb_stick :
             action = self.nb_stick
 
         self.nb_stick -= action
@@ -111,43 +131,56 @@ class GameModel :
             #     self.controler.need_refresh()
 
 
-
     def switch_player(self) -> None :
         """
         Change the current player
         """
+
         self.current_player = self.player1 if self.current_player == self.player2 else self.player2
     
-    def is_game_over(self) -> bool  :
+
+    def is_game_over(self) -> bool :
         """
         Return if the game is over
         """
+
         return True if self.nb_stick <= 0 else False
     
+
     @property
-    def get_current_player(self) -> object  :
+    def get_current_player(self) -> object :
         """
         Return the player whose turn it is.
         """
+
         return self.current_player
     
+
     @property
-    def loser(self) -> object:
+    def loser(self) -> object :
         """
         Return hte loser
         """
+
         if self.is_game_over() :
             return self.current_player
     
+
     @property
     def winner(self) -> object :
         """
         Return the winner
         """
+
         if self.is_game_over() :
             return self.player1 if self.current_player == self.player2 else self.player2
         
-    def play (self):
+
+    def play (self) :
+        """
+        used to train the ai play a complete game
+        """
+        
         self.reset()
         
         current_player = self.player1

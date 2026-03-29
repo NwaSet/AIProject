@@ -1,8 +1,9 @@
 import tkinter as tk
-from ..Controler.controler import gameControler
+from games.cubee.controler.controler import gameControler
 
 
-class View:
+class View :
+
     """
     Represent the graphical user interface of the Cubee game.
 
@@ -17,7 +18,10 @@ class View:
     trigger player actions.
     """
 
-    def __init__(self, controler: gameControler = None) -> None:
+    def __init__(
+            self,
+            controler: gameControler = None
+            ) -> None :
         """
         Initialize the game view.
 
@@ -28,12 +32,13 @@ class View:
         - binds keyboard arrows for human moves
         - creates the canvas and restart button
         """
+
         self.controler = controler
         self.controler.view = self
 
         self.data = self.controler.get_model_data()
 
-        self.nb_case = self.data["grid_size"]
+        self.nb_cell = self.data["grid_size"]
         self.grid = self.data["grid"]
         self.players_score = self.data["players"]
         self.player_id = self.data["player_id"]
@@ -54,7 +59,7 @@ class View:
         self.root.bind("<Up>", lambda event: self.controler.handle_human_move((0, -1)))
         self.root.bind("<Down>", lambda event: self.controler.handle_human_move((0, 1)))
 
-        self.max_size = self.size * self.nb_case
+        self.max_size = self.size * self.nb_cell
         self.canva = tk.Canvas(
             self.root,
             width=self.max_size + 200,
@@ -65,24 +70,26 @@ class View:
         self.player_coord = self.data["player_coord"]
         self.player_color = self.data["player_color"]
 
-        self.cases = []
+        self.cells = []
         self.score_text = None
 
         self.restart_button = tk.Button(
             self.root, text="Restart", command=self.controler.reset_game
         )
 
-    def creation_grid(self) -> None:
+
+    def creation_grid(self) -> None :
         """
         create and diplay the game grid on the canvas
         """
+
         self.canva.delete("all")
-        self.cases = []
+        self.cells = []
         offset = 4
 
-        for row in range(self.nb_case):
+        for row in range(self.nb_cell):
             line = []
-            for col in range(self.nb_case):
+            for col in range(self.nb_cell):
                 x = col * self.size + offset
                 y = row * self.size + offset
 
@@ -95,7 +102,7 @@ class View:
                 else:
                     fill_color = "white"
 
-                case = self.canva.create_rectangle(
+                cell = self.canva.create_rectangle(
                     x,
                     y,
                     x + self.size,
@@ -106,8 +113,8 @@ class View:
                     tags="grid",
                 )
 
-                line.append(case)
-            self.cases.append(line)
+                line.append(cell)
+            self.cells.append(line)
 
         self.canva.create_rectangle(
             offset,
@@ -118,13 +125,14 @@ class View:
             width=2,
         )
 
-    def display_infos(self) -> None:
+    def display_infos(self) -> None :
         """
         show all informations of the game :
         - whos turn it is
         - players colors
         - score
         """
+
         info_x = self.max_size + 30
 
         player1_name = self.player_names[0]
@@ -190,15 +198,18 @@ class View:
             anchor="nw",
         )
 
-    def game_over(self) -> None:
+
+    def game_over(self) -> None :
         """
         pack on the canvas the game over and show the button to restart a new game
         """
+
         loser = self.controler.get_loser()
         info_x = self.max_size + 30
 
         # Position sous les infos
-        y_base = 380
+        # y_base = 380
+        y_base = 0
 
         self.canva.create_text(
             info_x,
@@ -231,10 +242,12 @@ class View:
             tags="game_over",
         )
 
-    def display_player(self) -> None:
+
+    def display_player(self) -> None :
         """
         show the circle where the players are
         """
+
         self.canva.delete("player")
 
         radius = self.size // 3
@@ -259,12 +272,14 @@ class View:
                 tags="player",
             )
 
-    def refresh_data(self) -> None:
+
+    def refresh_data(self) -> None :
         """
         Met à jour les données venant du modèle
         """
+
         self.data = self.controler.get_model_data()
-        self.nb_case = self.data["grid_size"]
+        self.nb_cell = self.data["grid_size"]
         self.grid = self.data["grid"]
         self.players_score = self.data["players"]
         self.player_id = self.data["player_id"]
@@ -272,19 +287,23 @@ class View:
         self.player_color = self.data["player_color"]
         self.current_player = self.data["current_player"]
 
-    def update_view(self) -> None:
+
+    def update_view(self) -> None :
         """
         update all view to show the new game status
         """
+
         self.refresh_data()
         self.creation_grid()
         self.display_player()
         self.display_infos()
 
-    def run(self) -> None:
+
+    def run(self) -> None :
         """
         start the mainloop
         and update the view one first time
         """
+
         self.update_view()
         self.root.mainloop()
