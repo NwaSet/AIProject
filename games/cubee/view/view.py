@@ -1,8 +1,9 @@
 import tkinter as tk
-from ..controler.controler import gameControler
+from games.cubee.controler.controler import gameControler
 
 
-class View:
+class View :
+
     """
     Represent the graphical user interface of the Cubee game.
 
@@ -17,7 +18,10 @@ class View:
     trigger player actions.
     """
 
-    def __init__(self, controler: gameControler = None) -> None:
+    def __init__(
+            self,
+            controler: gameControler = None
+            ) -> None :
         """
         Initialize the game view.
 
@@ -28,6 +32,7 @@ class View:
         - binds keyboard arrows for human moves
         - creates the canvas and restart button
         """
+
         self.controler = controler
         self.controler.view = self
 
@@ -72,10 +77,12 @@ class View:
             self.root, text="Restart", command=self.controler.reset_game
         )
 
-    def creation_grid(self) -> None:
+
+    def creation_grid(self) -> None :
         """
         create and diplay the game grid on the canvas
         """
+
         self.canva.delete("all")
         self.cells = []
         offset = 4
@@ -118,13 +125,14 @@ class View:
             width=2,
         )
 
-    def display_infos(self) -> None:
+    def display_infos(self) -> None :
         """
         show all informations of the game :
         - whos turn it is
         - players colors
         - score
         """
+
         info_x = self.max_size + 30
 
         player1_name = self.player_names[0]
@@ -190,10 +198,12 @@ class View:
             anchor="nw",
         )
 
-    def game_over(self) -> None:
+
+    def game_over(self) -> None :
         """
         pack on the canvas the game over and show the button to restart a new game
         """
+
         loser = self.controler.get_loser()
         info_x = self.max_size + 30
 
@@ -232,10 +242,12 @@ class View:
             tags="game_over",
         )
 
-    def display_player(self) -> None:
+
+    def display_player(self) -> None :
         """
         show the circle where the players are
         """
+
         self.canva.delete("player")
 
         radius = self.size // 3
@@ -260,10 +272,12 @@ class View:
                 tags="player",
             )
 
-    def refresh_data(self) -> None:
+
+    def refresh_data(self) -> None :
         """
         Met à jour les données venant du modèle
         """
+
         self.data = self.controler.get_model_data()
         self.nb_cell = self.data["grid_size"]
         self.grid = self.data["grid"]
@@ -273,19 +287,23 @@ class View:
         self.player_color = self.data["player_color"]
         self.current_player = self.data["current_player"]
 
-    def update_view(self) -> None:
+
+    def update_view(self) -> None :
         """
         update all view to show the new game status
         """
+
         self.refresh_data()
         self.creation_grid()
         self.display_player()
         self.display_infos()
 
-    def run(self) -> None:
+
+    def run(self) -> None :
         """
         start the mainloop
         and update the view one first time
         """
+
         self.update_view()
         self.root.mainloop()
