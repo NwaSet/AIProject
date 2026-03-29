@@ -355,10 +355,8 @@ class GameModel:
         """
         return {
             "current_player": self.current_player.id,
-            "player1_coord": self.player1.coord[0] * self.grid_size
-            + self.player1.coord[1],
-            "player2_coord": self.player2.coord[0] * self.grid_size
-            + self.player2.coord[1],
+            "player1_coord": self.player1.coord[0] * self.grid_size + self.player1.coord[1],
+            "player2_coord": self.player2.coord[0] * self.grid_size + self.player2.coord[1],
             "grid": "".join(str(cell) for row in self.grid for cell in row),
             "grid_size": self.grid_size,
         }
