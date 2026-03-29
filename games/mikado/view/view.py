@@ -1,6 +1,6 @@
 from tkinter import *
-from .gameControler import *
-from .gameModel import *
+from games.mikado.controler.game_controler import *
+from games.mikado.model.game_model import *
 
 class GameView(Tk) :
 
@@ -8,7 +8,10 @@ class GameView(Tk) :
     A class for display the GUI of the game
     """
 
-    def __init__(self, controler: object):
+    def __init__(
+            self,
+            controler: object
+            ) -> None :
         """
         Initializes the visual interface for the Mikado game.
 
@@ -20,6 +23,7 @@ class GameView(Tk) :
             This class inherits from a Tkinter parent
             to create the main game window and its graphical components.
     """
+        
         super().__init__()
 
         #Link the controller to this view
@@ -44,6 +48,7 @@ class GameView(Tk) :
 
         self.add_button()
 
+
     def update_view(self) :
         """
         Refreshes the entire user interface.
@@ -51,6 +56,7 @@ class GameView(Tk) :
         Clears the canvas, redraws the remaining matchsticks, 
         and updates the status message label.
         """
+
         self.canvas.delete("all")
 
         self.draw_matches(self.controler.get_nb_matches())
@@ -63,15 +69,19 @@ class GameView(Tk) :
         """
         Initialise and display the action buttons
         """
+        
         self.button_frame = ButtonFrame(self, self.controler)
         self.button_frame.pack()
     
+
     def add_reset_button(self) :
         """
         Initialise and display the restart buttons
         """
+
         self.reset_button_frame = ResetButtonFrame(self, self.controler)
         self.reset_button_frame.pack()
+
 
     def end_game(self) :
         """
@@ -80,6 +90,7 @@ class GameView(Tk) :
         Removes move buttons, clears the matchstick display, shows the 
         final result, and offers a restart option.
         """
+
         self.button_frame.destroy()
         self.canvas.delete("all")
         self.label_message.config(text=f"game over. . . {self.controler.get_loser()} you loose !!")
@@ -91,9 +102,11 @@ class GameView(Tk) :
         """
         Restores the GUI to its initial game state
         """
+
         self.update_view()
         self.reset_button_frame.destroy()
         self.add_button()
+
 
     def draw_matches(self, nb_stick) :
         """
@@ -102,12 +115,12 @@ class GameView(Tk) :
         Args:
             nb_stick (int): The current number of sticks remaining in the game.
         """
+
         for i in range(nb_stick) :
             self.canvas.create_rectangle((i*50)+73, 50 , (i*50)+77 , 150 , fill="brown")
             self.canvas.create_oval((i*50)+72, 43 , (i*50)+78 , 55 , fill="red")
 
     
-
 
 class ButtonFrame(Frame) :
 
@@ -123,6 +136,7 @@ class ButtonFrame(Frame) :
             parent (Widget): The parent Tkinter container.
             controler (GameController): The controller to make moves.
         """ 
+
         super().__init__(parent)
 
         self.controler = controler
@@ -138,11 +152,13 @@ class ButtonFrame(Frame) :
         self.button2.pack(side="left",pady=25, padx = 25)
         self.button3.pack(side="left",pady=25, padx = 25)
     
+
 class ResetButtonFrame(Frame) :
 
     """
     A container for the restart button
     """
+
     def __init__(self, parent, controler) :
         """
         Initializes the frame with a restart button.
@@ -151,6 +167,7 @@ class ResetButtonFrame(Frame) :
             parent (Widget): The parent Tkinter container.
             controler(GameControler): the controller for restart the game
         """
+
         super().__init__(parent)
 
         self.controler = controler
