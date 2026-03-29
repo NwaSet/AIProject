@@ -48,9 +48,9 @@ class IA(Player):
         self.last_action = None
 
     def move_to_string(
-        self,
-        move: tuple[int, int]
-        ) -> str:
+            self,
+            move: tuple[int, int]
+            ) -> str:
         """
         return the move made as a string
         need a tuple as action
@@ -63,9 +63,9 @@ class IA(Player):
         }[move]
 
     def string_to_move(
-        self,
-        action: str
-        ) -> tuple[int, int]:
+            self,
+            action: str
+            ) -> tuple[int, int]:
         """
         return the move made as a tuple
         need a string as action
@@ -84,9 +84,9 @@ class IA(Player):
         return [self.move_to_string(move) for move in self.game.legal_move()]
 
     def init_state(
-        self,
-        state: dict
-        ) -> dict:
+            self,
+            state: dict
+            ) -> dict:
         """
         Create the state in DAO if it does not exist.
         Legal actions start at 0.
@@ -177,9 +177,9 @@ class IA(Player):
         return action
 
     def compute_reward(
-        self,
-        info: dict
-        ) -> float:
+            self,
+            info: dict
+            ) -> float:
         """
         Compute reward after the move.
         """
@@ -197,12 +197,12 @@ class IA(Player):
         return reward
 
     def q_function(
-        self,
-        state: dict,
-        action: str,
-        reward: float,
-        next_state: dict
-    ) -> None:
+            self,
+            state: dict,
+            action: str,
+            reward: float,
+            next_state: dict
+            ) -> None:
         """
         Apply Q-learning update.
         """
@@ -222,9 +222,9 @@ class IA(Player):
         self.dao.update_row(current_q_values)
 
     def update_after_move(
-        self,
-        info: dict
-        ) -> None:
+            self,
+            info: dict
+            ) -> None:
         """
         Must be called by the GameModel after the move has been applied.
         """
@@ -252,10 +252,10 @@ class IA(Player):
         return self.string_to_move(action)
 
     def next_epsilon(
-        self,
-        coefficient: float = 0.95,
-        minimum: float = 0.05
-    ) -> float:
+            self,
+            coefficient: float = 0.95,
+            minimum: float = 0.05
+            ) -> float:
         """
         Decrease epsilon while keeping it above a minimum value.
         """
