@@ -1,14 +1,20 @@
 import random
 
 
-class Player:
+class Player :
+
     """
     Represent a generic player in the game.
 
     This is a base class used for both human and AI players (not created yet).
     """
 
-    def __init__(self, id : int, name: str, game : object = None) -> int:
+    def __init__(
+            self,
+            id : int,
+            name: str,
+            game : object = None
+            ) -> int :
         """
         Initialize a player.
 
@@ -17,6 +23,7 @@ class Player:
             name (str): Name of the player.
             game (GameModel, optional): Game instance the player belongs to.
         """
+
         self.name = name
         self.game = game
 
@@ -28,24 +35,30 @@ class Player:
 
         self.id = id
 
-    def play(self) -> tuple:
+
+    def play(self) -> tuple :
         """
         chose a random choice between all legal move given by the model.
         """
+
         return random.choice(self.game.legal_move())
 
-    def win(self) -> None:
+
+    def win(self) -> None :
         """
         add one win
         """
+
         self.nb_win += 1
 
-    def lose(self) -> None:
+
+    def lose(self) -> None :
         """
         add one lose
         """
+
         self.nb_lose += 1
 
-    def __str__(self) -> str:
-        """change the toString of the class with the player name"""
+
+    def __str__(self) -> str :
         return self.name

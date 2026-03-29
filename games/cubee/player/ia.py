@@ -1,9 +1,10 @@
 import random
-from .player import Player
-from games.cubee.DAO.dao import Dao
+from games.cubee.player.player import *
+from games.cubee.dao.dao import *
 
 
-class IA(Player):
+class IA(Player) :
+
     """
     AI player using Q-learning.
 
@@ -18,7 +19,7 @@ class IA(Player):
             epsilon : float= 0.9,
             lr : float = 0.1,
             gamma : float = 0.8
-            ) -> None:
+            ) -> None :
         """
         initialize the Ai : 
 
@@ -30,6 +31,7 @@ class IA(Player):
         lr : how fast the ai will learn
         gamma : the importance of the instant move 
         """
+
         super().__init__(id, name, game)
         self.color = "gray"
 
@@ -50,11 +52,12 @@ class IA(Player):
     def move_to_string(
             self,
             move: tuple[int, int]
-            ) -> str:
+            ) -> str :
         """
         return the move made as a string
         need a tuple as action
         """
+
         return {
             (0, -1): "up",
             (0, 1): "down",
@@ -65,11 +68,12 @@ class IA(Player):
     def string_to_move(
             self,
             action: str
-            ) -> tuple[int, int]:
+            ) -> tuple[int, int] :
         """
         return the move made as a tuple
         need a string as action
         """
+
         return {
             "up": (0, -1),
             "down": (0, 1),
@@ -77,21 +81,25 @@ class IA(Player):
             "right": (1, 0),
         }[action]
 
-    def legal_actions(self) -> list[str]:
+
+    def legal_actions(self) -> list[str] :
         """
         Return legal actions as strings.
         """
+
         return [self.move_to_string(move) for move in self.game.legal_move()]
+
 
     def init_state(
             self,
             state: dict
-            ) -> dict:
+            ) -> dict :
         """
         Create the state in DAO if it does not exist.
         Legal actions start at 0.
         Illegal actions start at penalty.
         """
+
         legal_actions = self.legal_actions()
 
         data = {
@@ -106,7 +114,7 @@ class IA(Player):
             "right": self.penalty,
         }
 
-        for action in legal_actions:
+        for action in legal_actions :
             data[action] = 0.0
 
         self.dao.add_row(data)
@@ -126,18 +134,21 @@ class IA(Player):
         Return Q-values of a state.
         Create the state if unknown.
         """
+
         q_values = self.dao.select_row_by_dto(state)
 
-        if q_values is None:
+        if q_values is None :
             q_values = self.init_state(state)
 
         return q_values
 
-    def explore(self) -> str:
+
+    def explore(self) -> str :
         """
         Choose a random legal action.
         Save current state/action for future Q update.
         """
+
         state = self.game.get_state_dto()
         self.get_q_values(state)
 
@@ -148,11 +159,13 @@ class IA(Player):
 
         return action
 
-    def exploit(self) -> str:
+
+    def exploit(self) -> str :
         """
         Choose the best legal action according to Q-values.
         Save current state/action for future Q update.
         """
+
         state = self.game.get_state_dto()
         q_values = self.get_q_values(state)
         legal_actions = self.legal_actions()
@@ -176,25 +189,28 @@ class IA(Player):
 
         return action
 
+
     def compute_reward(
             self,
             info: dict
-            ) -> float:
+            ) -> float :
         """
         Compute reward after the move.
         """
+
         reward = self.penalty
 
-        if info.get("took_case"):
+        if info.get("took_case") :
             reward += self.take_cell
 
-        if info.get("win"):
+        if info.get("win") :
             reward += self.win_reward
 
-        if info.get("lose"):
+        if info.get("lose") :
             reward += self.lose_reward
 
         return reward
+
 
     def q_function(
             self,
@@ -202,10 +218,11 @@ class IA(Player):
             action: str,
             reward: float,
             next_state: dict
-            ) -> None:
+            ) -> None :
         """
         Apply Q-learning update.
         """
+
         current_q_values = self.get_q_values(state)
         next_q_values = self.get_q_values(next_state)
 
@@ -221,6 +238,7 @@ class IA(Player):
         self.dao.select_row_by_dto(state)
         self.dao.update_row(current_q_values)
 
+
     def update_after_move(
             self,
             info: dict
@@ -228,7 +246,8 @@ class IA(Player):
         """
         Must be called by the GameModel after the move has been applied.
         """
-        if self.last_state is None or self.last_action is None:
+
+        if self.last_state is None or self.last_action is None :
             return
 
         reward = self.compute_reward(info)
@@ -239,25 +258,29 @@ class IA(Player):
         self.last_state = None
         self.last_action = None
 
-    def play(self) -> tuple[int, int]:
+
+    def play(self) -> tuple[int, int] :
         """
         Choose a move with epsilon-greedy and return the move.
         The move is NOT applied here.
         """
-        if random.random() < self.epsilon:
+
+        if random.random() < self.epsilon :
             action = self.explore()
-        else:
+        else :
             action = self.exploit()
 
         return self.string_to_move(action)
+
 
     def next_epsilon(
             self,
             coefficient: float = 0.95,
             minimum: float = 0.05
-            ) -> float:
+            ) -> float :
         """
         Decrease epsilon while keeping it above a minimum value.
         """
+
         self.epsilon = max(minimum, self.epsilon * coefficient)
         return self.epsilon
