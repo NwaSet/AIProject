@@ -7,7 +7,15 @@ class GameSelectionController:
     class that permit to choose the game we wan't to play
     """
 
-    def start_game(self, game_name, view=None):
+    def start_game(
+            self,
+            game_name : str,
+            view : object = None
+            ) -> None :
+        """
+        start the choosen game
+        """
+        
         if game_name == "mikado":
             print("Lancement Mikado")
             self.view.destroy()
