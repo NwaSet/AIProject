@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker
 
 
 class Dao:
+    
     def __init__(
             self,
             db_name : str = None
@@ -13,6 +14,7 @@ class Dao:
         Args :
         ai_name : name of the ai
         """
+
         self.engine = None
         self.session = None
         self.db_name = None
@@ -22,6 +24,7 @@ class Dao:
         if db_name:
             self.connect_player_db(db_name)
 
+
     def connect_player_db(
             self,
             db_name : str
@@ -29,6 +32,7 @@ class Dao:
         """
         connect to the db if it existe, else create a new one
         """
+
         self.engine = create_engine(f"sqlite:///games/Cubee/DAO/{db_name}.db")
         self.engine.connect()
 
@@ -38,10 +42,12 @@ class Dao:
         self.db_name = db_name
         self.init_column()
 
+
     def init_column(self) -> None:
         """
         init the table of the db
         """
+
         metadata = MetaData()
 
         self.data_table = Table(
@@ -61,6 +67,7 @@ class Dao:
 
         metadata.create_all(self.engine)
 
+
     def add_row(
             self,
             dto_ai : dict
@@ -68,6 +75,7 @@ class Dao:
         """
         add a row, only if it does not exist 
         """
+
         existing = self.select_row_by_dto(dto_ai)
 
         if existing is not None:
@@ -78,6 +86,7 @@ class Dao:
         self.session.execute(row)
         self.session.commit()
 
+
     def select_row_by_dto(
             self,
             dto : dict
@@ -85,6 +94,7 @@ class Dao:
         """
         return a dict (up = x, ...) of the row if it exist, else return None
         """
+
         row = select(self.data_table).where(
             self.data_table.c.current_player == dto["current_player"],
             self.data_table.c.player1_coord == dto["player1_coord"],
@@ -106,15 +116,17 @@ class Dao:
         else:
             return None
 
+
     def update_row(
             self,
             dto : dict
             ) -> None :
         """
-        pre : need to do a select so self?current_row.id is not None
+        pre : need to do a select so self.current_row.id is not None
 
         update the selected row with new info 
         """
+
         if self.current_row is None:
             print("x")
             return 0
@@ -129,6 +141,7 @@ class Dao:
 
         self.session.execute(row)
         self.session.commit()
+
 
 if __name__ == "__main__" :
     test = Dao("test_db")
