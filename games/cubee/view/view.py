@@ -208,8 +208,7 @@ class View :
         info_x = self.max_size + 30
 
         # Position sous les infos
-        # y_base = 380
-        y_base = 0
+        y_base = 380
 
         self.canva.create_text(
             info_x,
