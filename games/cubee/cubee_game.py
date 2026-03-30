@@ -16,7 +16,7 @@ def start_cubee_game():
     flo = Human(1, "flo", "red")
     # yo = Human(2, "yo", "blue")
     ctrl = gameControler()
-    game = GameModel(3, Player1=flo, Player2=bot, controler=ctrl)
+    game = GameModel(5, Player1=flo, Player2=bot, controler=ctrl)
     view = View(ctrl)
     ctrl.start_game()
 
@@ -31,7 +31,7 @@ def train_ai() :
         bot_1 = Ia(1,"ia1", epsilon=x)
         bot_2 = Ia(2,"ia1", epsilon=x)
 
-        game = GameModel(3,False, bot_1,bot_2)
+        game = GameModel(5,False, bot_1,bot_2)
         game.play()
 
     print(bot_1.nb_win)
