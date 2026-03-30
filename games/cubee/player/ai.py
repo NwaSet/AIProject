@@ -3,7 +3,7 @@ from games.cubee.player.player import *
 from games.cubee.dao.dao import *
 
 
-class IA(Player) :
+class Ia(Player) :
 
     """
     AI player using Q-learning.

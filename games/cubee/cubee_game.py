@@ -3,7 +3,7 @@ from .model.cubee_model import GameModel
 from .view.view import View
 from .player.player import Player
 from .player.human import Human
-from .player.ia import IA
+from .player.ai import Ia
 
 
 def start_cubee_game():
@@ -12,7 +12,7 @@ def start_cubee_game():
     """
 
     train_ai()
-    bot = IA(2, "ia1", epsilon=0)
+    bot = Ia(2, "ia1", epsilon=0)
     flo = Human(1, "flo", "red")
     # yo = Human(2, "yo", "blue")
     ctrl = gameControler()
@@ -28,8 +28,8 @@ def train_ai() :
         if i % 1000 == 0 :
             x = max(0, x - 0.1)
         
-        bot_1 = IA(1,"ia1", epsilon=x)
-        bot_2 = IA(2,"ia1", epsilon=x)
+        bot_1 = Ia(1,"ia1", epsilon=x)
+        bot_2 = Ia(2,"ia1", epsilon=x)
 
         game = GameModel(3,False, bot_1,bot_2)
         game.play()

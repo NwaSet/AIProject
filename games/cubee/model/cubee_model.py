@@ -1,6 +1,6 @@
 import random
 from games.cubee.player.human import Human
-from games.cubee.player.ia import IA
+from games.cubee.player.ai import Ia
 
 from collections import deque
 
@@ -312,7 +312,7 @@ class GameModel :
 
             info = self.play_ai_step(move)
 
-            if isinstance(player, IA) :
+            if isinstance(player, Ia) :
                 player.update_after_move(info)
 
         self.winner.win()
@@ -385,7 +385,7 @@ class GameModel :
 
     def get_state_dto(self) -> dict :
         """
-        return state of the game that the ia and the dao will need
+        return state of the game that the ai and the dao will need
         """
 
         return {
