@@ -29,7 +29,7 @@ class Dao:
         connect to the db if it existe, else create a new one
         """
 
-        self.engine = create_engine(f"sqlite:///games/cubee/DAO/{db_name}.db")
+        self.engine = create_engine(f"sqlite:///games/cubee/dao/{db_name}.db")
         self.engine.connect()
 
         Session = sessionmaker(bind=self.engine)
