@@ -17,8 +17,8 @@ class Ia(Player) :
             name: str,
             game: object = None,
             epsilon : float= 0.9,
-            lr : float = 0.1,
-            gamma : float = 0.8
+            lr : float = 0.01,
+            gamma : float = 0.7
             ) -> None :
         """
         initialize the Ai : 

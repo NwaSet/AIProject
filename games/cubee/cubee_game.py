@@ -11,7 +11,7 @@ def start_cubee_game():
     function that permiet to launch the cubee game
     """
 
-    train_ai()
+    # train_ai()
     bot = Ia(2, "ia1", epsilon=0)
     flo = Human(1, "flo", "red")
     # yo = Human(2, "yo", "blue")
@@ -22,15 +22,17 @@ def start_cubee_game():
 
 
 def train_ai() :
+    bot_1 = Ia(1,"ia1")
+    bot_2 = Ia(2,"ia1")
 
-    x = 1
-    for i in range(100) :
-        if i % 1000 == 0 :
-            x = max(0, x - 0.1)
+    for i in range(100_000) :
+        if i % 10 == 0 :
+            bot_1.next_epsilon()
+            bot_2.next_epsilon()
+            
         
-        bot_1 = Ia(1,"ia1", epsilon=x)
-        bot_2 = Ia(2,"ia1", epsilon=x)
 
+        print(i)
         game = GameModel(5,False, bot_1,bot_2)
         game.play()
 
