@@ -23,15 +23,12 @@ def start_cubee_game():
 
 
 def train_ai():
-    shared_dao = Dao("cubee_training", commit_every=100)
-
     ia1 = Ia(
             id=1,
             name="ia1",
             epsilon=1,
             lr=0.01,
             gamma=0.7,
-            dao=shared_dao,
         )
 
     ia2 = Ia(
@@ -40,15 +37,11 @@ def train_ai():
             epsilon=1,
             lr=0.01,
             gamma=0.7,
-            dao=shared_dao,
         )
 
-    game = GameModel(5, False,  ia1, ia2)
+    game = GameModel(3, False,  ia1, ia2)
 
     for i in range(10_000):
         game.play()
         game.reset()
         print(i)
-
-    shared_dao.flush()
-    shared_dao.close()

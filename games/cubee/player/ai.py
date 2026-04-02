@@ -21,7 +21,6 @@ class Ia(Player):
             epsilon: float = 0.9,
             lr: float = 0.01,
             gamma: float = 0.7,
-            dao: Dao | None = None,
             ) -> None:
         super().__init__(id, name, game)
         self.color = "gray"
@@ -34,10 +33,7 @@ class Ia(Player):
         self.learning_rate = lr
         self.gamma = gamma
 
-        self.dao = dao if dao is not None else Dao(
-            f"{self.name}_lr{self.learning_rate}_g{self.gamma}",
-            commit_every=100,
-        )
+        self.dao = Dao(f"lr{self.learning_rate}_g{self.gamma}")
 
         self.last_state = None
         self.last_action = None
@@ -351,10 +347,3 @@ class Ia(Player):
         """
         self.epsilon = max(minimum, self.epsilon * coefficient)
         return self.epsilon
-
-    def flush_db(self) -> None:
-        """
-        Force commit pending writes.
-        Useful at the end of training.
-        """
-        self.dao.flush()
