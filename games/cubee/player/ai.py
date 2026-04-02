@@ -1,13 +1,16 @@
 import random
-from games.cubee.player.player import *
-from games.cubee.dao.dao import *
+from games.cubee.player.player import Player
+from games.cubee.dao.dao import Dao
 
 
 class Ia(Player):
     """
     AI player using Q-learning.
 
-    Q(s, a) <- Q(s, a) + lr * (reward + gamma * max(Q(s', .)) - Q(s, a))
+    Reward system:
+    - always -0.5
+    - +1 if the AI takes an empty cell
+    - +5 if the AI wins
     """
 
     def __init__(
@@ -15,26 +18,14 @@ class Ia(Player):
             id: int,
             name: str,
             game: object = None,
-            epsilon : float= 0.9,
-            lr : float = 0.01,
-            gamma : float = 0.7
-            ) -> None :
-        """
-        initialize the Ai :
-
-        Args :
-        id : id of hte player
-        name : name of the ai
-        game : game model where the player is playing
-        epsilon : represente if the play chose a randome move or a good move
-        lr : how fast the ai will learn
-        gamma : the importance of the instant move
-        """
-
+            epsilon: float = 0.9,
+            lr: float = 0.01,
+            gamma: float = 0.7,
+            dao: Dao | None = None,
+            ) -> None:
         super().__init__(id, name, game)
         self.color = "gray"
 
-        self.lose_reward = -5
         self.win_reward = 5
         self.penalty = -0.5
         self.take_cell = 1
@@ -43,17 +34,19 @@ class Ia(Player):
         self.learning_rate = lr
         self.gamma = gamma
 
-        self.dao = Dao(f"ia_lr{self.learning_rate}_g{self.gamma}")
+        self.dao = dao if dao is not None else Dao(
+            f"{self.name}_lr{self.learning_rate}_g{self.gamma}",
+            commit_every=100,
+        )
 
         self.last_state = None
         self.last_action = None
+        self.next_state = None
 
     def move_to_string(self, move: tuple[int, int]) -> str:
         """
-        return the move made as a string
-        need a tuple as action
+        Convert a move tuple into a string.
         """
-
         return {
             (0, -1): "up",
             (0, 1): "down",
@@ -63,10 +56,8 @@ class Ia(Player):
 
     def string_to_move(self, action: str) -> tuple[int, int]:
         """
-        return the move made as a tuple
-        need a string as action
+        Convert an action string into a move tuple.
         """
-
         return {
             "up": (0, -1),
             "down": (0, 1),
@@ -74,28 +65,77 @@ class Ia(Player):
             "right": (1, 0),
         }[action]
 
+    def _rebuild_grid(self, state: dict) -> list[list[int]]:
+        """
+        Rebuild the 2D grid from the DTO.
+        """
+        grid_size = state["grid_size"]
+        flat_grid = [int(cell) for cell in state["grid"]]
+
+        return [
+            flat_grid[i:i + grid_size]
+            for i in range(0, len(flat_grid), grid_size)
+        ]
+
+    def _index_to_coord(self, index: int, grid_size: int) -> tuple[int, int]:
+        """
+        Convert flattened index into (x, y).
+        """
+        return divmod(index, grid_size)
+
+    def _coord_to_index(self, x: int, y: int, grid_size: int) -> int:
+        """
+        Convert (x, y) into flattened index.
+        """
+        return x * grid_size + y
+
     def legal_actions(self) -> list[str]:
         """
-        Return legal actions as strings.
+        Return legal actions from the real current game state.
         """
-
         return [self.move_to_string(move) for move in self.game.legal_move()]
 
-    def init_state(self, state: dict) -> dict:
+    def legal_actions_from_state(self, state: dict) -> list[str]:
         """
-        Create the state in DAO if it does not exist.
-        Legal actions start at 0.
+        Return legal actions for a simulated state, without using the real model.
+        A move is legal if it stays inside the grid and lands on:
+        - an empty cell (0)
+        - or a cell already owned by the current player
+        """
+
+        grid_size = state["grid_size"]
+        grid = self._rebuild_grid(state)
+
+        if state["current_player"] == 1:
+            px, py = self._index_to_coord(state["player1_coord"], grid_size)
+        else:
+            px, py = self._index_to_coord(state["player2_coord"], grid_size)
+
+        legal_actions = []
+
+        for action, (dx, dy) in {
+            "up": (0, -1),
+            "down": (0, 1),
+            "left": (-1, 0),
+            "right": (1, 0),
+        }.items():
+            nx, ny = px + dx, py + dy
+
+            if 0 <= nx < grid_size and 0 <= ny < grid_size:
+                if grid[nx][ny] in (0, state["current_player"]):
+                    legal_actions.append(action)
+
+        return legal_actions
+
+    def build_default_q_values(self, legal_actions: list[str]) -> dict:
+        """
+        Build default Q-values.
+
+        Legal actions start at 0.0.
         Illegal actions start at penalty.
         """
 
-        legal_actions = self.legal_actions()
-
-        data = {
-            "current_player": state["current_player"],
-            "player1_coord": state["player1_coord"],
-            "player2_coord": state["player2_coord"],
-            "grid": state["grid"],
-            "grid_size": state["grid_size"],
+        q_values = {
             "up": self.penalty,
             "down": self.penalty,
             "left": self.penalty,
@@ -103,56 +143,65 @@ class Ia(Player):
         }
 
         for action in legal_actions:
-            data[action] = 0.0
+            q_values[action] = 0.0
 
-        self.dao.add_row(data)
+        return q_values
 
-        return {
-            "up": data["up"],
-            "down": data["down"],
-            "left": data["left"],
-            "right": data["right"],
-        }
-
-    def get_q_values(self, state: dict) -> dict:
+    def ensure_current_state(self, state: dict) -> dict:
         """
-        Return Q-values of a state.
-        Create the state if unknown.
+        Ensure current state exists in DB.
+        If missing, insert it with default values.
         """
 
         q_values = self.dao.select_row_by_dto(state)
+        if q_values is not None:
+            return q_values
 
-        if q_values is None:
-            q_values = self.init_state(state)
+        default_q_values = self.build_default_q_values(self.legal_actions())
 
-        return q_values
+        row_data = {
+            "current_player": state["current_player"],
+            "player1_coord": state["player1_coord"],
+            "player2_coord": state["player2_coord"],
+            "grid": state["grid"],
+            "grid_size": state["grid_size"],
+            "up": default_q_values["up"],
+            "down": default_q_values["down"],
+            "left": default_q_values["left"],
+            "right": default_q_values["right"],
+        }
+
+        self.dao.add_row(row_data)
+        return default_q_values.copy()
+
+    def get_next_q_values(self, next_state: dict) -> dict:
+        """
+        Get next state Q-values.
+
+        Important:
+        - if next_state exists in DB, use it
+        - otherwise, do NOT insert it
+        - return default values computed from the simulated state
+        """
+
+        q_values = self.dao.select_row_by_dto(next_state)
+        if q_values is not None:
+            return q_values
+
+        return self.build_default_q_values(self.legal_actions_from_state(next_state))
 
     def explore(self) -> str:
         """
         Choose a random legal action.
-        Save current state/action for future Q update.
         """
+        return random.choice(self.legal_actions())
 
-        state = self.game.get_state_dto()
-        self.get_q_values(state)
-
-        action = random.choice(self.legal_actions())
-
-        self.last_state = state
-        self.last_action = action
-
-        return action
-
-    def exploit(self) -> str:
+    def exploit(self, q_values: dict) -> str:
         """
         Choose the best legal action according to Q-values.
-        Save current state/action for future Q update.
         """
 
-        state = self.game.get_state_dto()
-        q_values = self.get_q_values(state)
         legal_actions = self.legal_actions()
-
         best_actions = []
         max_value = float("-inf")
 
@@ -165,40 +214,39 @@ class Ia(Player):
             elif value == max_value:
                 best_actions.append(action)
 
-        action = random.choice(best_actions)
+        return random.choice(best_actions)
 
-        self.last_state = state
-        self.last_action = action
-
-        return action
-
-    def compute_reward(self, info: dict) -> float:
+    def compute_reward(self, took_case: bool, win: bool) -> float:
         """
-        Compute reward after the move.
+        Compute reward for the simulated move.
         """
-
         reward = self.penalty
 
-        if info.get("took_case"):
+        if took_case:
             reward += self.take_cell
 
-        if info.get("win"):
+        if win:
             reward += self.win_reward
-
-        if info.get("lose"):
-            reward += self.lose_reward
 
         return reward
 
     def q_function(
-        self, state: dict, action: str, reward: float, next_state: dict
+        self,
+        state: dict,
+        current_q_values: dict,
+        action: str,
+        reward: float,
+        next_state: dict,
     ) -> None:
         """
         Apply Q-learning update.
+
+        Important:
+        - update only current_state
+        - do not create next_state here
         """
 
-        current_q_values = self.get_q_values(state)
-        next_q_values = self.get_q_values(next_state)
+        next_q_values = self.get_next_q_values(next_state)
 
         old_value = current_q_values[action]
         max_next = max(next_q_values[a] for a in ["up", "down", "left", "right"])
@@ -208,43 +256,105 @@ class Ia(Player):
         )
 
         current_q_values[action] = new_value
+        self.dao.update_row(state, current_q_values)
 
-        self.dao.select_row_by_dto(state)
-        self.dao.update_row(current_q_values)
-
-    def update_after_move(self, info: dict) -> None:
+    def set_next_state(self, current_q_values: dict) -> None:
         """
-        Must be called by the GameModel after the move has been applied.
+        Simulate the chosen move, compute reward, and update the current state.
+
+        Important:
+        - only current_state is inserted/updated
+        - next_state is only simulated
         """
 
         if self.last_state is None or self.last_action is None:
             return
 
-        reward = self.compute_reward(info)
-        next_state = self.game.get_state_dto()
+        state = self.last_state
+        grid_size = state["grid_size"]
+        current_player = state["current_player"]
 
-        self.q_function(self.last_state, self.last_action, reward, next_state)
+        grid = self._rebuild_grid(state)
 
-        self.last_state = None
-        self.last_action = None
+        p1_x, p1_y = self._index_to_coord(state["player1_coord"], grid_size)
+        p2_x, p2_y = self._index_to_coord(state["player2_coord"], grid_size)
+
+        if current_player == 1:
+            px, py = p1_x, p1_y
+        else:
+            px, py = p2_x, p2_y
+
+        dx, dy = self.string_to_move(self.last_action)
+        nx, ny = px + dx, py + dy
+
+        took_case = grid[nx][ny] == 0
+        grid[nx][ny] = current_player
+
+        new_p1_coord = state["player1_coord"]
+        new_p2_coord = state["player2_coord"]
+
+        if current_player == 1:
+            new_p1_coord = self._coord_to_index(nx, ny, grid_size)
+        else:
+            new_p2_coord = self._coord_to_index(nx, ny, grid_size)
+
+        next_player = 2 if current_player == 1 else 1
+        new_grid = "".join(str(cell) for row in grid for cell in row)
+
+        self.next_state = {
+            "current_player": next_player,
+            "player1_coord": new_p1_coord,
+            "player2_coord": new_p2_coord,
+            "grid": new_grid,
+            "grid_size": grid_size,
+        }
+
+        win = False
+        if "0" not in new_grid:
+            p1_score = new_grid.count("1")
+            p2_score = new_grid.count("2")
+
+            if self.id == 1:
+                win = p1_score > p2_score
+            else:
+                win = p2_score > p1_score
+
+        reward = self.compute_reward(took_case, win)
+        self.q_function(state, current_q_values, self.last_action, reward, self.next_state)
 
     def play(self) -> tuple[int, int]:
         """
-        Choose a move with epsilon-greedy and return the move.
-        The move is NOT applied here.
+        Choose a move, simulate it, update current_state, then return the move.
         """
 
-        if random.random() < self.epsilon:
-            action = self.explore()
-        else:
-            action = self.exploit()
+        self.last_state = self.game.get_state_dto()
+        current_q_values = self.ensure_current_state(self.last_state)
 
-        return self.string_to_move(action)
+        if random.random() < self.epsilon:
+            self.last_action = self.explore()
+        else:
+            self.last_action = self.exploit(current_q_values)
+
+        chosen_action = self.last_action
+        self.set_next_state(current_q_values)
+        move = self.string_to_move(chosen_action)
+
+        self.last_state = None
+        self.last_action = None
+        self.next_state = None
+
+        return move
 
     def next_epsilon(self, coefficient: float = 0.95, minimum: float = 0.05) -> float:
         """
         Decrease epsilon while keeping it above a minimum value.
         """
-
         self.epsilon = max(minimum, self.epsilon * coefficient)
         return self.epsilon
+
+    def flush_db(self) -> None:
+        """
+        Force commit pending writes.
+        Useful at the end of training.
+        """
+        self.dao.flush()

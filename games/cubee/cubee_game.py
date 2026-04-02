@@ -4,6 +4,7 @@ from .view.view import View
 from .player.player import Player
 from .player.human import Human
 from .player.ai import Ia
+from .dao.dao import Dao
 
 
 def start_cubee_game():
@@ -11,7 +12,7 @@ def start_cubee_game():
     function that permiet to launch the cubee game
     """
 
-    # train_ai()
+    train_ai()
     bot = Ia(2, "ia1", epsilon=0)
     flo = Human(1, "flo", "red")
     # yo = Human(2, "yo", "blue")
@@ -21,20 +22,33 @@ def start_cubee_game():
     ctrl.start_game()
 
 
-def train_ai() :
-    bot_1 = Ia(1,"ia1")
-    bot_2 = Ia(2,"ia1")
+def train_ai():
+    shared_dao = Dao("cubee_training", commit_every=100)
 
-    for i in range(100_000) :
-        if i % 10 == 0 :
-            bot_1.next_epsilon()
-            bot_2.next_epsilon()
-            
-        
+    ia1 = Ia(
+            id=1,
+            name="ia1",
+            epsilon=1,
+            lr=0.01,
+            gamma=0.7,
+            dao=shared_dao,
+        )
 
-        print(i)
-        game = GameModel(5,False, bot_1,bot_2)
+    ia2 = Ia(
+            id=2,
+            name="ia2",
+            epsilon=1,
+            lr=0.01,
+            gamma=0.7,
+            dao=shared_dao,
+        )
+
+    game = GameModel(5, False,  ia1, ia2)
+
+    for i in range(10_000):
         game.play()
+        game.reset()
+        print(i)
 
-    print(bot_1.nb_win)
-    print(bot_2.nb_win)
+    shared_dao.flush()
+    shared_dao.close()

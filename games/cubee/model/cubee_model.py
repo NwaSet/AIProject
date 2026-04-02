@@ -310,10 +310,12 @@ class GameModel :
             player = self.current_player
             move = player.play()
 
-            info = self.play_ai_step(move)
-
-            if isinstance(player, Ia) :
-                player.update_after_move(info)
+            if move in self.legal_move() :
+                self.set_player_coord(move)
+                self.set_cell()
+                self.update_enclosure()
+            
+            self.switch_player()
 
         self.winner.win()
         self.loser.lose()
@@ -347,40 +349,6 @@ class GameModel :
                 if self.score[self.player1.__str__()] < self.score[self.player2.__str__()]
                 else self.player2
             )
-
-
-    def play_ai_step(
-            self,
-            move : tuple[int,int]
-            ) -> None :
-        """
-        step ai version,
-        return info after the move to update the q-table.
-        """
-
-        info = {"took_case": False, "win": False, "lose": False}
-
-        old_score = self.score[self.current_player.__str__()]
-
-        if move in self.legal_move() :
-            self.set_player_coord(move)
-            self.set_cell()
-            self.update_enclosure()
-
-            new_score = self.score[self.current_player.__str__()]
-            if new_score > old_score :
-                info["took_case"] = True
-
-        if self.is_game_over() :
-            if self.winner == self.current_player :
-                info["win"] = True
-            else :
-                info["lose"] = True
-
-        else :
-            self.switch_player()
-
-        return info
 
 
     def get_state_dto(self) -> dict :

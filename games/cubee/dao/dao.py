@@ -4,35 +4,36 @@ from sqlalchemy.orm import sessionmaker
 
 class Dao:
     """
-    class that permit to communicate between the game model and a db
+    DAO used to communicate between the game model and the database.
+
+    Optimizations:
+    - in-memory cache for already seen states
+    - update does not depend on a previous select
+    - batched commits
     """
 
-    def __init__(self, db_name: str = None) -> None:
-        """
-        initialize a dao
-
-        Args :
-        ai_name : name of the ai
-        """
-
+    def __init__(self, db_name: str = None, commit_every: int = 100) -> None:
         self.engine = None
         self.session = None
         self.db_name = None
-        self.current_row = None
         self.data_table = None
+
+        self.cache: dict[tuple, dict[str, float]] = {}
+        self.commit_every = commit_every
+        self.pending_writes = 0
 
         if db_name:
             self.connect_player_db(db_name)
 
     def connect_player_db(self, db_name: str) -> None:
         """
-        connect to the db if it existe, else create a new one
+        Connect to the database if it exists, else create a new one.
         """
 
         self.engine = create_engine(f"sqlite:///games/cubee/dao/{db_name}.db")
         self.engine.connect()
 
-        Session = sessionmaker(bind=self.engine)
+        Session = sessionmaker(bind=self.engine, autoflush=False, autocommit=False)
         self.session = Session()
 
         self.db_name = db_name
@@ -40,7 +41,7 @@ class Dao:
 
     def init_column(self) -> None:
         """
-        init the table of the db
+        Initialize the table in the database.
         """
 
         metadata = MetaData()
@@ -48,152 +49,160 @@ class Dao:
         self.data_table = Table(
             "data",
             metadata,
-            Column("current_player", Integer),
-            Column("player1_coord", Integer),
-            Column("player2_coord", Integer),
-            Column("grid", String),
-            Column("grid_size", Integer),
-            Column("up", Float),
-            Column("down", Float),
-            Column("left", Float),
-            Column("right", Float),
             Column("id", Integer, primary_key=True, autoincrement=True),
+            Column("current_player", Integer, nullable=False),
+            Column("player1_coord", Integer, nullable=False),
+            Column("player2_coord", Integer, nullable=False),
+            Column("grid", String, nullable=False),
+            Column("grid_size", Integer, nullable=False),
+            Column("up", Float, nullable=False),
+            Column("down", Float, nullable=False),
+            Column("left", Float, nullable=False),
+            Column("right", Float, nullable=False),
         )
 
         metadata.create_all(self.engine)
 
-    def add_row(self, dto_ai: dict) -> None:
+    def _state_key(self, dto: dict) -> tuple:
         """
-        add a row, only if it does not exist
+        Build a stable key for a state.
         """
 
-        existing = self.select_row_by_dto(dto_ai)
+        return (
+            dto["current_player"],
+            dto["player1_coord"],
+            dto["player2_coord"],
+            dto["grid"],
+            dto["grid_size"],
+        )
 
-        if existing is not None:
-            print("Row already exists, skip insert")
-            return
-
-        row = self.data_table.insert().values(**dto_ai)
-        self.session.execute(row)
-        self.session.commit()
-
-    def select_row_by_dto(self, dto: dict) -> None:
+    def _extract_q_values(self, row) -> dict[str, float]:
         """
-        return a dict (up = x, ...) of the row if it exist, else return None
+        Extract Q-values from a SQLAlchemy row.
         """
+
+        return {
+            "up": row.up,
+            "down": row.down,
+            "left": row.left,
+            "right": row.right,
+        }
+
+    def _register_write(self) -> None:
+        """
+        Count writes and commit in batches.
+        """
+
+        self.pending_writes += 1
+
+        if self.pending_writes >= self.commit_every:
+            self.session.commit()
+            self.pending_writes = 0
+
+    def flush(self) -> None:
+        """
+        Force commit pending writes.
+        Call this at the end of training.
+        """
+
+        if self.session is not None and self.pending_writes > 0:
+            self.session.commit()
+            self.pending_writes = 0
+
+    def close(self) -> None:
+        """
+        Flush pending writes and close the session.
+        """
+
+        if self.session is not None:
+            self.flush()
+            self.session.close()
+            self.session = None
+
+    def select_row_by_dto(self, dto: dict) -> dict | None:
+        """
+        Return Q-values of the row if it exists, else return None.
+        Cache is checked first.
+        """
+
+        key = self._state_key(dto)
+
+        if key in self.cache:
+            return self.cache[key].copy()
 
         row = select(self.data_table).where(
             self.data_table.c.current_player == dto["current_player"],
             self.data_table.c.player1_coord == dto["player1_coord"],
             self.data_table.c.player2_coord == dto["player2_coord"],
             self.data_table.c.grid == dto["grid"],
+            self.data_table.c.grid_size == dto["grid_size"],
         )
 
-        self.current_row = self.session.execute(row).fetchone()
+        result = self.session.execute(row).fetchone()
 
-        if self.current_row:
-            return {
-                "up": self.current_row.up,
-                "down": self.current_row.down,
-                "left": self.current_row.left,
-                "right": self.current_row.right,
-            }
-        else:
+        if result is None:
             return None
 
-    def update_row(self, dto: dict) -> None:
-        """
-        pre : need to do a select so self.current_row.id is not None
+        q_values = self._extract_q_values(result)
+        self.cache[key] = q_values.copy()
+        return q_values.copy()
 
-        update the selected row with new info
+    def add_row(self, dto_ai: dict) -> None:
+        """
+        Add a row only if it does not already exist.
         """
 
-        if self.current_row is None:
-            print("x")
-            return 0
+        key = self._state_key(dto_ai)
+
+        if key in self.cache:
+            return
+
+        existing = self.select_row_by_dto(dto_ai)
+        if existing is not None:
+            return
+
+        row = self.data_table.insert().values(**dto_ai)
+        self.session.execute(row)
+
+        self.cache[key] = {
+            "up": dto_ai["up"],
+            "down": dto_ai["down"],
+            "left": dto_ai["left"],
+            "right": dto_ai["right"],
+        }
+
+        self._register_write()
+
+    def update_row(self, state: dict, q_values: dict) -> None:
+        """
+        Update the row matching the given state.
+        Does not require a previous select.
+        """
 
         row = (
             update(self.data_table)
-            .where(self.data_table.c.id == self.current_row.id)
+            .where(
+                self.data_table.c.current_player == state["current_player"],
+                self.data_table.c.player1_coord == state["player1_coord"],
+                self.data_table.c.player2_coord == state["player2_coord"],
+                self.data_table.c.grid == state["grid"],
+                self.data_table.c.grid_size == state["grid_size"],
+            )
             .values(
-                up=dto["up"], down=dto["down"], left=dto["left"], right=dto["right"]
+                up=q_values["up"],
+                down=q_values["down"],
+                left=q_values["left"],
+                right=q_values["right"],
             )
         )
 
         self.session.execute(row)
-        self.session.commit()
 
+        self.cache[self._state_key(state)] = {
+            "up": q_values["up"],
+            "down": q_values["down"],
+            "left": q_values["left"],
+            "right": q_values["right"],
+        }
 
-if __name__ == "__main__":
-    test = Dao("test_db")
-    test.add_row(
-        {
-            "current_player": 1,
-            "player1_coord": 5,
-            "player2_coord": 9,
-            "grid": "001020010",
-            "grid_size": 3,
-            "up": 10,
-            "down": -2,
-            "left": 4,
-            "right": 7,
-        }
-    )
-    test.add_row(
-        {
-            "current_player": 1,
-            "player1_coord": 20,
-            "player2_coord": 9,
-            "grid": "001020010",
-            "grid_size": 3,
-            "up": 10,
-            "down": -2,
-            "left": 4,
-            "right": 7,
-        }
-    )
-
-    print(
-        test.select_row_by_dto(
-            {
-                "current_player": 1,
-                "player1_coord": 20,
-                "player2_coord": 9,
-                "grid": "001020010",
-                "grid_size": 3,
-                "up": 10,
-                "down": -2,
-                "left": 4,
-                "right": 7,
-            }
-        )
-    )
-    test.update_row({"up": 5, "down": 5, "left": 5, "right": 5})
-    print(
-        test.select_row_by_dto(
-            {
-                "current_player": 1,
-                "player1_coord": 20,
-                "player2_coord": 9,
-                "grid": "001020010",
-                "grid_size": 3,
-                "up": 10,
-                "down": -2,
-                "left": 4,
-                "right": 7,
-            }
-        )
-    )
-    test.add_row(
-        {
-            "current_player": 1,
-            "player1_coord": 5,
-            "player2_coord": 9,
-            "grid": "001020010",
-            "grid_size": 3,
-            "up": 10,
-            "down": -2,
-            "left": 4,
-            "right": 7,
-        }
-    )
+        self._register_write()
