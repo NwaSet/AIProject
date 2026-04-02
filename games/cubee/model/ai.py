@@ -1,5 +1,5 @@
 import random
-from games.cubee.player.player import Player
+from .player import Player
 from games.cubee.dao.dao import Dao
 
 
@@ -14,21 +14,21 @@ class Ia(Player):
     """
 
     def __init__(
-            self,
-            id: int,
-            name: str,
-            game: object = None,
-            epsilon: float = 0.9,
-            lr: float = 0.01,
-            gamma: float = 0.7,
-            ) -> None:
+        self,
+        id: int,
+        name: str,
+        game: object = None,
+        epsilon: float = 0.9,
+        lr: float = 0.01,
+        gamma: float = 0.7,
+    ) -> None:
         super().__init__(id, name, game)
         self.color = "gray"
 
         self.win_reward = 5
         self.penalty = -0.5
         self.take_cell = 1
-
+        self.game = None
         self.epsilon = epsilon
         self.learning_rate = lr
         self.gamma = gamma
@@ -69,8 +69,7 @@ class Ia(Player):
         flat_grid = [int(cell) for cell in state["grid"]]
 
         return [
-            flat_grid[i:i + grid_size]
-            for i in range(0, len(flat_grid), grid_size)
+            flat_grid[i : i + grid_size] for i in range(0, len(flat_grid), grid_size)
         ]
 
     def _index_to_coord(self, index: int, grid_size: int) -> tuple[int, int]:
@@ -316,7 +315,9 @@ class Ia(Player):
                 win = p2_score > p1_score
 
         reward = self.compute_reward(took_case, win)
-        self.q_function(state, current_q_values, self.last_action, reward, self.next_state)
+        self.q_function(
+            state, current_q_values, self.last_action, reward, self.next_state
+        )
 
     def play(self) -> tuple[int, int]:
         """

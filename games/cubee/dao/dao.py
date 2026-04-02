@@ -2,16 +2,12 @@ from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
 
 
-class Dao :
-
+class Dao:
     """
     class that permit to communicate between the game model and a db
     """
-    
-    def __init__(
-            self,
-            db_name : str = None
-            ) -> None :
+
+    def __init__(self, db_name: str = None) -> None:
         """
         initialize a dao
 
@@ -25,19 +21,15 @@ class Dao :
         self.current_row = None
         self.data_table = None
 
-        if db_name :
+        if db_name:
             self.connect_player_db(db_name)
 
-
-    def connect_player_db(
-            self,
-            db_name : str
-            ) -> None : 
+    def connect_player_db(self, db_name: str) -> None:
         """
         connect to the db if it existe, else create a new one
         """
 
-        self.engine = create_engine(f"sqlite:///games/Cubee/DAO/{db_name}.db")
+        self.engine = create_engine(f"sqlite:///games/cubee/dao/{db_name}.db")
         self.engine.connect()
 
         Session = sessionmaker(bind=self.engine)
@@ -46,8 +38,7 @@ class Dao :
         self.db_name = db_name
         self.init_column()
 
-
-    def init_column(self) -> None :
+    def init_column(self) -> None:
         """
         init the table of the db
         """
@@ -66,18 +57,14 @@ class Dao :
             Column("down", Float),
             Column("left", Float),
             Column("right", Float),
-            Column("id", Integer, primary_key=True, autoincrement=True)
+            Column("id", Integer, primary_key=True, autoincrement=True),
         )
 
         metadata.create_all(self.engine)
 
-
-    def add_row(
-            self,
-            dto_ai : dict
-            ) -> None :
+    def add_row(self, dto_ai: dict) -> None:
         """
-        add a row, only if it does not exist 
+        add a row, only if it does not exist
         """
 
         existing = self.select_row_by_dto(dto_ai)
@@ -90,11 +77,7 @@ class Dao :
         self.session.execute(row)
         self.session.commit()
 
-
-    def select_row_by_dto(
-            self,
-            dto : dict
-            ) -> None :
+    def select_row_by_dto(self, dto: dict) -> None:
         """
         return a dict (up = x, ...) of the row if it exist, else return None
         """
@@ -106,26 +89,19 @@ class Dao :
             self.data_table.c.grid == dto["grid"],
         )
 
-        self.current_row = self.session.execute(
-            row
-        ).fetchone()
+        self.current_row = self.session.execute(row).fetchone()
 
-        if self.current_row :
+        if self.current_row:
             return {
                 "up": self.current_row.up,
                 "down": self.current_row.down,
                 "left": self.current_row.left,
                 "right": self.current_row.right,
             }
-        else :
+        else:
             return None
 
-
-    def update_row(
-                self,
-                state: dict,
-                q_values: dict
-                ) -> None :
+    def update_row(self, state: dict, q_values: dict) -> None:
         """
         update the row matching the given state
         """
@@ -154,7 +130,7 @@ class Dao :
             print("x")
 
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     test = Dao("test_db")
     test.add_row(
         {
@@ -227,3 +203,4 @@ if __name__ == "__main__" :
             "right": 7,
         }
     )
+

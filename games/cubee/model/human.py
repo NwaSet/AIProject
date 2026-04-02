@@ -1,19 +1,12 @@
-from games.cubee.player.player import Player
+from .player import Player
 
 
-class Human(Player) :
-
+class Human(Player):
     """
     class for a human player
     """
 
-    def __init__(
-            self,
-            id : int,
-            name : str,
-            color : str,
-            game : object = None
-            ) -> None :
+    def __init__(self, id: int, name: str, color: str, game: object = None) -> None:
         """
         Initialize a human player.
 

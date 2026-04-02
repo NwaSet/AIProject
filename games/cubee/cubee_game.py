@@ -1,9 +1,9 @@
-from .controler.controler import gameControler
+from .controler import gameControler
 from .model.cubee_model import GameModel
-from .view.view import View
-from .player.player import Player
-from .player.human import Human
-from .player.ai import Ia
+from .view import View
+from .model.player import Player
+from .model.human import Human
+from .model.ai import Ia
 from .dao.dao import Dao
 
 
@@ -24,22 +24,22 @@ def start_cubee_game():
 
 def train_ai():
     ia1 = Ia(
-            id=1,
-            name="ia1",
-            epsilon=1,
-            lr=0.01,
-            gamma=0.7,
-        )
+        id=1,
+        name="ia1",
+        epsilon=1,
+        lr=0.01,
+        gamma=0.7,
+    )
 
     ia2 = Ia(
-            id=2,
-            name="ia2",
-            epsilon=1,
-            lr=0.01,
-            gamma=0.7,
-        )
+        id=2,
+        name="ia2",
+        epsilon=1,
+        lr=0.01,
+        gamma=0.7,
+    )
 
-    game = GameModel(3, False,  ia1, ia2)
+    game = GameModel(3, False, ia1, ia2)
 
     for i in range(10_000):
         game.play()
