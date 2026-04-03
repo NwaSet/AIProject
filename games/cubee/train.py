@@ -7,8 +7,8 @@ import traceback
 from .model.ai import Ia
 from .model.cubee_model import GameModel
 
-train_games = 10
-test_games = 1
+train_games = 10_000
+test_games = 1_000
 epsilon_step = 250
 grid_size = 3
 
@@ -98,20 +98,9 @@ def test_ai():
             bot1 = Ia(1, f"b1_{lr1}_{gamma1}", epsilon=0, lr=lr1, gamma=gamma1)
             bot2 = Ia(2, f"b2_{lr2}_{gamma2}", epsilon=0, lr=lr2, gamma=gamma2)
 
-            bot1.nb_win = 0
-            bot2.nb_win = 0
-
             for _ in range(test_games):
                 game = GameModel(grid_size, False, bot1, bot2)
                 game.play()
-
-                score_1 = game.score[str(bot1)]
-                score_2 = game.score[str(bot2)]
-
-                if score_1 > score_2:
-                    bot1.nb_win += 1
-                elif score_2 > score_1:
-                    bot2.nb_win += 1
 
             matrix[i][j] = round(bot1.nb_win / test_games, 3)
             matrix[j][i] = round(bot2.nb_win / test_games, 3)

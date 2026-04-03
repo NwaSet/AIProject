@@ -208,6 +208,9 @@ class Ia(Player):
                 best_actions = [action]
             elif value == max_value:
                 best_actions.append(action)
+        
+        if not best_actions :
+            return random.choice(legal_actions)
 
         return random.choice(best_actions)
 

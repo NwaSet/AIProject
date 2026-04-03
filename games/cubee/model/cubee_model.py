@@ -291,7 +291,7 @@ class GameModel:
         """
 
         i = 0
-        while not self.is_game_over() and i < 1000:
+        while not self.is_game_over() and i < self.grid_size*100:
             player = self.current_player
             move = player.play()
 
