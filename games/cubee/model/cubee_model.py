@@ -290,7 +290,8 @@ class GameModel:
         - the loser's statistics are updated
         """
 
-        while not self.is_game_over():
+        i = 0
+        while not self.is_game_over() and i < 1000:
             player = self.current_player
             move = player.play()
 
@@ -300,9 +301,14 @@ class GameModel:
                 self.update_enclosure()
 
             self.switch_player()
+            i += 1
 
-        self.winner.win()
-        self.loser.lose()
+        if self.is_game_over() :
+            self.winner.win()
+            self.loser.lose()
+        else :
+            self.player1.tie()
+            self.player2.tie()
 
     @property
     def winner(self) -> object:

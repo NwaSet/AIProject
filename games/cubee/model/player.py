@@ -29,7 +29,7 @@ class Player :
 
         self.nb_win = 0
         self.nb_lose = 0
-        self.tie = 0
+        self.nb_tie = 0
         self.coord = None
         self.color = "gray"
 
@@ -58,6 +58,13 @@ class Player :
         """
 
         self.nb_lose += 1
+    
+    def tie(self) -> None :
+        """
+        add one tie
+        """
+
+        self.nb_tie += 1 
 
 
     def __str__(self) -> str :
