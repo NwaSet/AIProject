@@ -1,9 +1,8 @@
 import tkinter as tk
-from games.cubee.controler.controler import gameControler
+from .controler import gameControler
 
 
-class View :
-
+class View:
     """
     Represent the graphical user interface of the Cubee game.
 
@@ -18,10 +17,7 @@ class View :
     trigger player actions.
     """
 
-    def __init__(
-            self,
-            controler: gameControler = None
-            ) -> None :
+    def __init__(self, controler: gameControler = None) -> None:
         """
         Initialize the game view.
 
@@ -77,8 +73,7 @@ class View :
             self.root, text="Restart", command=self.controler.reset_game
         )
 
-
-    def creation_grid(self) -> None :
+    def creation_grid(self) -> None:
         """
         create and diplay the game grid on the canvas
         """
@@ -125,7 +120,7 @@ class View :
             width=2,
         )
 
-    def display_infos(self) -> None :
+    def display_infos(self) -> None:
         """
         show all informations of the game :
         - whos turn it is
@@ -198,8 +193,7 @@ class View :
             anchor="nw",
         )
 
-
-    def game_over(self) -> None :
+    def game_over(self) -> None:
         """
         pack on the canvas the game over and show the button to restart a new game
         """
@@ -241,8 +235,7 @@ class View :
             tags="game_over",
         )
 
-
-    def display_player(self) -> None :
+    def display_player(self) -> None:
         """
         show the circle where the players are
         """
@@ -271,8 +264,7 @@ class View :
                 tags="player",
             )
 
-
-    def refresh_data(self) -> None :
+    def refresh_data(self) -> None:
         """
         Met à jour les données venant du modèle
         """
@@ -286,8 +278,7 @@ class View :
         self.player_color = self.data["player_color"]
         self.current_player = self.data["current_player"]
 
-
-    def update_view(self) -> None :
+    def update_view(self) -> None:
         """
         update all view to show the new game status
         """
@@ -297,8 +288,7 @@ class View :
         self.display_player()
         self.display_infos()
 
-
-    def run(self) -> None :
+    def run(self) -> None:
         """
         start the mainloop
         and update the view one first time

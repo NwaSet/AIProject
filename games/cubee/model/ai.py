@@ -1,5 +1,6 @@
 import random
-from games.cubee.player.player import Player
+from collections import deque
+from .player import Player
 from games.cubee.dao.dao import Dao
 
 
@@ -14,21 +15,21 @@ class Ia(Player):
     """
 
     def __init__(
-            self,
-            id: int,
-            name: str,
-            game: object = None,
-            epsilon: float = 0.9,
-            lr: float = 0.01,
-            gamma: float = 0.7,
-            ) -> None:
+        self,
+        id: int,
+        name: str,
+        game: object = None,
+        epsilon: float = 0.9,
+        lr: float = 0.01,
+        gamma: float = 0.7,
+    ) -> None:
         super().__init__(id, name, game)
         self.color = "gray"
 
         self.win_reward = 5
         self.penalty = -0.5
         self.take_cell = 1
-
+        self.game = None
         self.epsilon = epsilon
         self.learning_rate = lr
         self.gamma = gamma
@@ -69,21 +70,78 @@ class Ia(Player):
         flat_grid = [int(cell) for cell in state["grid"]]
 
         return [
-            flat_grid[i:i + grid_size]
-            for i in range(0, len(flat_grid), grid_size)
+            flat_grid[i : i + grid_size] for i in range(0, len(flat_grid), grid_size)
         ]
 
     def _index_to_coord(self, index: int, grid_size: int) -> tuple[int, int]:
         """
         Convert flattened index into (x, y).
         """
-        return divmod(index, grid_size)
+        y, x = divmod(index, grid_size)
+        return x, y
 
     def _coord_to_index(self, x: int, y: int, grid_size: int) -> int:
         """
         Convert (x, y) into flattened index.
         """
-        return x * grid_size + y
+        return y * grid_size + x
+
+    def _update_enclosure(self, grid: list[list[int]]) -> None:
+        """
+        Apply the same enclosure capture rules as GameModel on a simulated grid.
+        """
+
+        grid_size = len(grid)
+        visited = [[False for _ in range(grid_size)] for _ in range(grid_size)]
+
+        player1_id = 1
+        player2_id = 2
+
+        if self.game is not None:
+            player1_id = self.game.player1.id
+            player2_id = self.game.player2.id
+
+        directions = ((0, -1), (0, 1), (-1, 0), (1, 0))
+
+        for row in range(grid_size):
+            for col in range(grid_size):
+                if grid[row][col] != 0 or visited[row][col]:
+                    continue
+
+                zone = []
+                queue = deque([(col, row)])
+                touches_p1 = False
+                touches_p2 = False
+
+                while queue:
+                    c, r = queue.popleft()
+
+                    if visited[r][c]:
+                        continue
+
+                    visited[r][c] = True
+                    zone.append((c, r))
+
+                    for dcol, drow in directions:
+                        nc, nr = c + dcol, r + drow
+
+                        if 0 <= nc < grid_size and 0 <= nr < grid_size:
+                            if grid[nr][nc] == 0:
+                                queue.append((nc, nr))
+                            elif grid[nr][nc] == player1_id:
+                                touches_p1 = True
+                            elif grid[nr][nc] == player2_id:
+                                touches_p2 = True
+
+                if touches_p1 and not touches_p2:
+                    owner = player1_id
+                elif touches_p2 and not touches_p1:
+                    owner = player2_id
+                else:
+                    continue
+
+                for c, r in zone:
+                    grid[r][c] = owner
 
     def legal_actions(self) -> list[str]:
         """
@@ -118,7 +176,7 @@ class Ia(Player):
             nx, ny = px + dx, py + dy
 
             if 0 <= nx < grid_size and 0 <= ny < grid_size:
-                if grid[nx][ny] in (0, state["current_player"]):
+                if grid[ny][nx] in (0, state["current_player"]):
                     legal_actions.append(action)
 
         return legal_actions
@@ -209,6 +267,9 @@ class Ia(Player):
                 best_actions = [action]
             elif value == max_value:
                 best_actions.append(action)
+        
+        if not best_actions :
+            return random.choice(legal_actions)
 
         return random.choice(best_actions)
 
@@ -245,7 +306,8 @@ class Ia(Player):
         next_q_values = self.get_next_q_values(next_state)
 
         old_value = current_q_values[action]
-        max_next = max(next_q_values[a] for a in ["up", "down", "left", "right"])
+        legal_next_actions = self.legal_actions_from_state(next_state)
+        max_next = max((next_q_values[a] for a in legal_next_actions), default=0.0)
 
         new_value = old_value + self.learning_rate * (
             reward + self.gamma * max_next - old_value
@@ -283,8 +345,9 @@ class Ia(Player):
         dx, dy = self.string_to_move(self.last_action)
         nx, ny = px + dx, py + dy
 
-        took_case = grid[nx][ny] == 0
-        grid[nx][ny] = current_player
+        took_case = grid[ny][nx] == 0
+        grid[ny][nx] = current_player
+        self._update_enclosure(grid)
 
         new_p1_coord = state["player1_coord"]
         new_p2_coord = state["player2_coord"]
@@ -316,7 +379,9 @@ class Ia(Player):
                 win = p2_score > p1_score
 
         reward = self.compute_reward(took_case, win)
-        self.q_function(state, current_q_values, self.last_action, reward, self.next_state)
+        self.q_function(
+            state, current_q_values, self.last_action, reward, self.next_state
+        )
 
     def play(self) -> tuple[int, int]:
         """
