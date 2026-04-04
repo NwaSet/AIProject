@@ -13,7 +13,6 @@ def start_cubee_game():
     function that permiet to launch the cubee game
     """
 
-    train_ai()
     flo = Human(1, "flo", "red")
     yo = Human(2, "yo", "blue")
     ctrl = gameControler()

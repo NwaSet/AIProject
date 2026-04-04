@@ -66,8 +66,12 @@ def _train_worker(args):
 
 
 def train(nb_game, learning_rate, gamma, nb_espilone):
-    bot1 = Ia(1, f"b1_{learning_rate}_{gamma}", epsilon=1, lr=learning_rate, gamma=gamma)
-    bot2 = Ia(2, f"b2_{learning_rate}_{gamma}", epsilon=1, lr=learning_rate, gamma=gamma)
+    bot1 = Ia(
+        1, f"b1_{learning_rate}_{gamma}", epsilon=1, lr=learning_rate, gamma=gamma
+    )
+    bot2 = Ia(
+        2, f"b2_{learning_rate}_{gamma}", epsilon=1, lr=learning_rate, gamma=gamma
+    )
 
     game = GameModel(grid_size, False, bot1, bot2)
 
@@ -103,8 +107,22 @@ def test_ai():
 
             matrix[i][j] = bot1.nb_win / test_games
             matrix[j][i] = bot2.nb_win / test_games
-            print("bot1 --> tie :", bot1.nb_tie, " | win :", bot1.nb_win, " | lose :", bot1.nb_lose)
-            print("bot2 --> tie :", bot2.nb_tie, " | win :", bot2.nb_win, " | lose :", bot2.nb_lose)
+            print(
+                "bot1 --> tie :",
+                bot1.nb_tie,
+                " | win :",
+                bot1.nb_win,
+                " | lose :",
+                bot1.nb_lose,
+            )
+            print(
+                "bot2 --> tie :",
+                bot2.nb_tie,
+                " | win :",
+                bot2.nb_win,
+                " | lose :",
+                bot2.nb_lose,
+            )
 
     save_matrix(matrix)
     print("test_ai end")

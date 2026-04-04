@@ -1,9 +1,15 @@
-# Allumette
+# 3 Games
+
+## Mikado
 
 ### whats the game ?
 their are 12 sticks. each player can take 1, 2 or 3 sticks and the player that take the last one loose the game.
 each player play turn by turn.
 a player can be an Ai, Random Ai or a Human Player
+
+## Cubee
+It's a turn per turn games. Each player must take the must cell. Another player cannot take a cell that belongs to another player.
+To play, you use the arrows keys.
 
 ### how to install the app :
 
@@ -35,6 +41,11 @@ python -m pip install -r requirements.txt
 4. start game by launching the file main.py
 ```bash
 python main.py
+
+```
+5. start a train for the ai's Cubee
+```bash
+python -m games.cubee.train
 ```
 
 ### Author Of The Project :
