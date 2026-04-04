@@ -1,6 +1,5 @@
 import random
 from .human import Human
-from .ai import Ia
 
 from collections import deque
 
@@ -347,10 +346,11 @@ class GameModel:
 
         return {
             "current_player": self.current_player.id,
-            "player1_coord": self.player1.coord[0] * self.grid_size
-            + self.player1.coord[1],
-            "player2_coord": self.player2.coord[0] * self.grid_size
-            + self.player2.coord[1],
+            # Coordinates use the same row-major flattening as the grid string.
+            "player1_coord": self.player1.coord[1] * self.grid_size
+            + self.player1.coord[0],
+            "player2_coord": self.player2.coord[1] * self.grid_size
+            + self.player2.coord[0],
             "grid": "".join(str(cell) for row in self.grid for cell in row),
             "grid_size": self.grid_size,
         }

@@ -7,8 +7,8 @@ import traceback
 from .model.ai import Ia
 from .model.cubee_model import GameModel
 
-train_games = 10_000
-test_games = 1_000
+train_games = 100
+test_games = 10
 epsilon_step = 250
 grid_size = 3
 
@@ -94,7 +94,6 @@ def test_ai():
             lr1, gamma1 = params[i]
             lr2, gamma2 = params[j]
 
-            # IMPORTANT : reprendre les mêmes noms que pendant l'entraînement
             bot1 = Ia(1, f"b1_{lr1}_{gamma1}", epsilon=0, lr=lr1, gamma=gamma1)
             bot2 = Ia(2, f"b2_{lr2}_{gamma2}", epsilon=0, lr=lr2, gamma=gamma2)
 
@@ -102,8 +101,10 @@ def test_ai():
                 game = GameModel(grid_size, False, bot1, bot2)
                 game.play()
 
-            matrix[i][j] = round(bot1.nb_win / test_games, 3)
-            matrix[j][i] = round(bot2.nb_win / test_games, 3)
+            matrix[i][j] = bot1.nb_win / test_games
+            matrix[j][i] = bot2.nb_win / test_games
+            print("bot1 --> tie :", bot1.nb_tie, " | win :", bot1.nb_win, " | lose :", bot1.nb_lose)
+            print("bot2 --> tie :", bot2.nb_tie, " | win :", bot2.nb_win, " | lose :", bot2.nb_lose)
 
     save_matrix(matrix)
     print("test_ai end")
