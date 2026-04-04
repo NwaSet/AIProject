@@ -62,7 +62,7 @@ class Ia(Player):
             "right": (1, 0),
         }[action]
 
-    def _rebuild_grid(self, state: dict) -> list[list[int]]:
+    def rebuild_grid(self, state: dict) -> list[list[int]]:
         """
         Rebuild the 2D grid from the DTO.
         """
@@ -73,20 +73,20 @@ class Ia(Player):
             flat_grid[i : i + grid_size] for i in range(0, len(flat_grid), grid_size)
         ]
 
-    def _index_to_coord(self, index: int, grid_size: int) -> tuple[int, int]:
+    def index_to_coord(self, index: int, grid_size: int) -> tuple[int, int]:
         """
         Convert flattened index into (x, y).
         """
         y, x = divmod(index, grid_size)
         return x, y
 
-    def _coord_to_index(self, x: int, y: int, grid_size: int) -> int:
+    def coord_to_index(self, x: int, y: int, grid_size: int) -> int:
         """
         Convert (x, y) into flattened index.
         """
         return y * grid_size + x
 
-    def _update_enclosure(self, grid: list[list[int]]) -> None:
+    def update_enclosure(self, grid: list[list[int]]) -> None:
         """
         Apply the same enclosure capture rules as GameModel on a simulated grid.
         """
@@ -158,12 +158,12 @@ class Ia(Player):
         """
 
         grid_size = state["grid_size"]
-        grid = self._rebuild_grid(state)
+        grid = self.rebuild_grid(state)
 
         if state["current_player"] == 1:
-            px, py = self._index_to_coord(state["player1_coord"], grid_size)
+            px, py = self.index_to_coord(state["player1_coord"], grid_size)
         else:
-            px, py = self._index_to_coord(state["player2_coord"], grid_size)
+            px, py = self.index_to_coord(state["player2_coord"], grid_size)
 
         legal_actions = []
 
@@ -332,10 +332,10 @@ class Ia(Player):
         grid_size = state["grid_size"]
         current_player = state["current_player"]
 
-        grid = self._rebuild_grid(state)
+        grid = self.rebuild_grid(state)
 
-        p1_x, p1_y = self._index_to_coord(state["player1_coord"], grid_size)
-        p2_x, p2_y = self._index_to_coord(state["player2_coord"], grid_size)
+        p1_x, p1_y = self.index_to_coord(state["player1_coord"], grid_size)
+        p2_x, p2_y = self.index_to_coord(state["player2_coord"], grid_size)
 
         if current_player == 1:
             px, py = p1_x, p1_y
@@ -347,15 +347,15 @@ class Ia(Player):
 
         took_case = grid[ny][nx] == 0
         grid[ny][nx] = current_player
-        self._update_enclosure(grid)
+        self.update_enclosure(grid)
 
         new_p1_coord = state["player1_coord"]
         new_p2_coord = state["player2_coord"]
 
         if current_player == 1:
-            new_p1_coord = self._coord_to_index(nx, ny, grid_size)
+            new_p1_coord = self.coord_to_index(nx, ny, grid_size)
         else:
-            new_p2_coord = self._coord_to_index(nx, ny, grid_size)
+            new_p2_coord = self.coord_to_index(nx, ny, grid_size)
 
         next_player = 2 if current_player == 1 else 1
         new_grid = "".join(str(cell) for row in grid for cell in row)
