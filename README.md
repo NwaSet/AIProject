@@ -8,6 +8,8 @@ each player play turn by turn.
 a player can be an Ai, Random Ai or a Human Player
 
 ## Cubee
+
+### whats the game ?
 It's a turn per turn games. Each player must take the must cell. Another player cannot take a cell that belongs to another player.
 To play, you use the arrows keys.
 
@@ -41,9 +43,11 @@ python -m pip install -r requirements.txt
 4. start game by launching the file main.py
 ```bash
 python main.py
-
 ```
-5. start a train for the ai's Cubee
+
+## how to start Ai's trainning 
+
+### start a train for the ai's Cubee
 ```bash
 python -m games.cubee.train
 ```
