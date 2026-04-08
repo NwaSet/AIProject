@@ -138,6 +138,11 @@ class GameModel:
         """
 
         return all(0 not in row for row in self.grid)
+    
+    def is_tie(self) -> bool:
+        return self.is_game_over() and (
+            self.score[str(self.player1)] == self.score[str(self.player2)]
+        )
 
     def legal_move(self) -> list[tuple]:
         """
@@ -302,10 +307,14 @@ class GameModel:
             self.switch_player()
             i += 1
 
-        if self.is_game_over() :
-            self.winner.win()
-            self.loser.lose()
-        else :
+        if self.is_game_over():
+            if self.is_tie():
+                self.player1.tie()
+                self.player2.tie()
+            else:
+                self.winner.win()
+                self.loser.lose()
+        else:
             self.player1.tie()
             self.player2.tie()
 
