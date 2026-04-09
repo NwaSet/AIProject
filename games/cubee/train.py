@@ -7,10 +7,10 @@ import traceback
 from .model.ai import Ia
 from .model.cubee_model import GameModel
 
-train_games = 100
-test_games = 10
-epsilon_step = 250
-grid_size = 3
+train_games = 100_000
+test_games = 1_000
+epsilon_step = 5000
+grid_size = 5
 
 params = [
     (0.05, 0.80),
@@ -47,11 +47,11 @@ def train_ai():
 
     print("avant pool.map")
     with Pool(processes=nb_processes) as pool:
-        pool.map(_train_worker, args)
+        pool.map(train_worker, args)
     print("après pool.map")
 
 
-def _train_worker(args):
+def train_worker(args):
     core_id, nb_game, lr, gamma, step = args
 
     try:
@@ -79,9 +79,13 @@ def train(nb_game, learning_rate, gamma, nb_espilone):
         if i % nb_espilone == 0 and i != 0:
             bot1.next_epsilon()
             bot2.next_epsilon()
+            print(i)
 
         game.play()
         game.reset()
+
+    bot1.force_commit()
+    bot2.force_commit()
 
 
 def test_ai():
