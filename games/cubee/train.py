@@ -47,11 +47,11 @@ def train_ai():
 
     print("avant pool.map")
     with Pool(processes=nb_processes) as pool:
-        pool.map(_train_worker, args)
+        pool.map(train_worker, args)
     print("après pool.map")
 
 
-def _train_worker(args):
+def train_worker(args):
     core_id, nb_game, lr, gamma, step = args
 
     try:

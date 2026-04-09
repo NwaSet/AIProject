@@ -275,7 +275,7 @@ class Ia(Player):
 
         return self.string_to_move(action)
 
-    def _end_episode(self) -> None:
+    def end_episode(self) -> None:
         """
         Reset episode memory and flush every X games.
         """
@@ -294,7 +294,7 @@ class Ia(Player):
         """
         self.learn(self.win_reward, None)
         super().win()
-        self._end_episode()
+        self.end_episode()
 
     def lose(self) -> None:
         """
@@ -302,7 +302,7 @@ class Ia(Player):
         """
         self.learn(self.lose_reward, None)
         super().lose()
-        self._end_episode()
+        self.end_episode()
 
     def tie(self) -> None:
         """
@@ -311,7 +311,7 @@ class Ia(Player):
         """
         self.learn(0.0, None)
         super().tie()
-        self._end_episode()
+        self.end_episode()
 
     def force_commit(self) -> None:
         """

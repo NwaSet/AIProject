@@ -25,8 +25,8 @@ class Dao:
         self.db_name = None
         self.data_table = None
 
-        self.pending_inserts = {}
-        self.pending_updates = {}
+        self.pending_inserts = {} # insert en attente
+        self.pending_updates = {} # update en attente -> pas trouvé mieux ? 
 
         if db_name:
             self.connect_player_db(db_name)
@@ -90,7 +90,7 @@ class Dao:
 
         metadata.create_all(self.engine)
 
-    def _state_key(self, dto: dict) -> tuple:
+    def state_key(self, dto: dict) -> tuple:
         """
         Immutable key for one state.
         """
@@ -108,7 +108,7 @@ class Dao:
 
         Checks pending updates/inserts first to avoid unnecessary DB reads.
         """
-        key = self._state_key(dto)
+        key = self.state_key(dto)
 
         if key in self.pending_updates:
             data = self.pending_updates[key]
@@ -160,7 +160,7 @@ class Dao:
         """
         Stage an insert only if the state does not already exist.
         """
-        key = self._state_key(dto_ai)
+        key = self.state_key(dto_ai)
 
         if key in self.pending_inserts or key in self.pending_updates:
             return
@@ -172,7 +172,7 @@ class Dao:
         """
         Stage Q-values update without immediate commit.
         """
-        key = self._state_key(state)
+        key = self.state_key(state)
 
         data = {
             "current_player": state["current_player"],
