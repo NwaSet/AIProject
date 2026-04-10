@@ -1,5 +1,6 @@
 from tkinter import *
 from .player_selection_frame import playerSelection
+from .circuit_selection_frame import circuitSelection
 
 class settings(Frame) :
 
