@@ -21,9 +21,9 @@ class playerSelection(Frame) :
         self.player_color = StringVar(value=POSSIBLE_PLAYER_COLOR[0])
 
         self.label_player_color = Label(self, font="Arial 14", text="Player color :")
-        self.player_color_selection_1 = Radiobutton(self, text = "brown", variable=self.player_color, value=POSSIBLE_PLAYER_COLOR[0])
-        self.player_color_selection_2 = Radiobutton(self, text = "pink", variable=self.player_color, value=POSSIBLE_PLAYER_COLOR[1])
-        self.player_color_selection_3 = Radiobutton(self, text = "blue", variable=self.player_color, value=POSSIBLE_PLAYER_COLOR[2])
+        self.player_color_selection_1 = Radiobutton(self, text = "brown", variable=self.player_color, value=POSSIBLE_PLAYER_COLOR[0], bg="lightblue")
+        self.player_color_selection_2 = Radiobutton(self, text = "pink", variable=self.player_color, value=POSSIBLE_PLAYER_COLOR[1], bg="lightblue")
+        self.player_color_selection_3 = Radiobutton(self, text = "blue", variable=self.player_color, value=POSSIBLE_PLAYER_COLOR[2], bg="lightblue")
 
         self.label_player_number.pack()
 
