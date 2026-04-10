@@ -6,45 +6,53 @@ from .circuit_selection_frame import circuitSelection
 class settings(Frame):
 
     def __init__(self, parent, controler):
-        super().__init__(parent)
+        super().__init__(parent, bg="#ecf0f1")
 
         self.controler = controler
 
         # -------------------------
         # FRAME POUR LES JOUEURS
         # -------------------------
-        self.players_frame = Frame(self)
-        self.players_frame.pack(pady=20)
+        self.players_box = Frame(self, bg="#d6ecff", bd=2, relief="groove")
+        self.players_box.pack(padx=10, pady=5)
 
-        self.player_selection_1 = Frame(self.players_frame)
-        self.player_selection_2 = Frame(self.players_frame)
+        self.players_frame = Frame(self.players_box, bg="#d6ecff")
+        self.players_frame.pack(padx=2, pady=2)
+
+        self.player_selection_1 = Frame(self.players_frame, bg="#d6ecff")
+        self.player_selection_2 = Frame(self.players_frame, bg="#d6ecff")
 
         self.settings_player_1 = playerSelection(self.player_selection_1, 1)
-        self. settings_player_2 = playerSelection(self.player_selection_2, 2)
+        self.settings_player_2 = playerSelection(self.player_selection_2, 2)
 
-        self.settings_player_1.pack(padx=25)
-        self.settings_player_2.pack(padx=25)
+        self.settings_player_1.pack(padx=8, pady=2)
+        self.settings_player_2.pack(padx=8, pady=2)
 
-        self.player_selection_1.pack(side="left")
-        self.player_selection_2.pack(side="left")
+        self.player_selection_1.pack(side="left", padx=2, pady=2)
+        self.player_selection_2.pack(side="left", padx=2, pady=2)
 
         # -------------------------
         # FRAME CIRCUIT (EN DESSOUS)
         # -------------------------
-        self.circuit_frame = Frame(self)
-        self.circuit_frame.pack(pady=5)
+        self.circuit_box = Frame(self, bg="#d4f5d0", bd=2, relief="groove")
+        self.circuit_box.pack(padx=10, pady=2)
+
+        self.circuit_frame = Frame(self.circuit_box, bg="#d4f5d0")
+        self.circuit_frame.pack(padx=2, pady=2)
 
         self.settings_circuit = circuitSelection(self.circuit_frame, self.controler)
-        self.settings_circuit.pack()
-        
-        self.start_button = Button (
+        self.settings_circuit.pack(padx=2, pady=2)
+
+        self.start_button = Button(
             self,
-            text= "Start gamme",
+            text="Start game",
             width=25,
+            height=10,
+            background="lightgray",
             command=self.start_game
         )
         self.start_button.pack(side="bottom", pady=25)
-    
+
     def start_game(self):
         player1_dto = self.settings_player_1.get_dto()
         player2_dto = self.settings_player_2.get_dto()

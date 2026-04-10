@@ -6,9 +6,10 @@ from ..circuit_editor_view import CircuitEditor
 class circuitSelection(Frame):
 
     def __init__(self, parent, controler=None):
-        super().__init__(parent)
+        super().__init__(parent, bg="#d4f5d0", bd=1, relief="solid")
 
         self.controler = controler
+        bg = "#d4f5d0"
 
         # récupération des circuits depuis le dao
         self.all_circuits = dao.get_all()
@@ -19,13 +20,13 @@ class circuitSelection(Frame):
             self.circuit_names = ["Aucun circuit"]
 
         # titre
-        self.label = Label(self, text="Circuit Selection", font=("Arial", 20))
+        self.label = Label(self, text="Circuit Selection", font=("Arial", 20), bg=bg)
         self.label.pack()
 
         # -------------------------
         # choix du circuit
         # -------------------------
-        self.circuit_label = Label(self, text="Choose a circuit:")
+        self.circuit_label = Label(self, text="Choose a circuit:", bg=bg)
         self.circuit_label.pack()
 
         self.selected_circuit = StringVar()
@@ -41,7 +42,7 @@ class circuitSelection(Frame):
         # -------------------------
         # nombre de tours
         # -------------------------
-        self.lap_label = Label(self, text="Number of laps:")
+        self.lap_label = Label(self, text="Number of laps:", bg=bg)
         self.lap_label.pack()
 
         self.nb_laps = IntVar(value=1)
@@ -64,7 +65,7 @@ class circuitSelection(Frame):
             width=50,
             command=self.open_circuit_editor
         )
-        self.circuit_editor_button.pack(pady=(5, 10))
+        self.circuit_editor_button.pack(pady=(10, 10))
 
     def open_circuit_editor(self):
         """
