@@ -41,6 +41,9 @@ class View(Tk):
         else:
             self.show_game()
             self.next_frame = 1
+    
+    def refresh(self) :
+        self.current_frame.refresh()
 
 
 if __name__ == "__main__":
