@@ -1,5 +1,6 @@
 from games.mikado.mikado_game import *
 from games.cubee.cubee_game import *
+from games.pixelkart.pixelkart_game import *
 
 
 class GameSelectionController:

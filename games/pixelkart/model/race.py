@@ -51,7 +51,7 @@ class Race:
     def update_lap(self, player):
         if player.direction == "East":    
             x, y = player.coord
-            current_cell = self.circuit[y][x]
+            current_cell = self.circuit.grid[y][x]
 
             if player.last_cell is None:
                 player.last_cell = current_cell
@@ -67,15 +67,15 @@ class Race:
         x, y = player.coord
 
         speed = player.speed
-        speed_factor = speed if self.circuit[y][x] != "G" else speed / 2
+        speed_factor = speed if self.circuit.grid[y][x] != "G" else speed / 2
 
         new_x = int(x + dx * speed_factor)
         new_y = int(y + dy * speed_factor)
 
-        if not (0 <= new_y < len(self.circuit) and 0 <= new_x < len(self.circuit[0])):
+        if not (0 <= new_y < len(self.circuit.grid) and 0 <= new_x < len(self.circuit.grid[0])):
             return
 
-        if self.circuit[new_y][new_x] == "W":
+        if self.circuit.grid[new_y][new_x] == "W":
             return
 
         player.coord = (new_x, new_y)
@@ -100,9 +100,9 @@ class Race:
 
     def search_starter(self):
         starters = []
-        for y in range(len(self.circuit)):
-            for x in range(len(self.circuit[y])):
-                if self.circuit[y][x] == "W":
+        for y in range(len(self.circuit.grid)):
+            for x in range(len(self.circuit.grid[y])):
+                if self.circuit.grid[y][x] == "W":
                     starters.append((x, y))
         return starters
 

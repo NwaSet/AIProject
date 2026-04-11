@@ -1,8 +1,8 @@
 from .view.game_view import View
 
-from .model.race import raceModel <----------------------------------------- # bon nom de model et bon import.
-from .model.human_kart import humanKart <----------------------------------- # meme
-from .model.random_kart import randomKart <--------------------------------- # meme
+from .model.race import Race 
+from .model.human import Human
+from .model.kart import Kart
 
 # 1 point modifier : 
 self.game.switch_player()
