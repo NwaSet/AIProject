@@ -4,13 +4,6 @@ from .model.race import Race
 from .model.human import Human
 from .model.kart import Kart
 
-# 1 point modifier : 
-self.game.switch_player()
-self.game.step(move)
-self.game.to_dto()
-self.view.refresh
-
-
 class pixelkart_controler:
 
     def __init__(self) : 
@@ -41,17 +34,17 @@ class pixelkart_controler:
         pass
 
     def handle_human_move(self, move : str) -> None : 
-        if isinstance(self.game.current_player, randomKart) :
+        if isinstance(self.game.current_player, Kart) :
             self.game.step(move)
             self.view.refresh()
-        if isinstance(self.game.current_player, randomKart) :
+        if isinstance(self.game.current_player, Kart) :
             self.handle_ai_move()
 
     def handle_ai_move(self) -> None :
-        if isinstance(self.game.current_player, randomKart) :
+        if isinstance(self.game.current_player, Kart) :
             move = self.game.current_player.play()
             self.game.step(move)
-        if isinstance(self.game.current_player, randomKart) :
+        if isinstance(self.game.current_player, Kart) :
             self.handle_ai_move()
 
     def accelerate(self) -> None :
