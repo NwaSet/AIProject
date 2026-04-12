@@ -21,7 +21,7 @@ class Kart:
         self.lap = 0
 
         self.coord = None
-        self.color = "gray"
+        self.color = "Red"
         self.speed = 0
         self.direction = "East"
     
