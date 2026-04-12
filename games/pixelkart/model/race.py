@@ -106,9 +106,9 @@ class Race:
 
     def search_starter(self):
         starters = []
-        for y in range(len(self.circuit.grid)):
-            for x in range(len(self.circuit.grid[y])):
-                if self.circuit.grid[y][x] == "F":
+        for x in range(len(self.circuit.grid)):
+            for y in range(len(self.circuit.grid[x])):
+                if self.circuit.grid[x][y] == "F":
                     starters.append((x, y))
         return starters
 
