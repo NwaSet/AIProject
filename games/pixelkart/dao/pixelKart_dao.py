@@ -32,13 +32,16 @@ def delete_circuit(name):
     """Delete a circuit by its name."""
     if not name:
         raise ValueError("Circuit name cannot be empty.")
+
     circuits = get_all()
     if name not in circuits:
         raise ValueError(f"The circuit '{name}' does not exist.")
+
     del circuits[name]
+    
     with open(FILE_PATH, "w", encoding="utf-8") as file:
-        for circuit_name in circuits:
-            file.write(circuit_name + "\n")
+        for n, c in circuits.items():
+            file.write(f"{n}:{c}\n")
 
 def update_circuit(name, string):
     """Update the name of an existing circuit."""
@@ -48,5 +51,5 @@ def update_circuit(name, string):
     
     circuits[name] = string
     with open(FILE_PATH, "w", encoding="utf-8") as file:
-        for circuit_name in circuits:
-            file.write(circuit_name + "\n")
+        for n, c in circuits.items():
+            file.write(f"{n}:{c}\n")
