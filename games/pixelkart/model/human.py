@@ -1,4 +1,4 @@
-from .kart import Kart
+from games.pixelkart.model.kart import Kart
 
 class Human(Kart):
     def __init__(

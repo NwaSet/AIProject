@@ -1,4 +1,5 @@
-from pixelkart.const import *
+from games.pixelkart.const import *
+import random
 
 class Race:
    

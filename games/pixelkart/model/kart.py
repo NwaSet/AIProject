@@ -1,6 +1,6 @@
-from pixelkart.const import *
+from games.pixelkart.const import *
 import random
-from .race import Race
+from games.pixelkart.model.race import Race
 
 class Kart:
 

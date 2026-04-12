@@ -1,5 +1,3 @@
-import pixelkart.dao.circuit as circuits
-
 class Circuit:
     def __init__(
         self, 
@@ -11,7 +9,7 @@ class Circuit:
         self.grid = grid
 
     def load_circuit(self, target_circuit):
-        with open(circuits.FILE_PATH,"r") as f:
+        with open("games/pixelkart/dao/circuits.txt","r") as f:
             for line in f:
                 line = line.strip()
                 if not line:

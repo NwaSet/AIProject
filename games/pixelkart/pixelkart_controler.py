@@ -1,14 +1,15 @@
-from .view.game_view import View
+from games.pixelkart.view.game_view import View
 
-from .model.race import Race 
-from .model.human import Human
-from .model.kart import Kart
+from games.pixelkart.model.race import Race 
+from games.pixelkart.model.human import Human
+from games.pixelkart.model.kart import Kart
 
 class pixelkart_controler:
 
     def __init__(self) : 
 
         self.view = View(self)
+        self.view.mainloop()
 
         # créer une game quand le view recoit le start game.
         self.game = None
@@ -70,3 +71,6 @@ class pixelkart_controler:
         return the dto of the game.
         """
         return self.game.to_dto()
+
+def start_pixelkart_game() :
+    controler = pixelkart_controler()
