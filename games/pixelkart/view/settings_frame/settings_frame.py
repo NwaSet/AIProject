@@ -68,5 +68,5 @@ class settings(Frame):
 
         if self.controler:
             self.controler.start_game(game_dto)
-
         self.master.toggle()
+        

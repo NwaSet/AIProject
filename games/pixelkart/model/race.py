@@ -1,4 +1,5 @@
 from games.pixelkart.const import *
+from games.pixelkart.model.circuit import *
 import random
 
 class Race:
@@ -17,6 +18,9 @@ class Race:
 
         self.player1 = Player1
         self.player2 = Player2
+
+        self.player1.game = self
+        self.player2.game = self
 
         self.current_player = self.shuffle()
 
@@ -130,6 +134,45 @@ class Race:
             self.player1.lap >= self.nb_max_lap or
             self.player2.lap >= self.nb_max_lap
         )
+    
+    def step(self, move) :
+        action = SETTINGS_TO_ACTION[move]
+
+        # if we pass
+        if action == "pass_turn" :
+            pass
+        
+        # if we change speed :
+        elif type(action) == int:
+                self.change_speed(action)
+        
+        # if we change direction 
+        elif type(action) == str:
+                    match self.current_player.direction :
+                        case "North" :
+                            move_action = NORTH_TO_MOVE[action]
+                        case "South" :
+                            move_action = SOUTH_TO_MOVE[action]
+                        case "East" :
+                            move_action = EAST_TO_MOVE[action]
+                        case "West" :
+                            move_action = WEST_TO_MOVE[action]
+                    self.change_direction(move_action)
+        
+        self.change_pos(self.current_player)
+        self.switch_player()
+        self.nb_round += 1
+        self.update_lap(self.current_player)
+        
+        if self.is_game_over() :
+            if self.winner is None:
+                self.player1.tie()
+                self.player2.tie()
+            else:
+                self.winner.win()
+                self.loser.lose()
+        else :
+            self.switch_player()
 
     def play(self):
         while not self.is_game_over():
@@ -173,4 +216,34 @@ class Race:
         return {
             "player_coord":[self.player1.coord, self.player2.coord],
             "nb_lap": self.nb_lap_game
+        }
+    
+    def to_dto(self) :
+        """
+        return the dto of the game
+
+        {
+            "grid": "GGGG,GRRG,GGGG",
+            "player1_pos": (row, col),
+            "player2_pos": (row, col),
+            "player1_name": "...",
+            "player2_name": "...",
+            "player1_speed": 0,
+            "player2_speed": 0,
+            "player1_laps": 0,
+            "player2_laps": 0,
+            "current_player": 1
+        }
+        """
+        return {
+            "grid": self.circuit.grid_str,
+            "player1_pos": self.player1.coord,
+            "player2_pos": self.player2.coord,
+            "player1_name": self.player1.name,
+            "player2_name": self.player2.name,
+            "player1_speed": self.player1.speed,
+            "player2_speed": self.player2.speed,
+            "player1_laps": self.player1.lap,
+            "player2_laps": self.player2.lap,
+            "current_player": self.current_player.id
         }

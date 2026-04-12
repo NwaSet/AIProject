@@ -3,8 +3,9 @@ from games.pixelkart.view.game_view import View
 from games.pixelkart.model.race import Race 
 from games.pixelkart.model.human import Human
 from games.pixelkart.model.kart import Kart
+from games.pixelkart.model.circuit import Circuit
 
-class pixelkart_controler:
+class pixelkartControler:
 
     def __init__(self) : 
 
@@ -45,18 +46,38 @@ class pixelkart_controler:
         nb_laps = view_dto["nb_laps"]
         circuit_name = view_dto["circuit_name"]
 
-    def handle_human_move(self, move : str) -> None : 
-        if isinstance(self.game.current_player, Kart) :
-            self.game.step(move)
-            self.view.refresh()
+        # create player 1
+        if player_1_info["player_type"] == "ai" :
+            player1 = Kart(player_1_info["player_number"], player_1_info["player_name"])
+        elif player_1_info["player_type"] == "human" :
+            player1 = Human(player_1_info["player_number"], player_1_info["player_name"], player_1_info["player_color"])
+
+        # create player 2
+        if player_2_info["player_type"] == "ai" :
+            player2 = Kart(player_2_info["player_number"], player_2_info["player_name"])
+        elif player_2_info["player_type"] == "human" :
+            player2 = Human(player_2_info["player_number"], player_2_info["player_name"], player_2_info["player_color"])
+        
+        # create the circuit
+        circuit = Circuit(circuit_name)
+
+        self.game = Race(circuit, nb_laps, True, self, player1, player2)
+
         if isinstance(self.game.current_player, Kart) :
             self.handle_ai_move()
 
+    def handle_human_move(self, move : str) -> None : 
+        if isinstance(self.game.current_player, Human) :
+            self.game.step(move)
+            self.view.refresh()
+        if not isinstance(self.game.current_player, Human) :
+            self.handle_ai_move()
+
     def handle_ai_move(self) -> None :
-        if isinstance(self.game.current_player, Kart) :
+        if not isinstance(self.game.current_player, Human) :
             move = self.game.current_player.play()
             self.game.step(move)
-        if isinstance(self.game.current_player, Kart) :
+        if not isinstance(self.game.current_player, Human) :
             self.handle_ai_move()
 
     def accelerate(self) -> None :
@@ -84,4 +105,4 @@ class pixelkart_controler:
         return self.game.to_dto()
 
 def start_pixelkart_game() :
-    controler = pixelkart_controler()
+    controler = pixelkartControler()

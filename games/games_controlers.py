@@ -29,5 +29,6 @@ class GameSelectionController:
 
         elif game_name == "pixelKart":
             print("Lancement pixelKart")
+            self.view.destroy()
             start_pixelkart_game()
 

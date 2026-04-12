@@ -19,6 +19,8 @@ class Kart:
         self.nb_lose = 0
         self.nb_tie = 0
 
+        self.lap = 0
+
         self.coord = None
         self.color = "gray"
         self.speed = 0

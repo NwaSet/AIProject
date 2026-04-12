@@ -1,12 +1,16 @@
 class Circuit:
     def __init__(
         self, 
-        name: str = None,
+        name: str,
         grid: list = None 
         ):
 
         self.name = name
         self.grid = grid
+
+        self.grid_str = ""
+
+        self.load_circuit(self.name)
 
     def load_circuit(self, target_circuit):
         with open("games/pixelkart/dao/circuits.txt","r") as f:
@@ -15,11 +19,11 @@ class Circuit:
                 if not line:
                     continue
 
-                name, grid_str = line.split(":")
+                name, self.grid_str = line.split(":")
 
                 if name == target_circuit:
                     self.name = name
-                    self.grid = [list(row) for row in grid_str.split(",")]
+                    self.grid = [list(row) for row in self.grid_str.split(",")]
     
     @property
     def width(self):
