@@ -96,8 +96,8 @@ class RaceView(Frame):
         self.circuit_frame.dto_to_grid(dto["grid"])
 
         karts = {
-            dto["player1_pos"]: "blue",
-            dto["player2_pos"]: "red"
+            dto["player1_pos"]: dto["player1_color"],
+            dto["player2_pos"]: dto["player2_color"]
         }
         self.circuit_frame.update_view(karts)
 

@@ -1,14 +1,22 @@
-import os
+from pathlib import Path
 
-FILE_PATH = "games/pixelkart/dao/circuits.txt"
+FILE_PATH = Path(__file__).with_name("circuits.txt")
+
+
+def _parse_circuit_line(line):
+    line = line.strip()
+    if not line or ":" not in line:
+        return None, None
+    return line.split(":", 1)
+
 
 def get_all():
     """Retrieve all circuits from the file as a dictionary {name: str}."""
     circuits = {}
-    if os.path.exists(FILE_PATH):
-        with open(FILE_PATH, "r", encoding="utf-8") as file:
+    if FILE_PATH.exists():
+        with FILE_PATH.open("r", encoding="utf-8") as file:
             for line in file:
-                name,circuit = line.split(":")
+                name, circuit = _parse_circuit_line(line)
                 if name:
                     circuits[name] = circuit
     return circuits
@@ -25,8 +33,10 @@ def save_circuit(name, string):
     circuits = get_all()
     if name in circuits:
         raise ValueError(f"The circuit '{name}' already exists.")
-    with open(FILE_PATH, "a", encoding="utf-8") as file:
-        file.write(f"\n{name}:{string}")
+    existing_content = FILE_PATH.read_text(encoding="utf-8") if FILE_PATH.exists() else ""
+    prefix = "\n" if existing_content and not existing_content.endswith("\n") else ""
+    with FILE_PATH.open("a", encoding="utf-8") as file:
+        file.write(f"{prefix}{name}:{string}")
 
 def delete_circuit(name):
     """Delete a circuit by its name."""
@@ -39,7 +49,7 @@ def delete_circuit(name):
 
     del circuits[name]
     
-    with open(FILE_PATH, "w", encoding="utf-8") as file:
+    with FILE_PATH.open("w", encoding="utf-8") as file:
         for n, c in circuits.items():
             file.write(f"{n}:{c}\n")
 
@@ -50,6 +60,6 @@ def update_circuit(name, string):
         raise ValueError(f"The circuit '{name}' does not exist.")
     
     circuits[name] = string
-    with open(FILE_PATH, "w", encoding="utf-8") as file:
+    with FILE_PATH.open("w", encoding="utf-8") as file:
         for n, c in circuits.items():
             file.write(f"{n}:{c}\n")

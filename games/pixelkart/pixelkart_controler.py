@@ -65,21 +65,31 @@ class pixelkartControler:
         self.game = Race(circuit, nb_laps, True, self, player1, player2)
 
         if isinstance(self.game.current_player, Kart) :
-            self.handle_ai_move()
+            self.view.after(0, self.handle_ai_move)
 
     def handle_human_move(self, move : str) -> None : 
+        if self.game is None or self.game.is_game_over():
+            return
+
         if isinstance(self.game.current_player, Human) :
             self.game.step(move)
-            self.view.refresh()
-        if not isinstance(self.game.current_player, Human) :
+
+        if not self.game.is_game_over() and not isinstance(self.game.current_player, Human) :
             self.handle_ai_move()
+        elif hasattr(self.view.current_frame, "refresh"):
+            self.view.refresh()
 
     def handle_ai_move(self) -> None :
-        if not isinstance(self.game.current_player, Human) :
+        while (
+            self.game is not None and
+            not self.game.is_game_over() and
+            not isinstance(self.game.current_player, Human)
+        ):
             move = self.game.current_player.play()
             self.game.step(move)
-        if not isinstance(self.game.current_player, Human) :
-            self.handle_ai_move()
+
+        if self.game is not None and hasattr(self.view.current_frame, "refresh"):
+            self.view.refresh()
 
     def accelerate(self) -> None :
         self.handle_human_move("accelerate")

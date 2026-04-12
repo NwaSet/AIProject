@@ -1,3 +1,6 @@
+import games.pixelkart.dao.pixelKart_dao as dao
+
+
 class Circuit:
     def __init__(
         self, 
@@ -10,20 +13,19 @@ class Circuit:
 
         self.grid_str = ""
 
-        self.load_circuit(self.name)
+        if self.grid is not None:
+            self.grid_str = ",".join("".join(row) for row in self.grid)
+        else:
+            self.load_circuit(self.name)
 
     def load_circuit(self, target_circuit):
-        with open("games/pixelkart/dao/circuits.txt","r") as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
+        circuit_str = dao.get_by_name(target_circuit)
+        if circuit_str is None:
+            raise ValueError(f"Unknown circuit: {target_circuit}")
 
-                name, self.grid_str = line.split(":")
-
-                if name == target_circuit:
-                    self.name = name
-                    self.grid = [list(row) for row in self.grid_str.split(",")]
+        self.name = target_circuit
+        self.grid_str = circuit_str
+        self.grid = [list(row) for row in circuit_str.split(",")]
     
     @property
     def width(self):

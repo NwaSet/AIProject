@@ -56,8 +56,8 @@ class Race:
 
     def update_lap(self, player):
         if player.direction == "East":    
-            x, y = player.coord
-            current_cell = self.circuit.grid[y][x]
+            row, col = player.coord
+            current_cell = self.circuit.grid[row][col]
 
             if player.last_cell is None:
                 player.last_cell = current_cell
@@ -69,22 +69,22 @@ class Race:
             player.last_cell = current_cell
             
     def change_pos(self, player):
-        dx, dy = ACTION_TO_MOVE[player.direction]
-        x, y = player.coord
+        d_row, d_col = ACTION_TO_MOVE[player.direction]
+        row, col = player.coord
 
         speed = player.speed
-        speed_factor = speed if self.circuit.grid[y][x] != "G" else speed / 2
+        speed_factor = speed if self.circuit.grid[row][col] != "G" else speed / 2
 
-        new_x = int(x + dx * speed_factor)
-        new_y = int(y + dy * speed_factor)
+        new_row = int(row + d_row * speed_factor)
+        new_col = int(col + d_col * speed_factor)
 
-        if not (0 <= new_y < len(self.circuit.grid) and 0 <= new_x < len(self.circuit.grid[0])):
+        if not (0 <= new_row < len(self.circuit.grid) and 0 <= new_col < len(self.circuit.grid[0])):
             return
 
-        if self.circuit.grid[new_y][new_x] == "W":
+        if self.circuit.grid[new_row][new_col] == "W":
             return
 
-        player.coord = (new_x, new_y)
+        player.coord = (new_row, new_col)
 
 
     
@@ -106,15 +106,18 @@ class Race:
 
     def search_starter(self):
         starters = []
-        for x in range(len(self.circuit.grid)):
-            for y in range(len(self.circuit.grid[x])):
-                if self.circuit.grid[x][y] == "F":
-                    starters.append((x, y))
+        for row in range(len(self.circuit.grid)):
+            for col in range(len(self.circuit.grid[row])):
+                if self.circuit.grid[row][col] == "F":
+                    starters.append((row, col))
         return starters
 
 
     def init_pos(self):
-        starter = self.coord_starter
+        if len(self.coord_starter) < 2:
+            raise ValueError("A circuit needs at least two finish cells to place the players.")
+
+        starter = self.coord_starter.copy()
         
         self.player1.coord = random.choice(starter)
         starter.remove(self.player1.coord)
@@ -137,65 +140,52 @@ class Race:
         )
     
     def step(self, move) :
-        action = SETTINGS_TO_ACTION[move]
+        if self.is_game_over():
+            return
 
-        # if we pass
-        if action == "pass_turn" :
+        player = self.current_player
+
+        if move == "pass_turn":
             pass
-        
-        # if we change speed :
-        elif type(action) == int:
-                self.change_speed(action)
-        
-        # if we change direction 
-        elif type(action) == str:
-                    match self.current_player.direction :
-                        case "North" :
-                            move_action = NORTH_TO_MOVE[action]
-                        case "South" :
-                            move_action = SOUTH_TO_MOVE[action]
-                        case "East" :
-                            move_action = EAST_TO_MOVE[action]
-                        case "West" :
-                            move_action = WEST_TO_MOVE[action]
-                    self.change_direction(move_action)
-        
-        self.change_pos(self.current_player)
-        self.switch_player()
+        elif move == "accelerate":
+            self.change_speed(1)
+        elif move == "decelerate":
+            self.change_speed(-1)
+        elif move in {"turn_left", "turn_right"}:
+            match self.current_player.direction:
+                case "North":
+                    move_action = NORTH_TO_MOVE[move]
+                case "South":
+                    move_action = SOUTH_TO_MOVE[move]
+                case "East":
+                    move_action = EAST_TO_MOVE[move]
+                case "West":
+                    move_action = WEST_TO_MOVE[move]
+            self.change_direction(move_action)
+        elif move in ACTION_TO_MOVE:
+            self.change_direction(move)
+        elif isinstance(move, int):
+            self.change_speed(move)
+        else:
+            raise ValueError(f"Unknown move: {move}")
+
+        self.change_pos(player)
         self.nb_round += 1
-        self.update_lap(self.current_player)
+        self.update_lap(player)
         
-        if self.is_game_over() :
+        if self.is_game_over():
             if self.winner is None:
                 self.player1.tie()
                 self.player2.tie()
             else:
                 self.winner.win()
                 self.loser.lose()
-        else :
+        else:
             self.switch_player()
 
     def play(self):
         while not self.is_game_over():
-            player = self.current_player
-            move = player.play()
-            
-            if type(move) == str:
-                    self.change_direction(move)
-            elif type(move) == int:
-                self.change_speed(move)
-            
-            self.change_pos(player)
-            self.switch_player()
-            self.nb_round += 1
-            self.update_lap(player)
-
-        if self.winner is None:
-            self.player1.tie()
-            self.player2.tie()
-        else:
-            self.winner.win()
-            self.loser.lose()
+            self.step(self.current_player.play())
 
     @property
     def winner(self):
@@ -216,7 +206,7 @@ class Race:
     def race_dto(self):
         return {
             "player_coord":[self.player1.coord, self.player2.coord],
-            "nb_lap": self.nb_lap_game
+            "nb_lap": self.nb_max_lap
         }
     
     def to_dto(self) :
@@ -242,6 +232,8 @@ class Race:
             "player2_pos": self.player2.coord,
             "player1_name": self.player1.name,
             "player2_name": self.player2.name,
+            "player1_color": self.player1.color,
+            "player2_color": self.player2.color,
             "player1_speed": self.player1.speed,
             "player2_speed": self.player2.speed,
             "player1_laps": self.player1.lap,

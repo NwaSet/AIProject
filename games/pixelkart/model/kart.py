@@ -1,6 +1,5 @@
 from games.pixelkart.const import *
 import random
-from games.pixelkart.model.race import Race
 
 class Kart:
 
@@ -30,13 +29,12 @@ class Kart:
         """
         chose a random choice between all legal move given by the model.
         """
-        actions = []
+        actions = ["pass_turn", "turn_left", "turn_right"]
 
-        actions.extend([-1,0,1])
-
-        for direction in ACTION_TO_MOVE.keys():
-            if self.game.is_legal_move(self.direction, direction):
-                actions.append(direction)
+        if self.speed < 2:
+            actions.append("accelerate")
+        if self.speed > -1:
+            actions.append("decelerate")
         
         return random.choice(actions)
 

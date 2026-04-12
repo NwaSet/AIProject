@@ -87,7 +87,7 @@ class CircuitFrame(ttk.Frame):
         """
         Args : dto (str) look like "rgc,rgc,rgc" 
         """
-        import_data = dto.split(",")
+        import_data = dto.strip().split(",") if dto else []
         if not import_data:
             return
         
