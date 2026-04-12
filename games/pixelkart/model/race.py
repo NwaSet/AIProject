@@ -29,6 +29,7 @@ class Race:
         self.nb_max_lap = nb_max_lap
 
         self.coord_starter = self.search_starter()
+        self.init_pos()
     
 
     def is_legal_move(self,current_action, next_action):
@@ -107,7 +108,7 @@ class Race:
         starters = []
         for y in range(len(self.circuit.grid)):
             for x in range(len(self.circuit.grid[y])):
-                if self.circuit.grid[y][x] == "W":
+                if self.circuit.grid[y][x] == "F":
                     starters.append((x, y))
         return starters
 
