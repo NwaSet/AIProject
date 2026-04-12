@@ -1,6 +1,6 @@
 import os
 
-FILE_PATH = "games\pixelkart\dao\circuits.txt"
+FILE_PATH = "games/pixelkart/dao/circuits.txt"
 
 def get_all():
     """Retrieve all circuits from the file as a dictionary {name: str}."""

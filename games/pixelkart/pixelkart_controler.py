@@ -9,12 +9,13 @@ class pixelkartControler:
 
     def __init__(self) : 
 
+        # créer une game quand le view recoit le start game.
+        self.game = None
         self.view = View(self)
         self.view.mainloop()
 
-        # créer une game quand le view recoit le start game.
-        self.game = None
-    
+        
+ 
     def start_game(self, view_dto : dict) -> None :
         """
         init a race and update the view.
@@ -42,7 +43,7 @@ class pixelkartControler:
         -> player 2
         """
         player_1_info = view_dto["player1"]
-        player_2_info = view_dto["player1"]
+        player_2_info = view_dto["player2"]
         nb_laps = view_dto["nb_laps"]
         circuit_name = view_dto["circuit_name"]
 
