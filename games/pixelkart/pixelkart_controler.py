@@ -14,7 +14,7 @@ class pixelkart_controler:
         # créer une game quand le view recoit le start game.
         self.game = None
     
-    def start_game(view_dto : dict) -> None :
+    def start_game(self, view_dto : dict) -> None :
         """
         init a race and update the view.
 
@@ -31,8 +31,19 @@ class pixelkart_controler:
             "player_type": str
             "player_color": color
         }
+
+        à faire : 
+        -> circuit : object
+        -> nb_tour
+        -> True
+        -> self
+        -> player 1
+        -> player 2
         """
-        pass
+        player_1_info = view_dto["player1"]
+        player_2_info = view_dto["player1"]
+        nb_laps = view_dto["nb_laps"]
+        circuit_name = view_dto["circuit_name"]
 
     def handle_human_move(self, move : str) -> None : 
         if isinstance(self.game.current_player, Kart) :
