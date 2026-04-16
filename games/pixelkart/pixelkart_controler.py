@@ -62,7 +62,7 @@ class pixelkartControler:
         # create the circuit
         circuit = Circuit(circuit_name)
 
-        self.game = Race(circuit, nb_laps, True, self, player1, player2)
+        self.game = Race(circuit, nb_laps, True, player1, player2)
 
         if isinstance(self.game.current_player, Kart) :
             self.view.after(0, self.handle_ai_move)
