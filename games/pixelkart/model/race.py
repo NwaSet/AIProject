@@ -1,5 +1,6 @@
 from games.pixelkart.const import *
 from games.pixelkart.model.circuit import *
+from games.pixelkart.model.human import Human
 import random
 
 class Race:
@@ -12,6 +13,8 @@ class Race:
         Player1: object = None,
         Player2: object = None
     ):   
+        self.display = display
+
         self.circuit = circuit  
 
         self.player1 = Player1
@@ -28,6 +31,9 @@ class Race:
 
         self.coord_starter = self.search_starter()
         self.init_pos()
+
+        if self.display and not isinstance(self.current_player, Human) :
+            self.step(self.current_player.play())
     
 
     def is_legal_move(self,current_action, next_action):
@@ -180,6 +186,9 @@ class Race:
                 self.loser.lose()
         else:
             self.switch_player()
+
+            if self.display and not isinstance(self.current_player, Human) :
+                self.step(self.current_player.play())
 
     def play(self):
         while not self.is_game_over():

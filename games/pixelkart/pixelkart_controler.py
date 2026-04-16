@@ -7,13 +7,15 @@ from games.pixelkart.model.circuit import Circuit
 
 class pixelkartControler:
 
+
     def __init__(self) : 
 
-        # créer une game quand le view recoit le start game.
+        # will be created when view start the game. 
         self.game = None
+
+        # init the view and start the mainloop.
         self.view = View(self)
         self.view.mainloop()
-
         
  
     def start_game(self, view_dto : dict) -> None :
@@ -33,14 +35,6 @@ class pixelkartControler:
             "player_type": str
             "player_color": color
         }
-
-        à faire : 
-        -> circuit : object
-        -> nb_tour
-        -> True
-        -> self
-        -> player 1
-        -> player 2
         """
         player_1_info = view_dto["player1"]
         player_2_info = view_dto["player2"]
@@ -62,33 +56,12 @@ class pixelkartControler:
         # create the circuit
         circuit = Circuit(circuit_name)
 
+        # create the game and refresh view
         self.game = Race(circuit, nb_laps, True, player1, player2)
 
-        if isinstance(self.game.current_player, Kart) :
-            self.view.after(0, self.handle_ai_move)
-
     def handle_human_move(self, move : str) -> None : 
-        if self.game is None or self.game.is_game_over():
-            return
-
         if isinstance(self.game.current_player, Human) :
             self.game.step(move)
-
-        if not self.game.is_game_over() and not isinstance(self.game.current_player, Human) :
-            self.handle_ai_move()
-        elif hasattr(self.view.current_frame, "refresh"):
-            self.view.refresh()
-
-    def handle_ai_move(self) -> None :
-        while (
-            self.game is not None and
-            not self.game.is_game_over() and
-            not isinstance(self.game.current_player, Human)
-        ):
-            move = self.game.current_player.play()
-            self.game.step(move)
-
-        if self.game is not None and hasattr(self.view.current_frame, "refresh"):
             self.view.refresh()
 
     def accelerate(self) -> None :
@@ -106,7 +79,7 @@ class pixelkartControler:
     def pass_turn(self) -> None :
         self.handle_human_move("pass_turn")
 
-    def refresh_view(self) -> None : # possiblement retiré car me semble inutile
+    def refresh_view(self) -> None :
         self.view.refresh()
 
     def get_game_dto(self) -> None :
