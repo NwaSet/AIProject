@@ -4,6 +4,9 @@ from games.pixelkart.model.human import Human
 import random
 
 class Race:
+    """
+    Represent one PixelKart race and its rules.
+    """
    
     def __init__(
         self,
@@ -12,7 +15,10 @@ class Race:
         display: bool = True,
         Player1: object = None,
         Player2: object = None
-    ):   
+    ) -> None:   
+        """
+        Initialize the race with a circuit and two players.
+        """
         self.display = display
 
         self.circuit = circuit  
@@ -36,7 +42,10 @@ class Race:
             self.step(self.current_player.play())
     
 
-    def is_legal_move(self,current_action, next_action):
+    def is_legal_move(self, current_action: str, next_action: str) -> bool:
+        """
+        Return True if the next direction does not reverse the current one.
+        """
     
         current_vec = ACTION_TO_MOVE[current_action]
         next_vec = ACTION_TO_MOVE[next_action]
@@ -45,11 +54,17 @@ class Race:
 
         return dot != -1
     
-    def change_direction(self, direction):
+    def change_direction(self, direction: str) -> None:
+        """
+        Change the direction of the current player if the move is legal.
+        """
         if self.is_legal_move(self.current_player.direction,direction):
             self.current_player.direction = direction
 
-    def change_speed(self,speed):
+    def change_speed(self, speed: int) -> None:
+        """
+        Change the speed of the current player within the allowed range.
+        """
         player = self.current_player
         if player.speed + speed > 2:
             player.speed = 2
@@ -58,7 +73,10 @@ class Race:
         else:
             player.speed += speed
 
-    def update_lap(self, player):
+    def update_lap(self, player: object) -> None:
+        """
+        Update the lap counter when a player crosses the finish line.
+        """
         if player.direction == "East":    
             row, col = player.coord
             current_cell = self.circuit.grid[row][col]
@@ -72,7 +90,10 @@ class Race:
 
             player.last_cell = current_cell
             
-    def change_pos(self, player):
+    def change_pos(self, player: object) -> None:
+        """
+        Move the player according to the current speed and direction.
+        """
         d_row, d_col = ACTION_TO_MOVE[player.direction]
         row, col = player.coord
 
@@ -108,7 +129,10 @@ class Race:
             self.player1 if self.current_player == self.player2 else self.player2
         )
 
-    def search_starter(self):
+    def search_starter(self) -> list[tuple[int, int]]:
+        """
+        Return all finish cells that can be used as starting positions.
+        """
         starters = []
         for row in range(len(self.circuit.grid)):
             for col in range(len(self.circuit.grid[row])):
@@ -117,7 +141,10 @@ class Race:
         return starters
 
 
-    def init_pos(self):
+    def init_pos(self) -> None:
+        """
+        Set the initial position, direction, and lap count of both players.
+        """
         if len(self.coord_starter) < 2:
             raise ValueError("A circuit needs at least two finish cells to place the players.")
 
@@ -137,13 +164,19 @@ class Race:
         self.player2.last_cell = None
 
 
-    def is_game_over(self):
+    def is_game_over(self) -> bool:
+        """
+        Return True when one player has completed enough laps.
+        """
         return (
             self.player1.lap >= self.nb_max_lap or
             self.player2.lap >= self.nb_max_lap
         )
     
-    def step(self, move) :
+    def step(self, move: str | int) -> None :
+        """
+        Apply one move and update the race state.
+        """
         if self.is_game_over():
             return
 
@@ -190,12 +223,18 @@ class Race:
             if self.display and not isinstance(self.current_player, Human) :
                 self.step(self.current_player.play())
 
-    def play(self):
+    def play(self) -> None:
+        """
+        Play the race automatically until it ends.
+        """
         while not self.is_game_over():
             self.step(self.current_player.play())
 
     @property
-    def winner(self):
+    def winner(self) -> object | None:
+        """
+        Return the winner of the race.
+        """
         if self.player1.lap > self.player2.lap:
             return self.player1
         elif self.player2.lap > self.player1.lap:
@@ -203,20 +242,26 @@ class Race:
         return None
     
     @property
-    def loser(self):
+    def loser(self) -> object | None:
+        """
+        Return the loser of the race.
+        """
         if self.player1.lap < self.player2.lap:
             return self.player1
         elif self.player2.lap < self.player1.lap:
             return self.player2
         return None
             
-    def race_dto(self):
+    def race_dto(self) -> dict:
+        """
+        Return a compact DTO for race positions and lap goal.
+        """
         return {
             "player_coord":[self.player1.coord, self.player2.coord],
             "nb_lap": self.nb_max_lap
         }
     
-    def to_dto(self) :
+    def to_dto(self) -> dict :
         """
         return the dto of the game
 

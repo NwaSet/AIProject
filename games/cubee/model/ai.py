@@ -39,6 +39,9 @@ class Ia(Player):
         lr: float = 0.01,
         gamma: float = 0.7,
     ) -> None:
+        """
+        Initialize the AI player and its Q-learning settings.
+        """
         super().__init__(id, name, game)
 
         self.color = "gray"

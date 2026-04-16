@@ -27,7 +27,7 @@ def training(
         training_game.reset()
 
 
-def compare_ai(*ais):
+def compare_ai(*ais: AI) -> None:
     """
     Print a comparison between the @ais
     """

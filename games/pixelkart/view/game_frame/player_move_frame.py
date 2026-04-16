@@ -2,7 +2,19 @@ from tkinter import *
 
 
 class PlayerMove(Frame):
-    def __init__(self, parent, controler, bg_color="#ecf0f1"):
+    """
+    Display the action buttons for one player.
+    """
+
+    def __init__(
+        self,
+        parent: object,
+        controler: object,
+        bg_color: str = "#ecf0f1",
+    ) -> None:
+        """
+        Initialize the move panel and its buttons.
+        """
         super().__init__(parent, bg=bg_color, bd=1, relief="solid")
 
         self.controler = controler
@@ -56,22 +68,37 @@ class PlayerMove(Frame):
         )
         self.on_pass_button.pack(side="bottom", pady=15)
 
-    def on_accelerate(self):
+    def on_accelerate(self) -> None:
+        """
+        Trigger the accelerate action.
+        """
         if self.controler:
             self.controler.accelerate()
 
-    def on_decelerate(self):
+    def on_decelerate(self) -> None:
+        """
+        Trigger the decelerate action.
+        """
         if self.controler:
             self.controler.decelerate()
 
-    def on_turn_left(self):
+    def on_turn_left(self) -> None:
+        """
+        Trigger the turn-left action.
+        """
         if self.controler:
             self.controler.turn_left()
 
-    def on_turn_right(self):
+    def on_turn_right(self) -> None:
+        """
+        Trigger the turn-right action.
+        """
         if self.controler:
             self.controler.turn_right()
 
-    def on_pass(self):
+    def on_pass(self) -> None:
+        """
+        Trigger the pass action.
+        """
         if self.controler:
             self.controler.pass_turn()

@@ -140,6 +140,9 @@ class GameModel:
         return all(0 not in row for row in self.grid)
     
     def is_tie(self) -> bool:
+        """
+        Return True when both players have the same score at the end of the game.
+        """
         return self.is_game_over() and (
             self.score[str(self.player1)] == self.score[str(self.player2)]
         )

@@ -176,7 +176,7 @@ class GameModel :
             return self.player1 if self.current_player == self.player2 else self.player2
         
 
-    def play (self) :
+    def play (self) -> None :
         """
         used to train the ai play a complete game
         """

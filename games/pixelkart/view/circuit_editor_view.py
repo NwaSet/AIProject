@@ -25,7 +25,7 @@ class CircuitEditor(tk.Toplevel):
             Updates the grid size based on the user-provided length and width values.
     """
 
-    def __init__(self, parent, callback):
+    def __init__(self, parent: object, callback: object) -> None:
         """
         Initializes the CircuitEditor GUI. Requires a parent window.
         Precondition : 
@@ -82,7 +82,7 @@ class CircuitEditor(tk.Toplevel):
         chose_button = ttk.Button(save_frame, text="Chose", command=self.chose)
         chose_button.pack(side="left", padx=5)
     
-    def chose(self):
+    def chose(self) -> None:
         """
         Calls the callback function with the selected circuit name.
         This method is typically used to notify the parent window about the selected circuit.
@@ -90,7 +90,7 @@ class CircuitEditor(tk.Toplevel):
         circuit_name = self.circuit_var.get()
         self.callback(circuit_name)
 
-    def import_circuit(self):
+    def import_circuit(self) -> None:
         """
         Imports a circuit based on the selected circuit name from the user interface.
         This method retrieves the circuit data transfer object (DTO) corresponding to the 
@@ -111,11 +111,14 @@ class CircuitEditor(tk.Toplevel):
         self.length_var.set(self.grid_frame.cols)
         self.width_var.set(self.grid_frame.rows)
 
-    def save_circuit(self):
+    def save_circuit(self) -> None:
         """
         Opens a popup to ask for the circuit name and saves the circuit using the DAO.
         """
-        def save_action():
+        def save_action() -> None:
+            """
+            Save the current circuit from the popup values.
+            """
             circuit_name = name_var.get()
             circuit_data = self.grid_frame.grid_to_dto()
             try :
@@ -142,7 +145,7 @@ class CircuitEditor(tk.Toplevel):
         save_popup_button = ttk.Button(popup, text="Save", command=save_action)
         save_popup_button.pack(pady=5)
 
-    def change_size(self):
+    def change_size(self) -> None:
         """
         change the size based on length and width entry
         """

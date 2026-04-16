@@ -25,7 +25,13 @@ class CircuitFrame(ttk.Frame):
             Deserializes a string representation of the grid and updates the grid display 
             and cells list accordingly.
     """
-    def __init__(self,container, circuit=None, rows=12, cols=20):
+    def __init__(
+        self,
+        container: object,
+        circuit: str | None = None,
+        rows: int = 12,
+        cols: int = 20,
+    ) -> None:
         """
         Initialize the CircuitFrame with a specified number of rows and columns.
         Args:
@@ -42,7 +48,7 @@ class CircuitFrame(ttk.Frame):
         if circuit:
             self.dto_to_grid(circuit)
 
-    def init_cells(self):
+    def init_cells(self) -> None:
         """
         Initialize the grid with road and grass on the borders.
         update the display and the cells list.
@@ -63,7 +69,7 @@ class CircuitFrame(ttk.Frame):
         for j in range(self.cols):
             self.grid_columnconfigure(j, weight=1, minsize=20)
 
-    def clear(self):
+    def clear(self) -> None:
         """
         Clear the grid.
         """
@@ -73,7 +79,7 @@ class CircuitFrame(ttk.Frame):
         self.cells.clear() 
     
     
-    def grid_to_dto(self):
+    def grid_to_dto(self) -> str:
         """
         Return the grid as a string look like "rgc,rgc,rgc".
         """
@@ -83,7 +89,7 @@ class CircuitFrame(ttk.Frame):
             export_result.append("".join(color_map[cell.cget("bg")] for cell in row))
         return ",".join(export_result)
 
-    def dto_to_grid(self, dto):
+    def dto_to_grid(self, dto: str) -> None:
         """
         Args : dto (str) look like "rgc,rgc,rgc" 
         """
@@ -121,7 +127,7 @@ class CircuitEditorFrame (CircuitFrame):
             the defined PIXEL_TYPES.
     """
 
-    def init_cells(self):
+    def init_cells(self) -> None:
         """
         Add a listener on Labels.
         """
@@ -131,7 +137,7 @@ class CircuitEditorFrame (CircuitFrame):
                     cell = self.cells[line][col]
                     cell.bind("<Button-1>", lambda e, x=line, y=col: self.change_color(x, y))
         
-    def change_color(self, x, y):
+    def change_color(self, x: int, y: int) -> None:
         """
         change the color of the cell at position x, y.
         Color change in order of PIXEL_TYPES.
@@ -155,11 +161,20 @@ class CircuitRaceFrame (CircuitFrame):
             Updates the view of the circuit by clearing the previous kart cells and 
             adding new kart cells based on the provided karts dictionary.
     """
-    def __init__(self, container, circuit=None, rows=12, cols=20):
+    def __init__(
+        self,
+        container: object,
+        circuit: str | None = None,
+        rows: int = 12,
+        cols: int = 20,
+    ) -> None:
+        """
+        Initialize the race frame and the kart overlays.
+        """
         super().__init__(container, circuit, rows, cols)
         self.karts_cells = []
 
-    def update_view(self, karts):
+    def update_view(self, karts: dict[tuple[int, int], str]) -> None:
         """
         Args : 
             kart : dict : {position: color}

@@ -34,7 +34,10 @@ data_path = os.path.join(base_path, "data")
 counter_file = os.path.join(data_path, "last.txt")
 
 
-def train_ai():
+def train_ai() -> None:
+    """
+    Train one AI pair for each parameter set.
+    """
     print("train_ai start")
     os.makedirs(data_path, exist_ok=True)
 
@@ -51,7 +54,10 @@ def train_ai():
     print("après pool.map")
 
 
-def train_worker(args):
+def train_worker(args: tuple[int, int, float, float, int]) -> None:
+    """
+    Train one worker with its own learning parameters.
+    """
     core_id, nb_game, lr, gamma, step = args
 
     try:
@@ -65,7 +71,15 @@ def train_worker(args):
         raise
 
 
-def train(nb_game, learning_rate, gamma, nb_espilone):
+def train(
+    nb_game: int,
+    learning_rate: float,
+    gamma: float,
+    nb_espilone: int,
+) -> None:
+    """
+    Train two Cubee AIs against each other.
+    """
     bot1 = Ia(
         1, f"b1_{learning_rate}_{gamma}", epsilon=1, lr=learning_rate, gamma=gamma
     )
@@ -88,7 +102,10 @@ def train(nb_game, learning_rate, gamma, nb_espilone):
     bot2.force_commit()
 
 
-def test_ai():
+def test_ai() -> None:
+    """
+    Test all trained parameter sets against each other.
+    """
     print("test_ai start")
     os.makedirs(data_path, exist_ok=True)
 
@@ -132,7 +149,10 @@ def test_ai():
     print("test_ai end")
 
 
-def save_matrix(matrix):
+def save_matrix(matrix: list[list[object]]) -> None:
+    """
+    Save the comparison matrix to a CSV file.
+    """
     if not os.path.exists(counter_file):
         current = 1
     else:
@@ -160,7 +180,10 @@ def save_matrix(matrix):
     print(f"csv créé : {csv_path}")
 
 
-def test():
+def test() -> None:
+    """
+    Run training and testing one after the other.
+    """
     train_ai()
     test_ai()
 

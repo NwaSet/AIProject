@@ -8,7 +8,7 @@ from .dao.dao import Dao
 from .train import *
 
 
-def start_cubee_game():
+def start_cubee_game() -> None:
     """
     function that permiet to launch the cubee game
     """

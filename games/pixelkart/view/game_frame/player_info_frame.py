@@ -2,7 +2,19 @@ from tkinter import *
 
 
 class PlayerInfo(Frame):
-    def __init__(self, parent, player_id, bg_color="#dfe6e9"):
+    """
+    Display basic information about one player.
+    """
+
+    def __init__(
+        self,
+        parent: object,
+        player_id: int,
+        bg_color: str = "#dfe6e9",
+    ) -> None:
+        """
+        Initialize the player information panel.
+        """
         super().__init__(parent, bg=bg_color, bd=1, relief="solid")
 
         self.player_id = player_id
@@ -44,7 +56,16 @@ class PlayerInfo(Frame):
         )
         self.laps_label.pack(pady=(2, 10))
 
-    def update_info(self, name, position, speed, laps):
+    def update_info(
+        self,
+        name: str,
+        position: tuple[int, int],
+        speed: int,
+        laps: int,
+    ) -> None:
+        """
+        Update the displayed player information.
+        """
         self.name_label.config(text=f"Name : {name}")
         self.position_label.config(text=f"Position : {position}")
         self.speed_label.config(text=f"Speed : {speed}")
