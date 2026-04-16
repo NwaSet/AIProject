@@ -20,6 +20,9 @@ class Dao:
     """
 
     def __init__(self, db_name: str = None) -> None:
+        """
+        Initialize the DAO and connect to the database if a name is given.
+        """
         self.engine = None
         self.session = None
         self.db_name = None
@@ -41,7 +44,13 @@ class Dao:
         )
 
         @event.listens_for(self.engine, "connect")
-        def set_sqlite_pragma(dbapi_connection, connection_record):
+        def set_sqlite_pragma(
+            dbapi_connection: object,
+            connection_record: object,
+        ) -> None:
+            """
+            Apply SQLite pragmas for faster staged writes.
+            """
             cursor = dbapi_connection.cursor()
             cursor.execute("PRAGMA journal_mode=WAL;")
             cursor.execute("PRAGMA synchronous=NORMAL;")

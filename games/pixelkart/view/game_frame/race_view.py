@@ -5,7 +5,14 @@ from .player_move_frame import PlayerMove
 
 
 class RaceView(Frame):
-    def __init__(self, parent, controler):
+    """
+    Main race view for the PixelKart game.
+    """
+
+    def __init__(self, parent: object, controler: object) -> None:
+        """
+        Initialize the race widgets and side panels.
+        """
         super().__init__(parent, bg="#bdc3c7")
 
         self.controler = controler
@@ -70,7 +77,7 @@ class RaceView(Frame):
         )
         self.player2_move.pack(expand=True, fill="both")
 
-    def refresh(self):
+    def refresh(self) -> None:
         """
         Refresh uniquement le plateau + affichage texte.
         DTO attendu depuis le controller :

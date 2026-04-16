@@ -6,7 +6,14 @@ from .game_frame.race_view import RaceView
 
 
 class View(Tk):
-    def __init__(self, controler, *args, **kwargs):
+    """
+    Root window of the PixelKart interface.
+    """
+
+    def __init__(self, controler: object, *args: object, **kwargs: object) -> None:
+        """
+        Initialize the root view and show the first frame.
+        """
         super().__init__(*args, **kwargs)
 
         self.title('pixel kart')
@@ -22,16 +29,25 @@ class View(Tk):
 
         self.toggle()
 
-    def show_settings(self):
+    def show_settings(self) -> None:
+        """
+        Display the settings frame.
+        """
         self.current_frame = settings(self, self.controler)
         self.current_frame.pack(fill="both", expand=True)
 
-    def show_game(self):
+    def show_game(self) -> None:
+        """
+        Display the race frame.
+        """
         self.current_frame = RaceView(self, self.controler)
         self.current_frame.pack(fill="both", expand=True)
         self.current_frame.refresh()
 
-    def toggle(self):
+    def toggle(self) -> None:
+        """
+        Switch between the settings frame and the game frame.
+        """
         if self.current_frame is not None:
             self.current_frame.destroy()
 
@@ -42,7 +58,10 @@ class View(Tk):
             self.show_game()
             self.next_frame = 1
     
-    def refresh(self) :
+    def refresh(self) -> None :
+        """
+        Refresh the current frame.
+        """
         self.current_frame.refresh()
 
 

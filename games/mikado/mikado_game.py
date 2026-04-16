@@ -8,7 +8,7 @@ from games.mikado.view.view import *
 from games.mikado.train import *
 
 
-def start_mikado_Game() :
+def start_mikado_Game() -> None :
     """
     
     Initialise  two player

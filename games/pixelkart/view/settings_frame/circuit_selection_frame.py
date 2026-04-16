@@ -4,8 +4,14 @@ from ..circuit_editor_view import CircuitEditor
 
 
 class circuitSelection(Frame):
+    """
+    Widget used to select a circuit and lap count.
+    """
 
-    def __init__(self, parent, controler=None):
+    def __init__(self, parent: object, controler: object = None) -> None:
+        """
+        Initialize the circuit selection widgets.
+        """
         super().__init__(parent, bg="#d4f5d0", bd=1, relief="solid")
 
         self.controler = controler
@@ -67,13 +73,13 @@ class circuitSelection(Frame):
         )
         self.circuit_editor_button.pack(pady=(10, 10))
 
-    def open_circuit_editor(self):
+    def open_circuit_editor(self) -> None:
         """
         Ouvre la fenêtre d'édition des circuits.
         """
         CircuitEditor(self, callback=self.set_selected_circuit)
 
-    def set_selected_circuit(self, circuit_name):
+    def set_selected_circuit(self, circuit_name: str) -> None:
         """
         Met à jour le circuit sélectionné après un choix dans le CircuitEditor.
         """
@@ -81,7 +87,7 @@ class circuitSelection(Frame):
         if circuit_name in self.circuit_names:
             self.selected_circuit.set(circuit_name)
 
-    def refresh_circuit_list(self):
+    def refresh_circuit_list(self) -> None:
         """
         Recharge la liste des circuits depuis le dao
         et met à jour le menu déroulant.
@@ -104,13 +110,13 @@ class circuitSelection(Frame):
         if self.selected_circuit.get() not in self.circuit_names:
             self.selected_circuit.set(self.circuit_names[0])
 
-    def get_selected_circuit(self):
+    def get_selected_circuit(self) -> str:
         """
         Retourne le nom du circuit sélectionné.
         """
         return self.selected_circuit.get()
 
-    def get_number_of_laps(self):
+    def get_number_of_laps(self) -> int:
         """
         Retourne le nombre de tours choisi.
         """

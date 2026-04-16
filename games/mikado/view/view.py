@@ -49,7 +49,7 @@ class GameView(Tk) :
         self.add_button()
 
 
-    def update_view(self) :
+    def update_view(self) -> None :
         """
         Refreshes the entire user interface.
         
@@ -65,7 +65,7 @@ class GameView(Tk) :
         self.label_message.config(text=status_message)
 
 
-    def add_button(self) :
+    def add_button(self) -> None :
         """
         Initialise and display the action buttons
         """
@@ -74,7 +74,7 @@ class GameView(Tk) :
         self.button_frame.pack()
     
 
-    def add_reset_button(self) :
+    def add_reset_button(self) -> None :
         """
         Initialise and display the restart buttons
         """
@@ -83,7 +83,7 @@ class GameView(Tk) :
         self.reset_button_frame.pack()
 
 
-    def end_game(self) :
+    def end_game(self) -> None :
         """
         Handles the GUI transition to the 'Game Over' state.
         
@@ -98,7 +98,7 @@ class GameView(Tk) :
         self.add_reset_button()
 
 
-    def reset(self) :
+    def reset(self) -> None :
         """
         Restores the GUI to its initial game state
         """
@@ -108,7 +108,7 @@ class GameView(Tk) :
         self.add_button()
 
 
-    def draw_matches(self, nb_stick) :
+    def draw_matches(self, nb_stick: int) -> None :
         """
         Renders the graphical representation of the sticks on the canvas.
 
@@ -128,7 +128,7 @@ class ButtonFrame(Frame) :
     A container for the move action buttons (Take 1, 2, or 3 sticks).
     """
 
-    def __init__(self, parent, controler) :
+    def __init__(self, parent: object, controler: object) -> None :
         """
         Initializes the frame and its three action buttons.
         
@@ -159,7 +159,7 @@ class ResetButtonFrame(Frame) :
     A container for the restart button
     """
 
-    def __init__(self, parent, controler) :
+    def __init__(self, parent: object, controler: object) -> None :
         """
         Initializes the frame with a restart button.
         

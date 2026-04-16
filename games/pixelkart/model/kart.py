@@ -2,13 +2,19 @@ from games.pixelkart.const import *
 import random
 
 class Kart:
+    """
+    Base kart class for a PixelKart player.
+    """
 
     def __init__(
         self,
         id: int,
         name: str,
         game: object = None
-    ):
+    ) -> None:
+        """
+        Initialize a kart with its base race data.
+        """
         self.id = id
         self.name = name
 
@@ -25,7 +31,7 @@ class Kart:
         self.speed = 0
         self.direction = "East"
     
-    def play(self):
+    def play(self) -> str:
         """
         chose a random choice between all legal move given by the model.
         """

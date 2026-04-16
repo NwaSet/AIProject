@@ -4,8 +4,14 @@ from .circuit_selection_frame import circuitSelection
 
 
 class settings(Frame):
+    """
+    Settings view used to prepare a new race.
+    """
 
-    def __init__(self, parent, controler):
+    def __init__(self, parent: object, controler: object) -> None:
+        """
+        Initialize the player and circuit settings widgets.
+        """
         super().__init__(parent, bg="#ecf0f1")
 
         self.controler = controler
@@ -53,7 +59,10 @@ class settings(Frame):
         )
         self.start_button.pack(side="bottom", pady=25)
 
-    def start_game(self):
+    def start_game(self) -> None:
+        """
+        Build the game DTO and start a new race.
+        """
         player1_dto = self.settings_player_1.get_dto()
         player2_dto = self.settings_player_2.get_dto()
         circuit_name = self.settings_circuit.get_selected_circuit()

@@ -4,8 +4,14 @@ POSSIBLE_PLAYER_COLOR = ["brown", "pink", "blue"]
 
 
 class playerSelection(Frame):
+    """
+    Widget used to configure one player before the race.
+    """
 
-    def __init__(self, parent, player_number):
+    def __init__(self, parent: object, player_number: int) -> None:
+        """
+        Initialize the player selection form.
+        """
         super().__init__(parent, bg="#d6ecff", bd=1, relief="solid")
 
         bg = "#d6ecff"
@@ -97,7 +103,10 @@ class playerSelection(Frame):
         self.player_color_selection_2.pack()
         self.player_color_selection_3.pack()
 
-    def get_dto(self):
+    def get_dto(self) -> dict[str, int | str]:
+        """
+        Return the configuration of the selected player.
+        """
         return {
             "player_number": self.player_number,
             "player_name": self.player_name.get("1.0", "end-1c"),

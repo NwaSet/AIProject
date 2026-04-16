@@ -1,13 +1,17 @@
 from games.pixelkart.model.kart import Kart
 
 class Human(Kart):
+    """
+    Human kart used in a PixelKart race.
+    """
+
     def __init__(
         self,
           id: int,
         name: str,
         color: str,
         game: object = None
-    ):
+    ) -> None:
         """
         Initialize a human player.
 

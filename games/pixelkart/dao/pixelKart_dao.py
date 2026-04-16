@@ -3,14 +3,14 @@ from pathlib import Path
 FILE_PATH = Path(__file__).with_name("circuits.txt")
 
 
-def _parse_circuit_line(line):
+def _parse_circuit_line(line: str) -> tuple[str | None, str | None]:
     line = line.strip()
     if not line or ":" not in line:
         return None, None
     return line.split(":", 1)
 
 
-def get_all():
+def get_all() -> dict[str, str]:
     """Retrieve all circuits from the file as a dictionary {name: str}."""
     circuits = {}
     if FILE_PATH.exists():
@@ -21,12 +21,12 @@ def get_all():
                     circuits[name] = circuit
     return circuits
 
-def get_by_name(name):
+def get_by_name(name: str) -> str | None:
     """Retrieve a circuit by its name."""
     circuits = get_all()
     return circuits.get(name)
 
-def save_circuit(name, string):
+def save_circuit(name: str, string: str) -> None:
     """Save a new circuit to the file."""
     if not name:
         raise ValueError("Circuit name cannot be empty.")
@@ -38,7 +38,7 @@ def save_circuit(name, string):
     with FILE_PATH.open("a", encoding="utf-8") as file:
         file.write(f"{prefix}{name}:{string}")
 
-def delete_circuit(name):
+def delete_circuit(name: str) -> None:
     """Delete a circuit by its name."""
     if not name:
         raise ValueError("Circuit name cannot be empty.")
@@ -53,7 +53,7 @@ def delete_circuit(name):
         for n, c in circuits.items():
             file.write(f"{n}:{c}\n")
 
-def update_circuit(name, string):
+def update_circuit(name: str, string: str) -> None:
     """Update the name of an existing circuit."""
     circuits = get_all()
     if name not in circuits:
