@@ -9,12 +9,10 @@ class Race:
         circuit: object,
         nb_max_lap: int,
         display: bool = True,
-        controler: object = None,
         Player1: object = None,
         Player2: object = None
     ):   
         self.circuit = circuit  
-        self.controler = controler
 
         self.player1 = Player1
         self.player2 = Player2
