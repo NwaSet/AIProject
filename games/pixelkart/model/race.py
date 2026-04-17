@@ -77,18 +77,24 @@ class Race:
         """
         Update the lap counter when a player crosses the finish line.
         """
-        if player.direction == "East":    
-            row, col = player.coord
-            current_cell = self.circuit.grid[row][col]
+        row, col = player.coord
+        current_cell = self.circuit.grid[row][col]
 
-            if player.last_cell is None:
-                player.last_cell = current_cell
-                return
-
-            if player.last_cell != "F" and current_cell == "F":
-                player.lap += 1
-
+        if player.last_cell is None:
             player.last_cell = current_cell
+            return
+
+        crossed_finish = player.last_cell != "F" and current_cell == "F"
+
+        if crossed_finish and player.direction == "East" and player.speed != -1:
+            player.lap += 1
+        if crossed_finish and (
+            player.direction == "West" or
+            (player.direction == "East" and player.speed == -1)
+        ):
+            player.lap -= 1
+
+        player.last_cell = current_cell
             
     def change_pos(self, player: object) -> None:
         """
