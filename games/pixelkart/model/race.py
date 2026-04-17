@@ -73,25 +73,35 @@ class Race:
         else:
             player.speed += speed
 
-    def update_lap(self, player: object) -> None:
+    def update_lap(self, player: object, old_coord: tuple[int, int]) -> None:
         """
         Update the lap counter when a player crosses the finish line.
         """
+        old_row, old_col = old_coord
         row, col = player.coord
+        old_cell = self.circuit.grid[old_row][old_col]
         current_cell = self.circuit.grid[row][col]
 
-        if player.last_cell is None:
-            player.last_cell = current_cell
+        moved_east = row == old_row and col > old_col
+        moved_west = row == old_row and col < old_col
+
+        crossed_finish_east = moved_east and any(
+            self.circuit.grid[row][finish_col] == "F"
+            for finish_col in range(old_col + 1, col + 1)
+        )
+        crossed_finish_west = moved_west and any(
+            self.circuit.grid[row][finish_col] == "F"
+            for finish_col in range(col, old_col)
+        )
+
+        if player.last_cell == "START":
+            if moved_east and current_cell != "F" and (old_cell == "F" or crossed_finish_east):
+                player.last_cell = current_cell
             return
 
-        crossed_finish = player.last_cell != "F" and current_cell == "F"
-
-        if crossed_finish and player.direction == "East" and player.speed != -1:
+        if crossed_finish_east:
             player.lap += 1
-        if crossed_finish and (
-            player.direction == "West" or
-            (player.direction == "East" and player.speed == -1)
-        ):
+        elif crossed_finish_west:
             player.lap -= 1
 
         player.last_cell = current_cell
@@ -166,8 +176,8 @@ class Race:
         self.player1.lap = 0
         self.player2.lap = 0
 
-        self.player1.last_cell = None
-        self.player2.last_cell = None
+        self.player1.last_cell = "START"
+        self.player2.last_cell = "START"
 
 
     def is_game_over(self) -> bool:
@@ -212,9 +222,10 @@ class Race:
         else:
             raise ValueError(f"Unknown move: {move}")
 
+        old_coord = player.coord
         self.change_pos(player)
         self.nb_round += 1
-        self.update_lap(player)
+        self.update_lap(player, old_coord)
         
         if self.is_game_over():
             if self.winner is None:
