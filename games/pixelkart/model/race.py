@@ -1,5 +1,6 @@
 from games.pixelkart.const import *
 from games.pixelkart.model.circuit import *
+from games.pixelkart.model.ai import Ai
 from games.pixelkart.model.human import Human
 import random
 
@@ -88,11 +89,21 @@ class Race:
 
         if crossed_finish and player.direction == "East" and player.speed != -1:
             player.lap += 1
+
+            if isinstance(player, Ai):
+                turns_for_lap = player.turn_count - player.last_lap_turn
+
+                player.last_lap_turn = player.turn_count
+                player.last_reward = player.lap_reward_base / max(1, turns_for_lap)
+
         if crossed_finish and (
             player.direction == "West" or
             (player.direction == "East" and player.speed == -1)
         ):
             player.lap -= 1
+            
+            if isinstance(player, Ai):
+                player.last_reward = player.backward_lap_penalty
 
         player.last_cell = current_cell
             
@@ -168,6 +179,11 @@ class Race:
 
         self.player1.last_cell = None
         self.player2.last_cell = None
+        for player in (self.player1, self.player2):
+            if isinstance(player, Ai):
+                player.turn_count = 0
+                player.last_lap_turn = 0
+                player.last_reward = 0.0
 
 
     def is_game_over(self) -> bool:
@@ -213,16 +229,27 @@ class Race:
             raise ValueError(f"Unknown move: {move}")
 
         self.change_pos(player)
+        if isinstance(player, Ai):
+            player.turn_count += 1
         self.nb_round += 1
+        if isinstance(player, Ai):
+            player.last_reward = player.step_penalty
         self.update_lap(player)
         
         if self.is_game_over():
             if self.winner is None:
                 self.player1.tie()
                 self.player2.tie()
+                for player in (self.player1, self.player2):
+                    if isinstance(player, Ai):
+                        player.last_reward = 0.0
             else:
                 self.winner.win()
                 self.loser.lose()
+                if isinstance(self.winner, Ai):
+                    self.winner.last_reward += self.winner.win_reward
+                if isinstance(self.loser, Ai):
+                    self.loser.last_reward += self.loser.lose_reward
         else:
             self.switch_player()
 

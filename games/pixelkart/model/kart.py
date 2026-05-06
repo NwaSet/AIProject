@@ -30,6 +30,7 @@ class Kart:
         self.color = "Red"
         self.speed = 0
         self.direction = "East"
+        self.last_cell = None
     
     def play(self) -> str:
         """
