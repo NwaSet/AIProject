@@ -1,4 +1,5 @@
 from games.pixelkart.model.kart import Kart
+from games.pixelkart.const import ACTION_TO_MOVE
 
 
 class Ai(Kart):
@@ -27,11 +28,16 @@ class Ai(Kart):
         self.last_lap_turn = 0
         self.last_reward = 0.0
 
+        self.q_table = {}
+        self.last_state = None
+        self.last_action = None
+
         self.step_penalty = -0.01
         self.backward_lap_penalty = -20.0
         self.win_reward = 50.0
         self.lose_reward = -50.0
         self.lap_reward_base = 100.0
+        self.penalty = -10
 
 
 
@@ -42,12 +48,11 @@ class Ai(Kart):
         return self.last_reward
 
     def get_state(self):
-        cell = self.get_surrounding_cells()
         return (
             self.coord,
             self.direction,
             self.speed,
-            *cell
+            *self.get_surrounding_cells()
         )
 
     def get_cell_value(self, row: int, col: int) -> str:
@@ -58,7 +63,7 @@ class Ai(Kart):
 
         return "OUT"
 
-    def get_surrounding_cells(self) -> tuple[str, ...]:
+    def get_surrounding_cells(self) -> tuple:
         row, col = self.coord
         dr, dc = ACTION_TO_MOVE[self.direction]
 
@@ -93,7 +98,7 @@ class Ai(Kart):
             back_1,
         )
 
-    def get_legal_actions(self):
+    def get_legal_actions(self) -> list:
         legal_actions =["pass_turn","turn_left","turn_right"]
 
         if self.speed < 2:
@@ -104,4 +109,76 @@ class Ai(Kart):
         
         return legal_actions
 
-    def get_q_value(self):
+    def build_default_q_values(self) ->tuple:
+        legal_actions = self.get_legal_actions()
+        q_values = {
+            "pass_turn": self.penalty,
+            "turn_left": self.penalty,
+            "turn_right": self.penalty,
+            "accelerate": self.penalty,
+            "decelerate": self.penalty
+        }
+        for action in legal_actions:
+            q_values[action] = 0.0
+        
+        return q_values
+
+
+    def get_q_values(self, state: tuple, action: str):
+        return self.q_table.get(state,action),0.0)
+
+
+    def choose_action(self, state: tuple) -> str:
+        legal_actions = self.get_legal_actions()
+
+        if random.random() < self.epsilon:
+            return random.choice(legal_actions)
+
+        best_actions = []
+        best_value = float("-inf")
+
+        for action in legal_actions:
+            q_value = self.get_q_value(state, action)
+
+            if q_value > best_value:
+                best_value = q_value
+                best_actions = [action]
+            elif q_value == best_value:
+                best_actions.append(action)
+
+        return random.choice(best_actions)
+
+    def learn(self, reward: float, next_state: tuple | None = None) -> None:
+        if self.last_state is None or self.last_action is None:
+            return
+
+        old_value = self.get_q_value(self.last_state, self.last_action)
+
+        if next_state is None:
+            max_next = 0.0
+        else:
+            legal_next_actions = self.get_legal_actions()
+            max_next = max(
+                (self.get_q_value(next_state, action) for action in legal_next_actions),
+                default=0.0,
+            )
+
+        new_value = old_value + self.learning_rate * (
+            reward + self.gamma * max_next - old_value
+        )
+
+        self.q_table[(self.last_state, self.last_action)] = new_value
+    
+    def play(self) -> str:
+        state = self.get_state()
+
+        if self.last_state is not None and self.last_action is not None:
+            reward = self.get_reward()
+            self.learn(reward, state)
+
+        action = self.choose_action(state)
+
+        self.last_state = state
+        self.last_action = action
+
+        return action
