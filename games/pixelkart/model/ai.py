@@ -1,5 +1,6 @@
 from games.pixelkart.model.kart import Kart
 from games.pixelkart.const import ACTION_TO_MOVE
+import random
 
 
 class Ai(Kart):
