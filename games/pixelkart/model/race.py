@@ -240,16 +240,9 @@ class Race:
             if self.winner is None:
                 self.player1.tie()
                 self.player2.tie()
-                for player in (self.player1, self.player2):
-                    if isinstance(player, Ai):
-                        player.last_reward = 0.0
             else:
                 self.winner.win()
                 self.loser.lose()
-                if isinstance(self.winner, Ai):
-                    self.winner.last_reward += self.winner.win_reward
-                if isinstance(self.loser, Ai):
-                    self.loser.last_reward += self.loser.lose_reward
         else:
             self.switch_player()
 
@@ -259,9 +252,16 @@ class Race:
     def play(self) -> None:
         """
         Play the race automatically until it ends.
+        if the ai game is made by more than 1_000 turns, we consider both player will have a tie.
         """
-        while not self.is_game_over():
+        i = 0
+        while not self.is_game_over() and i < 1_000:
             self.step(self.current_player.play())
+            i += 1
+        
+        if not self.is_game_over() :
+            self.player1.tie()
+            self.player2.tie()
 
     @property
     def winner(self) -> object | None:

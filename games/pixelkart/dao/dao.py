@@ -61,7 +61,7 @@ class Dao:
         Connect to the SQLite DB and initialize the table.
         """
         self.engine = create_engine(
-            f"sqlite:///games/pixelkart/dao/{db_name}.db",
+            f"sqlite:///games/pixelkart/dao/ai_db/{db_name}.db",
             future=True,
         )
 

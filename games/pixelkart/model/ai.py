@@ -20,6 +20,8 @@ class Ai(Kart):
         epsilon: float = 0.9,
         lr: float = 0.01,
         gamma: float = 0.7,
+        learning_enabled: bool = True,
+        db_name: str | None = None,
     ) -> None:
         super().__init__(id, name, game)
 
@@ -28,6 +30,7 @@ class Ai(Kart):
         self.epsilon = epsilon
         self.learning_rate = lr
         self.gamma = gamma
+        self.learning_enabled = learning_enabled
 
         self.turn_count = 0
         self.last_lap_turn = 0
@@ -44,7 +47,7 @@ class Ai(Kart):
         self.last_action = None
         self.games_since_commit = 0
 
-        self.dao = Dao(f"lr{self.learning_rate}_g{self.gamma}")
+        self.dao = Dao(db_name or f"lr{self.learning_rate}_g{self.gamma}")
         self.q_cache = {}
 
     def get_reward(self) -> float:
@@ -167,6 +170,10 @@ class Ai(Kart):
         legal_actions = self.get_legal_actions_from_state(state)
         q_values = self.build_default_q_values(legal_actions)
 
+        if not self.learning_enabled:
+            self.q_cache[state] = q_values.copy()
+            return self.q_cache[state]
+
         self.dao.stage_insert_if_missing(state, q_values)
         self.q_cache[state] = q_values.copy()
         return self.q_cache[state]
@@ -206,6 +213,9 @@ class Ai(Kart):
         """
         Learn from the previous state and action.
         """
+        if not self.learning_enabled:
+            return
+
         if self.last_state is None or self.last_action is None:
             return
 
@@ -264,14 +274,14 @@ class Ai(Kart):
         """
         Final terminal learn on win, then increment stats.
         """
-        self.end_episode(self.get_reward())
+        self.end_episode(self.get_reward() + self.win_reward)
         super().win()
 
     def lose(self) -> None:
         """
         Final terminal learn on lose, then increment stats.
         """
-        self.end_episode(self.get_reward())
+        self.end_episode(self.get_reward() + self.lose_reward)
         super().lose()
 
     def tie(self) -> None:
