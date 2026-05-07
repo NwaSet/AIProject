@@ -1,12 +1,16 @@
-from games.pixelkart.model.kart import Kart
-from games.pixelkart.const import ACTION_TO_MOVE
 import random
+
+from games.pixelkart.const import ACTION_TO_MOVE
+from games.pixelkart.dao.dao import Dao
+from games.pixelkart.model.kart import Kart
 
 
 class Ai(Kart):
     """
-    Basic PixelKart AI shell with reward settings for lap-based learning.
+    PixelKart AI using Q-learning with a SQLite-backed Q-table.
     """
+
+    COMMIT_EVERY_GAMES = 5000
 
     def __init__(
         self,
@@ -29,18 +33,19 @@ class Ai(Kart):
         self.last_lap_turn = 0
         self.last_reward = 0.0
 
-        self.q_table = {}
-        self.last_state = None
-        self.last_action = None
-
         self.step_penalty = -0.01
         self.backward_lap_penalty = -20.0
         self.win_reward = 50.0
         self.lose_reward = -50.0
         self.lap_reward_base = 100.0
-        self.penalty = -10
+        self.penalty = -10.0
 
+        self.last_state = None
+        self.last_action = None
+        self.games_since_commit = 0
 
+        self.dao = Dao(f"lr{self.learning_rate}_g{self.gamma}")
+        self.q_cache = {}
 
     def get_reward(self) -> float:
         """
@@ -48,15 +53,21 @@ class Ai(Kart):
         """
         return self.last_reward
 
-    def get_state(self):
+    def get_state(self) -> tuple:
+        """
+        Return the current state seen by the AI.
+        """
         return (
             self.coord,
             self.direction,
             self.speed,
-            *self.get_surrounding_cells()
+            *self.get_surrounding_cells(),
         )
 
     def get_cell_value(self, row: int, col: int) -> str:
+        """
+        Return the cell content or OUT if outside the grid.
+        """
         grid = self.game.circuit.grid
 
         if 0 <= row < len(grid) and 0 <= col < len(grid[0]):
@@ -65,6 +76,9 @@ class Ai(Kart):
         return "OUT"
 
     def get_surrounding_cells(self) -> tuple:
+        """
+        Return the cells around the kart relative to its direction.
+        """
         row, col = self.coord
         dr, dc = ACTION_TO_MOVE[self.direction]
 
@@ -99,47 +113,86 @@ class Ai(Kart):
             back_1,
         )
 
-    def get_legal_actions(self) -> list:
-        legal_actions =["pass_turn","turn_left","turn_right"]
+    def get_legal_actions(self) -> list[str]:
+        """
+        Return legal actions from the current state.
+        """
+        return self.get_legal_actions_from_state(self.get_state())
 
-        if self.speed < 2:
+    def get_legal_actions_from_state(self, state: tuple) -> list[str]:
+        """
+        Return legal actions from a given state tuple.
+        """
+        speed = state[2]
+
+        legal_actions = ["pass_turn", "turn_left", "turn_right"]
+
+        if speed < 2:
             legal_actions.append("accelerate")
-        
-        if self.speed > -1:
+
+        if speed > -1:
             legal_actions.append("decelerate")
-        
+
         return legal_actions
 
-    def build_default_q_values(self) ->tuple:
-        legal_actions = self.get_legal_actions()
+    def build_default_q_values(self, legal_actions: list[str]) -> dict:
+        """
+        Build default Q-values for one state.
+        """
         q_values = {
             "pass_turn": self.penalty,
             "turn_left": self.penalty,
             "turn_right": self.penalty,
             "accelerate": self.penalty,
-            "decelerate": self.penalty
+            "decelerate": self.penalty,
         }
+
         for action in legal_actions:
             q_values[action] = 0.0
-        
+
         return q_values
 
+    def ensure_state_cached(self, state: tuple) -> dict:
+        """
+        Return Q-values from cache, DB, or create defaults.
+        """
+        if state in self.q_cache:
+            return self.q_cache[state]
 
-    def get_q_values(self, state: tuple, action: str):
-        return self.q_table.get(state,action),0.0)
+        q_values = self.dao.select_row_by_state(state)
+        if q_values is not None:
+            self.q_cache[state] = q_values
+            return q_values
 
+        legal_actions = self.get_legal_actions_from_state(state)
+        q_values = self.build_default_q_values(legal_actions)
+
+        self.dao.stage_insert_if_missing(state, q_values)
+        self.q_cache[state] = q_values.copy()
+        return self.q_cache[state]
+
+    def get_q_value(self, state: tuple, action: str) -> float:
+        """
+        Return one Q-value for the given state and action.
+        """
+        q_values = self.ensure_state_cached(state)
+        return q_values[action]
 
     def choose_action(self, state: tuple) -> str:
-        legal_actions = self.get_legal_actions()
+        """
+        Choose one action with epsilon-greedy strategy.
+        """
+        legal_actions = self.get_legal_actions_from_state(state)
 
         if random.random() < self.epsilon:
             return random.choice(legal_actions)
 
+        q_values = self.ensure_state_cached(state)
         best_actions = []
         best_value = float("-inf")
 
         for action in legal_actions:
-            q_value = self.get_q_value(state, action)
+            q_value = q_values[action]
 
             if q_value > best_value:
                 best_value = q_value
@@ -150,17 +203,22 @@ class Ai(Kart):
         return random.choice(best_actions)
 
     def learn(self, reward: float, next_state: tuple | None = None) -> None:
+        """
+        Learn from the previous state and action.
+        """
         if self.last_state is None or self.last_action is None:
             return
 
-        old_value = self.get_q_value(self.last_state, self.last_action)
+        current_q_values = self.ensure_state_cached(self.last_state)
+        old_value = current_q_values[self.last_action]
 
         if next_state is None:
             max_next = 0.0
         else:
-            legal_next_actions = self.get_legal_actions()
+            next_q_values = self.ensure_state_cached(next_state)
+            legal_next_actions = self.get_legal_actions_from_state(next_state)
             max_next = max(
-                (self.get_q_value(next_state, action) for action in legal_next_actions),
+                (next_q_values[action] for action in legal_next_actions),
                 default=0.0,
             )
 
@@ -168,9 +226,13 @@ class Ai(Kart):
             reward + self.gamma * max_next - old_value
         )
 
-        self.q_table[(self.last_state, self.last_action)] = new_value
-    
+        current_q_values[self.last_action] = new_value
+        self.dao.stage_q_update(self.last_state, current_q_values)
+
     def play(self) -> str:
+        """
+        Learn from the previous move, then choose and return an action.
+        """
         state = self.get_state()
 
         if self.last_state is not None and self.last_action is not None:
@@ -183,3 +245,51 @@ class Ai(Kart):
         self.last_action = action
 
         return action
+
+    def end_episode(self, reward: float) -> None:
+        """
+        Apply terminal learning and reset the episode memory.
+        """
+        self.learn(reward, None)
+
+        self.last_state = None
+        self.last_action = None
+
+        self.games_since_commit += 1
+        if self.games_since_commit >= self.COMMIT_EVERY_GAMES:
+            self.dao.flush()
+            self.games_since_commit = 0
+
+    def win(self) -> None:
+        """
+        Final terminal learn on win, then increment stats.
+        """
+        self.end_episode(self.get_reward())
+        super().win()
+
+    def lose(self) -> None:
+        """
+        Final terminal learn on lose, then increment stats.
+        """
+        self.end_episode(self.get_reward())
+        super().lose()
+
+    def tie(self) -> None:
+        """
+        Final terminal learn on tie, then increment stats.
+        """
+        self.end_episode(0.0)
+        super().tie()
+
+    def next_epsilon(self, coefficient: float = 0.95, minimum: float = 0.05) -> float:
+        """
+        Decrease epsilon while keeping it above a minimum.
+        """
+        self.epsilon = max(minimum, self.epsilon * coefficient)
+        return self.epsilon
+
+    def force_commit(self) -> None:
+        """
+        Write pending DB updates immediately.
+        """
+        self.dao.flush()
