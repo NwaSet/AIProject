@@ -7,9 +7,13 @@ import traceback
 from .model.ai import Ia
 from .model.cubee_model import GameModel
 
-train_games = 100_000
-test_games = 1_000
+train_games = 1_000_000
+test_games = 10_000
+checkpoint_step = 100_000
 epsilon_step = 5000
+epsilon_decay = 0.95
+min_epsilon = 0.05
+min_learning_rate_ratio = 0.10
 grid_size = 5
 
 params = [
@@ -40,63 +44,149 @@ counter_file = os.path.join(data_path, "last.txt")
 
 def train_ai() -> None:
     """
-    Train one AI pair for each parameter set.
+    Train one AI pair for each parameter set, testing every checkpoint.
     """
     print("train_ai start")
     os.makedirs(data_path, exist_ok=True)
 
-    args = []
     nb_cores = psutil.cpu_count(logical=True)
     nb_processes = min(len(params), nb_cores if nb_cores is not None else len(params))
 
-    for i, (lr, gamma) in enumerate(params):
-        args.append((i, train_games, lr, gamma, epsilon_step))
+    for trained_games in range(0, train_games, checkpoint_step):
+        next_checkpoint = min(trained_games + checkpoint_step, train_games)
+        chunk_games = next_checkpoint - trained_games
+        args = []
 
-    print("avant pool.map")
-    with Pool(processes=nb_processes) as pool:
-        pool.map(train_worker, args)
-    print("après pool.map")
+        for i, (initial_lr, gamma) in enumerate(params):
+            args.append(
+                (
+                    i,
+                    chunk_games,
+                    trained_games,
+                    initial_lr,
+                    learning_rate_at(initial_lr, trained_games),
+                    gamma,
+                    epsilon_at(trained_games),
+                    epsilon_step,
+                )
+            )
+
+        print(f"train checkpoint {trained_games} -> {next_checkpoint}")
+        with Pool(processes=nb_processes) as pool:
+            pool.map(train_worker, args)
+
+        print(f"test checkpoint {next_checkpoint}")
+        test_ai(next_checkpoint)
+
+    print("train_ai end")
 
 
-def train_worker(args: tuple[int, int, float, float, int]) -> None:
+def train_worker(args: tuple[int, int, int, float, float, float, float, int]) -> None:
     """
     Train one worker with its own learning parameters.
     """
-    core_id, nb_game, lr, gamma, step = args
+    (
+        core_id,
+        nb_game,
+        trained_games_start,
+        initial_lr,
+        current_lr,
+        gamma,
+        epsilon,
+        step,
+    ) = args
 
     try:
-        print(f"worker start core={core_id} lr={lr} gamma={gamma}")
-        train(nb_game, lr, gamma, step)
-        print(f"worker end core={core_id} lr={lr} gamma={gamma}")
+        print(
+            f"worker start core={core_id} "
+            f"initial_lr={initial_lr} current_lr={current_lr} "
+            f"gamma={gamma} epsilon={epsilon}"
+        )
+        train(
+            nb_game,
+            trained_games_start,
+            initial_lr,
+            current_lr,
+            gamma,
+            epsilon,
+            step,
+        )
+        print(
+            f"worker end core={core_id} "
+            f"initial_lr={initial_lr} current_lr={current_lr} gamma={gamma}"
+        )
 
     except Exception as e:
-        print("erreur dans _train_worker :", e)
+        print("erreur dans train_worker :", e)
         traceback.print_exc()
         raise
 
 
+def learning_rate_at(initial_lr: float, trained_games: int) -> float:
+    """
+    Linearly decay the learning rate from its initial value to 10%.
+    """
+    progress = min(trained_games / train_games, 1.0)
+    min_lr = initial_lr * min_learning_rate_ratio
+    return initial_lr - ((initial_lr - min_lr) * progress)
+
+
+def epsilon_at(trained_games: int) -> float:
+    """
+    Return the epsilon value after the already trained game count.
+    """
+    nb_decay = trained_games // epsilon_step
+    return max(min_epsilon, epsilon_decay ** nb_decay)
+
+
+def db_name_for(initial_lr: float, gamma: float) -> str:
+    """
+    Stable database name for a parameter set.
+    """
+    return f"lr{initial_lr}_g{gamma}"
+
+
 def train(
     nb_game: int,
-    learning_rate: float,
+    trained_games_start: int,
+    initial_learning_rate: float,
+    current_learning_rate: float,
     gamma: float,
+    epsilon: float,
     nb_espilone: int,
 ) -> None:
     """
     Train two Cubee AIs against each other.
     """
     bot1 = Ia(
-        1, f"b1_{learning_rate}_{gamma}", epsilon=1, lr=learning_rate, gamma=gamma
+        1,
+        f"b1_{initial_learning_rate}_{gamma}",
+        epsilon=epsilon,
+        lr=current_learning_rate,
+        gamma=gamma,
+        db_name=db_name_for(initial_learning_rate, gamma),
     )
     bot2 = Ia(
-        2, f"b2_{learning_rate}_{gamma}", epsilon=1, lr=learning_rate, gamma=gamma
+        2,
+        f"b2_{initial_learning_rate}_{gamma}",
+        epsilon=epsilon,
+        lr=current_learning_rate,
+        gamma=gamma,
+        db_name=db_name_for(initial_learning_rate, gamma),
     )
 
     game = GameModel(grid_size, False, bot1, bot2)
 
     for i in range(nb_game):
         if i % nb_espilone == 0 and i != 0:
-            bot1.next_epsilon()
-            bot2.next_epsilon()
+            bot1.next_epsilon(epsilon_decay, min_epsilon)
+            bot2.next_epsilon(epsilon_decay, min_epsilon)
+            current_learning_rate = learning_rate_at(
+                initial_learning_rate,
+                trained_games_start + i,
+            )
+            bot1.learning_rate = current_learning_rate
+            bot2.learning_rate = current_learning_rate
             print(i)
 
         game.play()
@@ -106,7 +196,7 @@ def train(
     bot2.force_commit()
 
 
-def test_ai() -> None:
+def test_ai(checkpoint_games: int | None = None) -> None:
     """
     Test all trained parameter sets against each other.
     """
@@ -122,9 +212,26 @@ def test_ai() -> None:
 
             lr1, gamma1 = params[i]
             lr2, gamma2 = params[j]
+            trained_games = checkpoint_games or train_games
 
-            bot1 = Ia(1, f"b1_{lr1}_{gamma1}", epsilon=0, lr=lr1, gamma=gamma1)
-            bot2 = Ia(2, f"b2_{lr2}_{gamma2}", epsilon=0, lr=lr2, gamma=gamma2)
+            bot1 = Ia(
+                1,
+                f"b1_{lr1}_{gamma1}",
+                epsilon=0,
+                lr=learning_rate_at(lr1, trained_games),
+                gamma=gamma1,
+                learning_enabled=False,
+                db_name=db_name_for(lr1, gamma1),
+            )
+            bot2 = Ia(
+                2,
+                f"b2_{lr2}_{gamma2}",
+                epsilon=0,
+                lr=learning_rate_at(lr2, trained_games),
+                gamma=gamma2,
+                learning_enabled=False,
+                db_name=db_name_for(lr2, gamma2),
+            )
 
             for _ in range(test_games):
                 game = GameModel(grid_size, False, bot1, bot2)
@@ -149,11 +256,11 @@ def test_ai() -> None:
                 bot2.nb_lose,
             )
 
-    save_matrix(matrix)
+    save_matrix(matrix, checkpoint_games)
     print("test_ai end")
 
 
-def save_matrix(matrix: list[list[object]]) -> None:
+def save_matrix(matrix: list[list[object]], checkpoint_games: int | None = None) -> None:
     """
     Save the comparison matrix to a CSV file.
     """
@@ -164,7 +271,12 @@ def save_matrix(matrix: list[list[object]]) -> None:
             content = f.read().strip()
             current = int(content) + 1 if content else 1
 
-    csv_path = os.path.join(data_path, f"data_{current}.csv")
+    if checkpoint_games is None:
+        csv_name = f"data_{current}.csv"
+    else:
+        csv_name = f"data_{current}_{checkpoint_games}.csv"
+
+    csv_path = os.path.join(data_path, csv_name)
 
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
@@ -181,15 +293,14 @@ def save_matrix(matrix: list[list[object]]) -> None:
     with open(counter_file, "w", encoding="utf-8") as f:
         f.write(str(current))
 
-    print(f"csv créé : {csv_path}")
+    print(f"csv cree : {csv_path}")
 
 
 def test() -> None:
     """
-    Run training and testing one after the other.
+    Run training with checkpoint tests.
     """
     train_ai()
-    test_ai()
 
 
 if __name__ == "__main__":

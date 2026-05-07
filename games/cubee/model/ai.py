@@ -38,6 +38,8 @@ class Ia(Player):
         epsilon: float = 0.9,
         lr: float = 0.01,
         gamma: float = 0.7,
+        learning_enabled: bool = True,
+        db_name: str | None = None,
     ) -> None:
         """
         Initialize the AI player and its Q-learning settings.
@@ -54,9 +56,10 @@ class Ia(Player):
         self.epsilon = epsilon
         self.learning_rate = lr
         self.gamma = gamma
+        self.learning_enabled = learning_enabled
 
         self.legal_moves = []
-        self.dao = Dao(f"lr{self.learning_rate}_g{self.gamma}")
+        self.dao = Dao(db_name or f"lr{self.learning_rate}_g{self.gamma}")
 
         self.last_state = None
         self.last_action = None
@@ -170,6 +173,10 @@ class Ia(Player):
         legal_actions = self.legal_actions_from_state(state)
         default_q_values = self.build_default_q_values(legal_actions)
 
+        if not self.learning_enabled:
+            self.q_cache[key] = default_q_values.copy()
+            return self.q_cache[key]
+
         row_data = {
             "current_player": state["current_player"],
             "player1_coord": state["player1_coord"],
@@ -228,6 +235,9 @@ class Ia(Player):
 
         If next_state is None, this is a terminal update.
         """
+        if not self.learning_enabled:
+            return
+
         if self.last_state is None or self.last_action is None:
             return
 
