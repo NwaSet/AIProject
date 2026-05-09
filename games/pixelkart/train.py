@@ -18,10 +18,10 @@ else:
     from .model.circuit import Circuit
     from .model.race import Race
 
-train_games = 1_000
-test_games = 10
-checkpoint_step = 100
-epsilon_step = 5
+train_games = 1_000_000
+test_games = 10_000
+checkpoint_step = 100_000
+epsilon_step = 5000
 epsilon_decay = 0.95
 min_epsilon = 0.05
 circuit_name = "Basic"
