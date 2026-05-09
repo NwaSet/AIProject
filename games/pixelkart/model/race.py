@@ -1,5 +1,6 @@
 from games.pixelkart.const import *
 from games.pixelkart.model.circuit import *
+from games.pixelkart.model.ai import Ai
 from games.pixelkart.model.human import Human
 import random
 
@@ -103,6 +104,9 @@ class Race:
             player.lap += 1
         elif crossed_finish_west:
             player.lap -= 1
+            
+            if isinstance(player, Ai):
+                player.last_reward = player.backward_lap_penalty
 
         player.last_cell = current_cell
             
@@ -224,6 +228,8 @@ class Race:
 
         old_coord = player.coord
         self.change_pos(player)
+        if isinstance(player, Ai):
+            player.turn_count += 1
         self.nb_round += 1
         self.update_lap(player, old_coord)
         
@@ -243,9 +249,16 @@ class Race:
     def play(self) -> None:
         """
         Play the race automatically until it ends.
+        if the ai game is made by more than 1_000 turns, we consider both player will have a tie.
         """
-        while not self.is_game_over():
+        i = 0
+        while not self.is_game_over() and i < 1_000:
             self.step(self.current_player.play())
+            i += 1
+        
+        if not self.is_game_over() :
+            self.player1.tie()
+            self.player2.tie()
 
     @property
     def winner(self) -> object | None:

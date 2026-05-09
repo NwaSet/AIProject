@@ -47,9 +47,17 @@ python main.py
 
 ## how to start Ai's trainning 
 
+### **<span style="color:red">Warning !</span>**
+<span style="color:red">you need at least **16 logical processor** to start an ai trainning.</span>
+
 ### start a train for the ai's Cubee
 ```bash
 python -m games.cubee.train
+```
+
+### start a train for the ai's PixelKart
+```bash
+python -m games.pixelkart.train
 ```
 
 ### Author Of The Project :

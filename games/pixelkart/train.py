@@ -5,22 +5,27 @@ import psutil
 import traceback
 import sys
 
+# err when launch with python -m ...
+# solution by chatgpt 
 if __package__ in (None, ""):
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     sys.path.append(project_root)
-    from games.cubee.model.ai import Ia
-    from games.cubee.model.cubee_model import GameModel
+    from games.pixelkart.model.ai import Ai
+    from games.pixelkart.model.circuit import Circuit
+    from games.pixelkart.model.race import Race
 else:
-    from .model.ai import Ia
-    from .model.cubee_model import GameModel
+    from .model.ai import Ai
+    from .model.circuit import Circuit
+    from .model.race import Race
 
-train_games = 1_000_000
-test_games = 10_000
-checkpoint_step = 100_000
-epsilon_step = 5000
+train_games = 1_000
+test_games = 10
+checkpoint_step = 100
+epsilon_step = 5
 epsilon_decay = 0.95
 min_epsilon = 0.05
-grid_size = 5
+circuit_name = "Basic"
+nb_laps = 1
 
 params = [
     (0.01, 0.70),
@@ -140,6 +145,13 @@ def db_name_for(initial_lr: float, gamma: float) -> str:
     return f"lr{initial_lr}_g{gamma}"
 
 
+def build_race(bot1: Ai, bot2: Ai) -> Race:
+    """
+    Build a fresh PixelKart race for one training or test episode.
+    """
+    return Race(Circuit(circuit_name), nb_laps, False, bot1, bot2)
+
+
 def train(
     nb_game: int,
     trained_games_start: int,
@@ -149,9 +161,9 @@ def train(
     nb_espilone: int,
 ) -> None:
     """
-    Train two Cubee AIs against each other.
+    Train two PixelKart AIs against each other.
     """
-    bot1 = Ia(
+    bot1 = Ai(
         1,
         f"b1_{learning_rate}_{gamma}",
         epsilon=epsilon,
@@ -159,7 +171,7 @@ def train(
         gamma=gamma,
         db_name=db_name_for(learning_rate, gamma),
     )
-    bot2 = Ia(
+    bot2 = Ai(
         2,
         f"b2_{learning_rate}_{gamma}",
         epsilon=epsilon,
@@ -168,16 +180,14 @@ def train(
         db_name=db_name_for(learning_rate, gamma),
     )
 
-    game = GameModel(grid_size, False, bot1, bot2)
-
     for i in range(nb_game):
         if i % nb_espilone == 0 and i != 0:
             bot1.next_epsilon(epsilon_decay, min_epsilon)
             bot2.next_epsilon(epsilon_decay, min_epsilon)
             print(i)
 
+        game = build_race(bot1, bot2)
         game.play()
-        game.reset()
 
     bot1.force_commit()
     bot2.force_commit()
@@ -199,7 +209,7 @@ def test_ai(checkpoint_games: int | None = None) -> None:
 
             lr1, gamma1 = params[i]
             lr2, gamma2 = params[j]
-            bot1 = Ia(
+            bot1 = Ai(
                 1,
                 f"b1_{lr1}_{gamma1}",
                 epsilon=0,
@@ -208,7 +218,7 @@ def test_ai(checkpoint_games: int | None = None) -> None:
                 learning_enabled=False,
                 db_name=db_name_for(lr1, gamma1),
             )
-            bot2 = Ia(
+            bot2 = Ai(
                 2,
                 f"b2_{lr2}_{gamma2}",
                 epsilon=0,
@@ -219,7 +229,7 @@ def test_ai(checkpoint_games: int | None = None) -> None:
             )
 
             for _ in range(test_games):
-                game = GameModel(grid_size, False, bot1, bot2)
+                game = build_race(bot1, bot2)
                 game.play()
 
             matrix[i][j] = bot1.nb_win / test_games
