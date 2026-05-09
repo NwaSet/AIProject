@@ -3,18 +3,27 @@ import os
 import csv
 import psutil
 import traceback
+import sys
 
-from .model.ai import Ai
-from .model.circuit import Circuit
-from .model.race import Race
+# err when launch with python -m ...
+# solution by chatgpt 
+if __package__ in (None, ""):
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sys.path.append(project_root)
+    from games.pixelkart.model.ai import Ai
+    from games.pixelkart.model.circuit import Circuit
+    from games.pixelkart.model.race import Race
+else:
+    from .model.ai import Ai
+    from .model.circuit import Circuit
+    from .model.race import Race
 
-train_games = 1_000_000
-test_games = 10_000
-checkpoint_step = 100_000
-epsilon_step = 5000
+train_games = 1_000
+test_games = 10
+checkpoint_step = 100
+epsilon_step = 5
 epsilon_decay = 0.95
 min_epsilon = 0.05
-min_learning_rate_ratio = 0.10
 circuit_name = "Basic"
 nb_laps = 1
 
@@ -66,7 +75,6 @@ def train_ai() -> None:
                     chunk_games,
                     trained_games,
                     initial_lr,
-                    learning_rate_at(initial_lr, trained_games),
                     gamma,
                     epsilon_at(trained_games),
                     epsilon_step,
@@ -83,7 +91,7 @@ def train_ai() -> None:
     print("train_ai end")
 
 
-def train_worker(args: tuple[int, int, int, float, float, float, float, int]) -> None:
+def train_worker(args: tuple[int, int, int, float, float, float, int]) -> None:
     """
     Train one worker with its own learning parameters.
     """
@@ -92,7 +100,6 @@ def train_worker(args: tuple[int, int, int, float, float, float, float, int]) ->
         nb_game,
         trained_games_start,
         initial_lr,
-        current_lr,
         gamma,
         epsilon,
         step,
@@ -101,36 +108,26 @@ def train_worker(args: tuple[int, int, int, float, float, float, float, int]) ->
     try:
         print(
             f"worker start core={core_id} "
-            f"initial_lr={initial_lr} current_lr={current_lr} "
+            f"learning_rate={initial_lr} "
             f"gamma={gamma} epsilon={epsilon}"
         )
         train(
             nb_game,
             trained_games_start,
             initial_lr,
-            current_lr,
             gamma,
             epsilon,
             step,
         )
         print(
             f"worker end core={core_id} "
-            f"initial_lr={initial_lr} current_lr={current_lr} gamma={gamma}"
+            f"learning_rate={initial_lr} gamma={gamma}"
         )
 
     except Exception as e:
         print("erreur dans train_worker :", e)
         traceback.print_exc()
         raise
-
-
-def learning_rate_at(initial_lr: float, trained_games: int) -> float:
-    """
-    Linearly decay the learning rate from its initial value to 10%.
-    """
-    progress = min(trained_games / train_games, 1.0)
-    min_lr = initial_lr * min_learning_rate_ratio
-    return initial_lr - ((initial_lr - min_lr) * progress)
 
 
 def epsilon_at(trained_games: int) -> float:
@@ -158,8 +155,7 @@ def build_race(bot1: Ai, bot2: Ai) -> Race:
 def train(
     nb_game: int,
     trained_games_start: int,
-    initial_learning_rate: float,
-    current_learning_rate: float,
+    learning_rate: float,
     gamma: float,
     epsilon: float,
     nb_espilone: int,
@@ -169,31 +165,25 @@ def train(
     """
     bot1 = Ai(
         1,
-        f"b1_{initial_learning_rate}_{gamma}",
+        f"b1_{learning_rate}_{gamma}",
         epsilon=epsilon,
-        lr=current_learning_rate,
+        lr=learning_rate,
         gamma=gamma,
-        db_name=db_name_for(initial_learning_rate, gamma),
+        db_name=db_name_for(learning_rate, gamma),
     )
     bot2 = Ai(
         2,
-        f"b2_{initial_learning_rate}_{gamma}",
+        f"b2_{learning_rate}_{gamma}",
         epsilon=epsilon,
-        lr=current_learning_rate,
+        lr=learning_rate,
         gamma=gamma,
-        db_name=db_name_for(initial_learning_rate, gamma),
+        db_name=db_name_for(learning_rate, gamma),
     )
 
     for i in range(nb_game):
         if i % nb_espilone == 0 and i != 0:
             bot1.next_epsilon(epsilon_decay, min_epsilon)
             bot2.next_epsilon(epsilon_decay, min_epsilon)
-            current_learning_rate = learning_rate_at(
-                initial_learning_rate,
-                trained_games_start + i,
-            )
-            bot1.learning_rate = current_learning_rate
-            bot2.learning_rate = current_learning_rate
             print(i)
 
         game = build_race(bot1, bot2)
@@ -219,13 +209,11 @@ def test_ai(checkpoint_games: int | None = None) -> None:
 
             lr1, gamma1 = params[i]
             lr2, gamma2 = params[j]
-            trained_games = checkpoint_games or train_games
-
             bot1 = Ai(
                 1,
                 f"b1_{lr1}_{gamma1}",
                 epsilon=0,
-                lr=learning_rate_at(lr1, trained_games),
+                lr=lr1,
                 gamma=gamma1,
                 learning_enabled=False,
                 db_name=db_name_for(lr1, gamma1),
@@ -234,7 +222,7 @@ def test_ai(checkpoint_games: int | None = None) -> None:
                 2,
                 f"b2_{lr2}_{gamma2}",
                 epsilon=0,
-                lr=learning_rate_at(lr2, trained_games),
+                lr=lr2,
                 gamma=gamma2,
                 learning_enabled=False,
                 db_name=db_name_for(lr2, gamma2),

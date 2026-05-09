@@ -11,7 +11,9 @@ from sqlalchemy import (
     select,
     update,
 )
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import sessionmaker
+import os
 
 
 class Dao:
@@ -60,8 +62,13 @@ class Dao:
         """
         Connect to the SQLite DB and initialize the table.
         """
+        db_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ai_db")
+        os.makedirs(db_dir, exist_ok=True)
+        db_path = os.path.join(db_dir, f"{db_name}.db").replace("\\", "/")
+
         self.engine = create_engine(
-            f"sqlite:///games/pixelkart/dao/ai_db/{db_name}.db",
+            f"sqlite:///{db_path}",
+            connect_args={"timeout": 30},
             future=True,
         )
 
@@ -225,8 +232,8 @@ class Dao:
 
         if key in self.pending_inserts:
             self.pending_inserts[key] = data
-        else:
-            self.pending_updates[key] = data
+
+        self.pending_updates[key] = data
 
     def flush(self) -> None:
         """
@@ -237,10 +244,15 @@ class Dao:
 
         try:
             if self.pending_inserts:
-                self.session.execute(
-                    self.data_table.insert(),
-                    list(self.pending_inserts.values()),
-                )
+                for data in self.pending_inserts.values():
+                    stmt = sqlite_insert(self.data_table).values(data)
+                    stmt = stmt.on_conflict_do_nothing(
+                        index_elements=[
+                            getattr(self.data_table.c, column)
+                            for column in self.STATE_COLUMNS
+                        ],
+                    )
+                    self.session.execute(stmt)
 
             for data in self.pending_updates.values():
                 stmt = (
