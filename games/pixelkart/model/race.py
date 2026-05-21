@@ -1,6 +1,13 @@
 from games.pixelkart.const import *
 from games.pixelkart.model.circuit import *
-from games.pixelkart.model.ai import Ai
+from games.pixelkart.model.ai import (
+    Ai,
+    BACKWARD_LAP_PENALTY,
+    LAP_REWARD_BASE,
+    LOSE_REWARD,
+    STEP_PENALTY,
+    WIN_REWARD,
+)
 from games.pixelkart.model.human import Human
 import random
 
@@ -74,7 +81,38 @@ class Race:
         else:
             player.speed += speed
 
-    def update_lap(self, player: object, old_coord: tuple[int, int]) -> None:
+
+    def crossed_finish_on_path(
+        self,
+        previous_coord: tuple[int, int],
+        current_coord: tuple[int, int],
+    ) -> bool:
+        """
+        Return True when the move path crosses at least one finish cell.
+        """
+        old_row, old_col = previous_coord
+        new_row, new_col = current_coord
+
+        if old_row == new_row:
+            step = 1 if new_col > old_col else -1
+            for col in range(old_col + step, new_col + step, step):
+                if self.circuit.grid[old_row][col] == "F":
+                    return True
+
+        if old_col == new_col:
+            step = 1 if new_row > old_row else -1
+            for row in range(old_row + step, new_row + step, step):
+                if self.circuit.grid[row][old_col] == "F":
+                    return True
+
+        return False
+
+    def update_lap(
+        self,
+        player: object,
+        previous_coord: tuple[int, int],
+    ) -> None:
+
         """
         Update the lap counter when a player crosses the finish line.
         """
@@ -100,13 +138,26 @@ class Race:
                 player.last_cell = current_cell
             return
 
-        if crossed_finish_east:
+
+        crossed_finish = self.crossed_finish_on_path(previous_coord, player.coord)
+        moved_east = player.coord[0] == previous_coord[0] and player.coord[1] > previous_coord[1]
+        moved_west = player.coord[0] == previous_coord[0] and player.coord[1] < previous_coord[1]
+
+        if crossed_finish and moved_east:
             player.lap += 1
-        elif crossed_finish_west:
+
+            if isinstance(player, Ai):
+                turns_for_lap = player.turn_count - player.last_lap_turn
+
+                player.last_lap_turn = player.turn_count
+                player.last_reward = LAP_REWARD_BASE / max(1, turns_for_lap)
+
+        if crossed_finish and moved_west:
+
             player.lap -= 1
             
             if isinstance(player, Ai):
-                player.last_reward = player.backward_lap_penalty
+                player.last_reward = BACKWARD_LAP_PENALTY
 
         player.last_cell = current_cell
             
@@ -165,14 +216,17 @@ class Race:
         """
         Set the initial position, direction, and lap count of both players.
         """
-        if len(self.coord_starter) < 2:
-            raise ValueError("A circuit needs at least two finish cells to place the players.")
+        if not self.coord_starter:
+            raise ValueError("A circuit needs at least one finish cell to place the players.")
 
         starter = self.coord_starter.copy()
         
         self.player1.coord = random.choice(starter)
-        starter.remove(self.player1.coord)
-        self.player2.coord = random.choice(starter)
+        if len(starter) >= 2:
+            starter.remove(self.player1.coord)
+            self.player2.coord = random.choice(starter)
+        else:
+            self.player2.coord = self.player1.coord
 
         self.player1.direction = "East"
         self.player2.direction = "East"
@@ -226,12 +280,15 @@ class Race:
         else:
             raise ValueError(f"Unknown move: {move}")
 
-        old_coord = player.coord
+
+        previous_coord = player.coord
         self.change_pos(player)
         if isinstance(player, Ai):
             player.turn_count += 1
         self.nb_round += 1
-        self.update_lap(player, old_coord)
+        if isinstance(player, Ai):
+            player.last_reward = STEP_PENALTY
+        self.update_lap(player, previous_coord)
         
         if self.is_game_over():
             if self.winner is None:
@@ -240,6 +297,11 @@ class Race:
             else:
                 self.winner.win()
                 self.loser.lose()
+                if isinstance(self.winner, Ai):
+                    self.winner.last_reward += WIN_REWARD
+                if isinstance(self.loser, Ai):
+                    self.loser.last_reward += LOSE_REWARD
+
         else:
             self.switch_player()
 

@@ -4,6 +4,13 @@ from games.pixelkart.const import ACTION_TO_MOVE
 from games.pixelkart.dao.dao import Dao
 from games.pixelkart.model.kart import Kart
 
+STEP_PENALTY = -0.01
+BACKWARD_LAP_PENALTY = -20.0
+WIN_REWARD = 50.0
+LOSE_REWARD = -50.0
+LAP_REWARD_BASE = 100.0
+ILLEGAL_ACTION_PENALTY = -10.0
+
 
 class Ai(Kart):
     """
@@ -36,18 +43,12 @@ class Ai(Kart):
         self.last_lap_turn = 0
         self.last_reward = 0.0
 
-        self.step_penalty = -0.01
-        self.backward_lap_penalty = -20.0
-        self.win_reward = 50.0
-        self.lose_reward = -50.0
-        self.lap_reward_base = 100.0
-        self.penalty = -10.0
-
         self.last_state = None
         self.last_action = None
         self.games_since_commit = 0
 
-        self.dao = Dao(db_name or f"lr{self.learning_rate}_g{self.gamma}")
+
+        self.dao = Dao(f"lr{self.learning_rate}_g{self.gamma}_relative_state")
         self.q_cache = {}
 
     def get_reward(self) -> float:
@@ -61,7 +62,6 @@ class Ai(Kart):
         Return the current state seen by the AI.
         """
         return (
-            self.coord,
             self.direction,
             self.speed,
             *self.get_surrounding_cells(),
@@ -116,12 +116,6 @@ class Ai(Kart):
             back_1,
         )
 
-    def get_legal_actions(self) -> list[str]:
-        """
-        Return legal actions from the current state.
-        """
-        return self.get_legal_actions_from_state(self.get_state())
-
     def get_legal_actions_from_state(self, state: tuple) -> list[str]:
         """
         Return legal actions from a given state tuple.
@@ -143,11 +137,11 @@ class Ai(Kart):
         Build default Q-values for one state.
         """
         q_values = {
-            "pass_turn": self.penalty,
-            "turn_left": self.penalty,
-            "turn_right": self.penalty,
-            "accelerate": self.penalty,
-            "decelerate": self.penalty,
+            "pass_turn": ILLEGAL_ACTION_PENALTY,
+            "turn_left": ILLEGAL_ACTION_PENALTY,
+            "turn_right": ILLEGAL_ACTION_PENALTY,
+            "accelerate": ILLEGAL_ACTION_PENALTY,
+            "decelerate": ILLEGAL_ACTION_PENALTY,
         }
 
         for action in legal_actions:
