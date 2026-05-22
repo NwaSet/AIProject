@@ -1,14 +1,14 @@
 from games.pixelkart.const import *
 from games.pixelkart.model.circuit import *
-from games.pixelkart.model.ai import (
-    Ai,
-    BACKWARD_LAP_PENALTY,
-    LAP_REWARD_BASE,
-    LOSE_REWARD,
-    STEP_PENALTY,
-    WIN_REWARD,
-)
+from games.pixelkart.model.ai import Ai
 from games.pixelkart.model.human import Human
+from games.pixelkart.const import (
+    STEP_PENALTY,
+    BACKWARD_LAP_PENALTY,
+    WIN_REWARD,LOSE_REWARD,
+    LAP_REWARD_BASE,
+    ILLEGAL_ACTION_PENALTY
+)
 import random
 
 class Race:
