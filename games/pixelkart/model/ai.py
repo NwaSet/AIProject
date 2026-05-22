@@ -1,15 +1,8 @@
 import random
 
-from games.pixelkart.const import ACTION_TO_MOVE
+from games.pixelkart.const import ACTION_TO_MOVE, STEP_PENALTY,BACKWARD_LAP_PENALTY,WIN_REWARD,LOSE_REWARD,LAP_REWARD_BASE,ILLEGAL_ACTION_PENALTY
 from games.pixelkart.dao.dao import Dao
 from games.pixelkart.model.kart import Kart
-
-STEP_PENALTY = -0.01
-BACKWARD_LAP_PENALTY = -20.0
-WIN_REWARD = 50.0
-LOSE_REWARD = -50.0
-LAP_REWARD_BASE = 100.0
-ILLEGAL_ACTION_PENALTY = -10.0
 
 
 class Ai(Kart):
