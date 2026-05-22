@@ -128,10 +128,6 @@ class Race:
             self.circuit.grid[row][finish_col] == "F"
             for finish_col in range(old_col + 1, col + 1)
         )
-        crossed_finish_west = moved_west and any(
-            self.circuit.grid[row][finish_col] == "F"
-            for finish_col in range(col, old_col)
-        )
 
         if player.last_cell == "START":
             if moved_east and current_cell != "F" and (old_cell == "F" or crossed_finish_east):
