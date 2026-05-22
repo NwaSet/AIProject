@@ -116,7 +116,7 @@ class Race:
         """
         Update the lap counter when a player crosses the finish line.
         """
-        old_row, old_col = old_coord
+        old_row, old_col = previous_coord
         row, col = player.coord
         old_cell = self.circuit.grid[old_row][old_col]
         current_cell = self.circuit.grid[row][col]
