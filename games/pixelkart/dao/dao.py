@@ -15,23 +15,15 @@ from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import sessionmaker
 import os
 
-
-class Dao:
-    """
-    DAO used to store PixelKart Q-values with staged writes.
-    """
-
-    ACTION_COLUMNS = (
+ACTION_COLUMNS = (
         "pass_turn",
         "turn_left",
         "turn_right",
         "accelerate",
         "decelerate",
-    )
+)
 
-    STATE_COLUMNS = (
-        "coord_row",
-        "coord_col",
+STATE_COLUMNS = (
         "direction",
         "speed",
         "front_1",
@@ -44,7 +36,12 @@ class Dao:
         "right_2",
         "right_3",
         "back_1",
-    )
+)
+
+class Dao:
+    """
+    DAO used to store PixelKart Q-values with staged writes.
+    """
 
     def __init__(self, db_name: str | None = None) -> None:
         self.engine = None
@@ -103,8 +100,6 @@ class Dao:
         self.data_table = Table(
             "data",
             metadata,
-            Column("coord_row", Integer, nullable=False),
-            Column("coord_col", Integer, nullable=False),
             Column("direction", String, nullable=False),
             Column("speed", Integer, nullable=False),
             Column("front_1", String, nullable=False),
@@ -123,7 +118,7 @@ class Dao:
             Column("accelerate", Float, nullable=False),
             Column("decelerate", Float, nullable=False),
             Column("id", Integer, primary_key=True, autoincrement=True),
-            UniqueConstraint(*self.STATE_COLUMNS, name="uq_state"),
+            UniqueConstraint(*STATE_COLUMNS, name="uq_state"),
         )
 
         metadata.create_all(self.engine)
@@ -132,12 +127,9 @@ class Dao:
         """
         Convert one PixelKart state tuple into DB row fields.
         """
-        coord, direction, speed, *cells = state
-        row, col = coord
+        direction, speed, *cells = state
 
         return {
-            "coord_row": row,
-            "coord_col": col,
             "direction": direction,
             "speed": speed,
             "front_1": cells[0],
@@ -157,7 +149,7 @@ class Dao:
         Immutable key for one state.
         """
         row = self.state_to_row(state)
-        return tuple(row[column] for column in self.STATE_COLUMNS)
+        return tuple(row[column] for column in STATE_COLUMNS)
 
     def select_row_by_state(self, state: tuple) -> dict | None:
         """
@@ -167,19 +159,17 @@ class Dao:
 
         if key in self.pending_updates:
             data = self.pending_updates[key]
-            return {column: data[column] for column in self.ACTION_COLUMNS}
+            return {column: data[column] for column in ACTION_COLUMNS}
 
         if key in self.pending_inserts:
             data = self.pending_inserts[key]
-            return {column: data[column] for column in self.ACTION_COLUMNS}
+            return {column: data[column] for column in ACTION_COLUMNS}
 
         row = self.state_to_row(state)
 
         stmt = (
-            select(*(getattr(self.data_table.c, column) for column in self.ACTION_COLUMNS))
+            select(*(getattr(self.data_table.c, column) for column in ACTION_COLUMNS))
             .where(
-                self.data_table.c.coord_row == row["coord_row"],
-                self.data_table.c.coord_col == row["coord_col"],
                 self.data_table.c.direction == row["direction"],
                 self.data_table.c.speed == row["speed"],
                 self.data_table.c.front_1 == row["front_1"],
@@ -200,7 +190,7 @@ class Dao:
         if result is None:
             return None
 
-        return {column: getattr(result, column) for column in self.ACTION_COLUMNS}
+        return {column: getattr(result, column) for column in ACTION_COLUMNS}
 
     def stage_insert_if_missing(self, state: tuple, q_values: dict) -> None:
         """
@@ -215,7 +205,7 @@ class Dao:
             return
 
         data = self.state_to_row(state)
-        for column in self.ACTION_COLUMNS:
+        for column in ACTION_COLUMNS:
             data[column] = q_values[column]
 
         self.pending_inserts[key] = data
@@ -227,7 +217,7 @@ class Dao:
         key = self.state_key(state)
         data = self.state_to_row(state)
 
-        for column in self.ACTION_COLUMNS:
+        for column in ACTION_COLUMNS:
             data[column] = q_values[column]
 
         if key in self.pending_inserts:
@@ -258,8 +248,6 @@ class Dao:
                 stmt = (
                     update(self.data_table)
                     .where(
-                        self.data_table.c.coord_row == data["coord_row"],
-                        self.data_table.c.coord_col == data["coord_col"],
                         self.data_table.c.direction == data["direction"],
                         self.data_table.c.speed == data["speed"],
                         self.data_table.c.front_1 == data["front_1"],
@@ -273,7 +261,7 @@ class Dao:
                         self.data_table.c.right_3 == data["right_3"],
                         self.data_table.c.back_1 == data["back_1"],
                     )
-                    .values({column: data[column] for column in self.ACTION_COLUMNS})
+                    .values({column: data[column] for column in ACTION_COLUMNS})
                 )
                 self.session.execute(stmt)
 
