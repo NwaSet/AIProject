@@ -1,6 +1,13 @@
 import random
 
-from games.pixelkart.const import ACTION_TO_MOVE, STEP_PENALTY,BACKWARD_LAP_PENALTY,WIN_REWARD,LOSE_REWARD,LAP_REWARD_BASE,ILLEGAL_ACTION_PENALTY
+from games.pixelkart.const import (
+    ACTION_TO_MOVE, 
+    STEP_PENALTY,
+    BACKWARD_LAP_PENALTY,
+    WIN_REWARD,LOSE_REWARD,
+    LAP_REWARD_BASE,
+    ILLEGAL_ACTION_PENALTY
+)
 from games.pixelkart.dao.dao import Dao
 from games.pixelkart.model.kart import Kart
 
