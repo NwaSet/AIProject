@@ -48,3 +48,11 @@ WEST_TO_MOVE = {
     "turn_right" : "North",
     "turn_left" : "South"
 }
+
+
+STEP_PENALTY = -0.01
+BACKWARD_LAP_PENALTY = -20.0
+WIN_REWARD = 50.0
+LOSE_REWARD = -50.0
+LAP_REWARD_BASE = 100.0
+ILLEGAL_ACTION_PENALTY = -10.0
