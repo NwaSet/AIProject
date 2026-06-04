@@ -24,7 +24,7 @@ checkpoint_step = 100_000
 epsilon_step = 5000
 epsilon_decay = 0.95
 min_epsilon = 0.05
-circuit_name = "Basic"
+circuit_name = "Large"
 nb_laps = 1
 
 params = [

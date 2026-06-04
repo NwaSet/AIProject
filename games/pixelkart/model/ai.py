@@ -120,7 +120,7 @@ class Ai(Kart):
         """
         Return legal actions from a given state tuple.
         """
-        speed = state[2]
+        speed = state[1]
 
         legal_actions = ["pass_turn", "turn_left", "turn_right"]
 
@@ -268,14 +268,14 @@ class Ai(Kart):
         """
         Final terminal learn on win, then increment stats.
         """
-        self.end_episode(self.get_reward() + self.win_reward)
+        self.end_episode(self.get_reward() + WIN_REWARD)
         super().win()
 
     def lose(self) -> None:
         """
         Final terminal learn on lose, then increment stats.
         """
-        self.end_episode(self.get_reward() + self.lose_reward)
+        self.end_episode(self.get_reward() + LOSE_REWARD)
         super().lose()
 
     def tie(self) -> None:

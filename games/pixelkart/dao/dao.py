@@ -239,7 +239,7 @@ class Dao:
                     stmt = stmt.on_conflict_do_nothing(
                         index_elements=[
                             getattr(self.data_table.c, column)
-                            for column in self.STATE_COLUMNS
+                            for column in STATE_COLUMNS
                         ],
                     )
                     self.session.execute(stmt)
