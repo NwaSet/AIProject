@@ -28,24 +28,24 @@ circuit_name = "Large"
 nb_laps = 1
 
 params = [
-    (0.01, 0.70),
-    (0.01, 0.80),
-    (0.01, 0.90),
+    (0.01, 0.40),
+    (0.01, 0.50),
+    (0.01, 0.60),
 
-    (0.03, 0.75),
-    (0.03, 0.85),
-    (0.03, 0.95),
+    (0.03, 0.45),
+    (0.03, 0.55),
+    (0.03, 0.65),
 
-    (0.05, 0.75),
-    (0.05, 0.85),
-    (0.05, 0.95),
+    (0.05, 0.45),
+    (0.05, 0.55),
+    (0.05, 0.65),
 
-    (0.10, 0.75),
-    (0.10, 0.85),
-    (0.10, 0.95),
+    (0.07, 0.45),
+    (0.07, 0.55),
+    (0.07, 0.65),
 
-    (0.15, 0.80),
-    (0.20, 0.90),
+    (0.10, 0.50),
+    (0.10, 0.60),
 ]
 
 base_path = os.path.dirname(os.path.abspath(__file__))
@@ -278,12 +278,12 @@ def save_matrix(matrix: list[list[object]], checkpoint_games: int | None = None)
 
         header = [""]
         for i, (lr, gamma) in enumerate(params):
-            header.append(f"bot_{i} ({lr}, {gamma})")
+            header.append(f"bot_{i} ({lr} - {gamma})")
         writer.writerow(header)
 
         for i, row in enumerate(matrix):
             lr, gamma = params[i]
-            writer.writerow([f"bot_{i} ({lr}, {gamma})"] + row)
+            writer.writerow([f"bot_{i} ({lr} - {gamma})"] + row)
 
     with open(counter_file, "w", encoding="utf-8") as f:
         f.write(str(current))
